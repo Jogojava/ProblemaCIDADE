@@ -10,6 +10,6 @@ Débora Luiza de Paula Ferreira<br>
 Guilherme Nascimento Bilibio<br>
 Henrique Daisuke Akiyama<br>
 
-# Linguagens
+# Linguagens Utilizadas
 
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
