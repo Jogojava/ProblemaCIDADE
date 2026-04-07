@@ -1,12 +1,11 @@
 # Jogo de cidade
 
-Neste projeto pretendemos desenvolver um jogo de gestão de uma cidade para as materias de Teoria e desenvolvimento de sistemas, matemática computacional e desenvolvimento web 2
+Neste projeto pretendemos desenvolver um jogo de gestão de uma cidade para as matérias de Teoria e Desenvolvimento de Sistemas, Matemática Computacional e Desenvolvimento Web 2
 
 # Participantes
 
-Beatriz Fernandes<br>
-Camilo Handal<br>
-Daisuke Akiyama<br>
-Debora Luiza<br>
-Guilherme Nascimento<br>
-
+Beatriz Leonardo Fernandes da silva<br>
+Camilo Handal Batista Oliveira<br>
+Débora Luiza de Paula Ferreira<br>
+Guilherme Nascimento Bilibio<br>
+Henrique Daisuke Akiyama<br>
