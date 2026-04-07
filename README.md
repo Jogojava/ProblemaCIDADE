@@ -4,7 +4,7 @@ Neste projeto pretendemos desenvolver um jogo de gestão de uma cidade para as m
 
 # Participantes
 
-Beatriz Leonardo Fernandes da silva<br>
+Beatriz Leonardo Fernandes da Silva<br>
 Camilo Handal Batista Oliveira<br>
 Débora Luiza de Paula Ferreira<br>
 Guilherme Nascimento Bilibio<br>
