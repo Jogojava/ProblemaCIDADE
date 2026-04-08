@@ -2,54 +2,37 @@ import entities.Player;
 import utils.InputHandler;
 import utils.RandomEvent;
 import game.GameUI;
-import game.GameState;
 
 import java.util.Scanner;
-import java.util.Random;
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class Main {
     public static void main (String[] args) {
         Scanner sc = new Scanner(System.in);
-        Random random = new Random();
         Timer timer = new Timer();
-
-        // Cria um objeto player na classe Player
-        Player player = InputHandler.createPlayer(sc);
+        
+        Player player = InputHandler.createPlayer();
         player.printPlayerStats();
 
-        // Timer de 2m para evento aleatório de 10%
-        timer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    if (GameState.canTriggerEvent) {
-                        RandomEvent.triggerEvent(10, "Evento raro! (10%)");
-                    }
-                }
-            }, 0, 1000);
+        RandomEvent.eventTimer(10, "Evento Raro! (10%)", timer);
+
+        GameUI.showWelcome(sc);
 
         // Jogo
-        while (true) {
-            GameUI.showWelcome(sc);
-
-            // Espaço eventos aleatórios
+        do {
+            // Espaço eventos aleatórios (test)
             boolean espaco = true;
             do {
-                System.out.println("Tire um tempinho para descançar...");
+                System.out.println("\nTire um tempinho para descansar...");
                 String input = sc.nextLine();
                 if (input != null) {
                     espaco = false;
                 }
             } while (espaco);
 
+        } while (!GameUI.shouldExit(sc));
 
-            if (GameUI.shouldExit(sc)) {
-                timer.cancel();
-                break;
-            }
-        }
-
+        RandomEvent.eventTimerStop(timer);
         sc.close();
     }
 }
