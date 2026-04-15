@@ -2,62 +2,33 @@ package utils;
 
 import entities.Player;
 
-import java.util.Scanner;
+import javax.swing.JOptionPane;
 
 public class InputHandler {
     public static Player createPlayer() {
-        Scanner sc = new Scanner(System.in);
 
-        String name = getUserName(sc);
-        int reputation = getUserReputation(sc);
+    String name;
+    do {
+        name = JOptionPane.showInputDialog("Digite seu apelido:");
+        if (name == null) System.exit(0); // cancelou
+    } while (name.isBlank());
 
-        return new Player(name, reputation);
+    int reputation;
+    while (true) {
+        String input = JOptionPane.showInputDialog("Reputação inicial (0-100):");
+
+        if (input == null) System.exit(0);
+
+        try {
+            reputation = Integer.parseInt(input);
+            if (reputation >= 0 && reputation <= 100) {
+                break;
+            }
+        } catch (NumberFormatException ignored) {}
+
+        JOptionPane.showMessageDialog(null, "Valor inválido.");
     }
 
-    private static String getUserName(Scanner sc) {
-        String userName;
-        boolean loop;
-
-        do {
-            System.out.print("\nApelido\n-> ");
-            userName = sc.nextLine();
-
-            if (userName.isBlank()) {
-                System.out.println("Digite um apelido válido!");
-                loop = true;
-            } else {
-                loop = false;
-            }
-        } while(loop);
-        
-        return userName;
-    }
-
-    private static int getUserReputation(Scanner sc) {
-        int reputation = 0;
-
-        while (true) {
-            System.out.print("\nReputação inicial (0-100)\n-> ");
-            String line = sc.nextLine();
-
-            if (line.isBlank()) {
-                System.out.println("Digite algum número.");
-                continue;
-            }
-
-            try {
-                reputation = Integer.parseInt(line);
-
-                if (reputation >= 0 && reputation <= 100) {
-                    break;
-                } else {
-                    System.out.println("Número fora do intervalo.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Entrada inválida. Digite um número.");
-            }
-        }
-
-        return reputation;
+    return new Player(name, reputation);
     }
 }
