@@ -13,3 +13,7 @@ Henrique Daisuke Akiyama<br>
 # Linguagens Utilizadas
 
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+
+# Ideias (pensar sobre antes de implementar)
+
+adicionar evento de invasão hacker (misantropia: referencia ao acontecimento de junho de 2026)
