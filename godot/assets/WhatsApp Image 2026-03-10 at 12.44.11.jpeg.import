@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d0obssx5aoe0j"
-path="res://.godot/imported/92383eb7-e9fc-4ce4-9f63-a708f7d18a72.jpeg-9470a05a8849c26b45e10f4cb9498f51.ctex"
+uid="uid://by6owio0gkh4p"
+path="res://.godot/imported/WhatsApp Image 2026-03-10 at 12.44.11.jpeg-c265635234349e550d1156260dd9ac2a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://scenes/game/92383eb7-e9fc-4ce4-9f63-a708f7d18a72.jpeg"
-dest_files=["res://.godot/imported/92383eb7-e9fc-4ce4-9f63-a708f7d18a72.jpeg-9470a05a8849c26b45e10f4cb9498f51.ctex"]
+source_file="res://assets/WhatsApp Image 2026-03-10 at 12.44.11.jpeg"
+dest_files=["res://.godot/imported/WhatsApp Image 2026-03-10 at 12.44.11.jpeg-c265635234349e550d1156260dd9ac2a.ctex"]
 
 [params]
 
