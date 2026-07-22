@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bm6mhfmqexjqt" path="res://assets/ui/92383eb7-e9fc-4ce4-9f63-a708f7d18a721.jpeg" id="3_7qcb4"]
 [ext_resource type="Script" uid="uid://d3eats1aoil1j" path="res://scenes/game/InvestmentUiButton.gd" id="3_365ku"]
 [ext_resource type="Script" uid="uid://d2c7rn7sa61hf" path="res://scripts/camera_2d.gd" id="3_lyhax"]
-[ext_resource type="Material" uid="uid://b3c3m3q3x7tx2" path="res://assets/ui/dbc8c764a3094644a23e5d93d404dd55.jpg" id="5_365ku"]
+[ext_resource type="Texture2D" uid="uid://by6owio0gkh4p" path="res://assets/WhatsApp Image 2026-03-10 at 12.44.11.jpeg" id="6_365ku"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_365ku"]
 texture = ExtResource("1_vrspl")
@@ -104,7 +104,6 @@ expand_icon = true
 
 [node name="RightBar" type="VBoxContainer" parent="CanvasLayer/HUD" unique_id=1840427465]
 z_index = -1
-material = ExtResource("5_365ku")
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -121,3 +120,8 @@ grow_vertical = 2
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1734649817]
 position = Vector2(961, 538)
 script = ExtResource("3_lyhax")
+
+[node name="WhatsAppImage20260310At12_44_11" type="Sprite2D" parent="." unique_id=1612485949]
+position = Vector2(1724.5, 536.75)
+scale = Vector2(0.54483694, 0.98668504)
+texture = ExtResource("6_365ku")
