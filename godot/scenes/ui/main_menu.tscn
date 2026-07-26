@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://83w7bu1cy0ss"]
 
-[ext_resource type="Script" uid="uid://oa87qvchjlvh" path="res://scenes/game/main_menu.gd" id="1_sbiqi"]
+[ext_resource type="Script" uid="uid://oa87qvchjlvh" path="res://scenes/ui/main_menu.gd" id="1_sl1te"]
 
 [node name="TittleScreen" type="Control" unique_id=1596576623]
 layout_mode = 3
@@ -10,7 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1.0007015, 0.99832326)
-script = ExtResource("1_sbiqi")
+script = ExtResource("1_sl1te")
 metadata/_edit_group_ = true
 metadata/_edit_lock_ = true
 
@@ -88,7 +88,7 @@ action_mode = 0
 keep_pressed_outside = true
 text = "Jogar"
 
-[node name="Button2" type="Button" parent="Menu/VBoxContainer" unique_id=2100443714]
+[node name="continuar" type="Button" parent="Menu/VBoxContainer" unique_id=2100443714]
 custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 theme_override_constants/outline_size = 0
