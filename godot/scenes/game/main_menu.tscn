@@ -1,9 +1,110 @@
 [gd_scene format=3 uid="uid://83w7bu1cy0ss"]
 
-[node name="Control" type="Control" unique_id=1596576623]
+[node name="TittleScreen" type="Control" unique_id=1596576623]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(1.0007015, 0.99832326)
+metadata/_edit_group_ = true
+metadata/_edit_lock_ = true
+
+[node name="bg" type="ColorRect" parent="." unique_id=629084801]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.6864179, 0.92125535, 0.99788123, 1)
+
+[node name="bgImg" type="TextureRect" parent="." unique_id=1311402072]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TitleGroup" type="CenterContainer" parent="." unique_id=65278687]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.28
+anchor_right = 0.5
+anchor_bottom = 0.28
+offset_left = -416.5
+offset_top = -19.926361
+offset_right = 416.5
+offset_bottom = 163.38101
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TitleGroup" unique_id=878808826]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="TitleGroup/HBoxContainer" unique_id=928557985]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 100
+text = "Problema"
+vertical_alignment = 1
+
+[node name="Label2" type="Label" parent="TitleGroup/HBoxContainer" unique_id=1936916420]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.7546208, 0.7389324, 1)
+theme_override_font_sizes/font_size = 100
+text = "CIDADE"
+
+[node name="Menu" type="CenterContainer" parent="." unique_id=1482514600]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.504
+anchor_top = 0.61600006
+anchor_right = 0.504
+anchor_bottom = 0.61600006
+offset_left = -205.2149
+offset_top = -244.5747
+offset_right = 204.49774
+offset_bottom = 245.24652
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Menu" unique_id=92242762]
+custom_minimum_size = Vector2(350, 90)
+custom_maximum_size = Vector2(450, -1)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Button" type="Button" parent="Menu/VBoxContainer" unique_id=1175225226]
+custom_minimum_size = Vector2(450, 80)
+layout_mode = 2
+offset_transform_enabled = true
+theme_override_font_sizes/font_size = 40
+text = "Jogar"
+
+[node name="Button2" type="Button" parent="Menu/VBoxContainer" unique_id=2100443714]
+layout_mode = 2
+theme_override_constants/outline_size = 0
+theme_override_font_sizes/font_size = 40
+text = "Continuar"
+
+[node name="Button3" type="Button" parent="Menu/VBoxContainer" unique_id=1555434040]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Opções"
+
+[node name="Button4" type="Button" parent="Menu/VBoxContainer" unique_id=577062449]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Créditos"
+
+[node name="SoundButton" type="TextureButton" parent="." unique_id=1257913032]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ExitButton" type="TextureButton" parent="." unique_id=353378696]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
