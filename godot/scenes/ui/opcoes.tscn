@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://cmy8ti66fabp6"]
+
+[node name="OptionsScreen" type="Control" unique_id=823850283]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="bg" type="ColorRect" parent="." unique_id=49016169]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.8398224, 0.87307954, 0.9911191, 1)
+
+[node name="Label" type="Label" parent="bg" unique_id=1084928628]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -69.5
+offset_right = 300.0
+offset_bottom = 69.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 90
+text = "SIM OU NADA"

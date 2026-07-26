@@ -95,13 +95,13 @@ theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 40
 text = "Continuar"
 
-[node name="Button3" type="Button" parent="Menu/VBoxContainer" unique_id=1555434040]
+[node name="opcoes" type="Button" parent="Menu/VBoxContainer" unique_id=1555434040]
 custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "Opções"
 
-[node name="Button4" type="Button" parent="Menu/VBoxContainer" unique_id=577062449]
+[node name="creditos" type="Button" parent="Menu/VBoxContainer" unique_id=577062449]
 custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
