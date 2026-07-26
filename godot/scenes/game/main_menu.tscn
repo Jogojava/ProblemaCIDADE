@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://83w7bu1cy0ss"]
 
+[ext_resource type="Script" uid="uid://oa87qvchjlvh" path="res://scenes/game/main_menu.gd" id="1_sbiqi"]
+
 [node name="TittleScreen" type="Control" unique_id=1596576623]
 layout_mode = 3
 anchors_preset = 15
@@ -8,6 +10,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1.0007015, 0.99832326)
+script = ExtResource("1_sbiqi")
 metadata/_edit_group_ = true
 metadata/_edit_lock_ = true
 
@@ -76,35 +79,53 @@ custom_maximum_size = Vector2(450, -1)
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Button" type="Button" parent="Menu/VBoxContainer" unique_id=1175225226]
-custom_minimum_size = Vector2(450, 80)
+[node name="jogar" type="Button" parent="Menu/VBoxContainer" unique_id=1175225226]
+custom_minimum_size = Vector2(450, 90)
 layout_mode = 2
 offset_transform_enabled = true
 theme_override_font_sizes/font_size = 40
+action_mode = 0
+keep_pressed_outside = true
 text = "Jogar"
 
 [node name="Button2" type="Button" parent="Menu/VBoxContainer" unique_id=2100443714]
+custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 40
 text = "Continuar"
 
 [node name="Button3" type="Button" parent="Menu/VBoxContainer" unique_id=1555434040]
+custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "Opções"
 
 [node name="Button4" type="Button" parent="Menu/VBoxContainer" unique_id=577062449]
+custom_minimum_size = Vector2(0, 90)
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "Créditos"
 
 [node name="SoundButton" type="TextureButton" parent="." unique_id=1257913032]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
 offset_right = 40.0
-offset_bottom = 40.0
+grow_vertical = 0
 
 [node name="ExitButton" type="TextureButton" parent="." unique_id=353378696]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -58.30603
+offset_top = -63.295288
+offset_right = -16.33545
+offset_bottom = -22.226318
+grow_horizontal = 0
+grow_vertical = 0
