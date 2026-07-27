@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://cbwndpppllr8o"]
 
+[ext_resource type="Script" uid="uid://b8vgewlccn3ls" path="res://scenes/ui/continuar.gd" id="1_amxv2"]
+
 [node name="LooadScreen" type="Control" unique_id=1088058590]
 layout_mode = 3
 anchors_preset = 15
@@ -33,3 +35,16 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 90
 text = "CAGAR"
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1692520647]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Button" type="Button" parent="MarginContainer" unique_id=777187310]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+text = "Voltar"
+script = ExtResource("1_amxv2")
+
+[connection signal="pressed" from="MarginContainer/Button" to="MarginContainer/Button" method="voltar_on_pressed"]

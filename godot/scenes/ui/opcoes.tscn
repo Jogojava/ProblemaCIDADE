@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://cmy8ti66fabp6"]
 
+[ext_resource type="Script" uid="uid://crkpbkj5nhd4g" path="res://scenes/ui/opcoes.gd" id="1_0x4op"]
+
 [node name="OptionsScreen" type="Control" unique_id=823850283]
 layout_mode = 3
 anchors_preset = 15
@@ -33,3 +35,16 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_font_sizes/font_size = 90
 text = "SIM OU NADA"
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=257108589]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Button" type="Button" parent="MarginContainer" unique_id=152036979]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+text = "Voltar"
+script = ExtResource("1_0x4op")
+
+[connection signal="pressed" from="MarginContainer/Button" to="MarginContainer/Button" method="voltar_on_pressed"]
