@@ -75,8 +75,10 @@ func clear_all() -> void:
 
 func get_all_event_ids() -> Array[String]:
 	var result: Array[String] = []
+
 	for id in events.keys():
 		result.append(String(id))
+
 	return result
 
 func get_events_by_category(category: String) -> Array[Dictionary]:
@@ -122,6 +124,7 @@ func get_random_event_id_by_category(category: String) -> String:
 	var chosen_id := available[_rng.randi_range(0, available.size() - 1)]
 	used_ids.append(chosen_id)
 	_used_ids_by_category[category] = used_ids
+
 	return chosen_id
 
 func reset_category_usage(category: String) -> void:
