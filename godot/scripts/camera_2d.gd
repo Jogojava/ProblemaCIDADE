@@ -6,6 +6,11 @@ extends Camera2D
 
 var dragging := false
 
+func _input(event: InputEvent) -> void:
+	# A release over the HUD must also end a drag that started on the map.
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		dragging = false
+
 func _unhandled_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:

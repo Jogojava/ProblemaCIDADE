@@ -1,0 +1,288 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/pause_menu.gd" id="1_pause"]
+
+[sub_resource type="StyleBoxFlat" id="StylePanel"]
+bg_color = Color(0.15, 0.19, 0.21, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.282353, 0.513725, 0.6, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleButton"]
+content_margin_left = 20.0
+content_margin_top = 10.0
+content_margin_right = 20.0
+content_margin_bottom = 10.0
+bg_color = Color(0.541176, 0.545098, 0.576471, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleButtonActive"]
+content_margin_left = 20.0
+content_margin_top = 10.0
+content_margin_right = 20.0
+content_margin_bottom = 10.0
+bg_color = Color(0.282353, 0.513725, 0.6, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleButtonDisabled"]
+content_margin_left = 20.0
+content_margin_top = 10.0
+content_margin_right = 20.0
+content_margin_bottom = 10.0
+bg_color = Color(0.541176, 0.545098, 0.576471, 0.4)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleFocus"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.247059, 0.721569, 0.898039, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="Theme" id="PauseTheme"]
+default_font_size = 30
+Button/colors/font_color = Color(1, 1, 1, 1)
+Button/colors/font_hover_color = Color(1, 1, 1, 1)
+Button/colors/font_pressed_color = Color(1, 1, 1, 1)
+Button/colors/font_focus_color = Color(1, 1, 1, 1)
+Button/colors/font_disabled_color = Color(1, 1, 1, 0.65)
+Button/styles/normal = SubResource("StyleButton")
+Button/styles/hover = SubResource("StyleButtonActive")
+Button/styles/pressed = SubResource("StyleButtonActive")
+Button/styles/disabled = SubResource("StyleButtonDisabled")
+Button/styles/focus = SubResource("StyleFocus")
+PanelContainer/styles/panel = SubResource("StylePanel")
+Label/colors/font_color = Color(1, 1, 1, 1)
+RichTextLabel/colors/default_color = Color(1, 1, 1, 1)
+CheckBox/colors/font_color = Color(1, 1, 1, 1)
+CheckBox/colors/font_hover_color = Color(1, 1, 1, 1)
+CheckBox/colors/font_pressed_color = Color(1, 1, 1, 1)
+CheckBox/colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+CheckBox/colors/font_focus_color = Color(1, 1, 1, 1)
+
+[node name="PauseMenu" type="Control"]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("PauseTheme")
+mouse_force_pass_scroll_events = false
+script = ExtResource("1_pause")
+
+[node name="DimBackground" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.72)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainPanel" type="PanelContainer" parent="Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(720, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/MainPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Center/MainPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Brand" type="RichTextLabel" parent="Center/MainPanel/Margin/Content"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 50
+bbcode_enabled = true
+text = "[center]Problema[color=#3FB8E5]CIDADE[/color][/center]"
+fit_content = true
+scroll_active = false
+
+[node name="PauseHint" type="Label" parent="Center/MainPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Partida pausada"
+horizontal_alignment = 1
+
+[node name="ResumeButton" type="Button" parent="Center/MainPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+text = "Continuar"
+
+[node name="SavesButton" type="Button" parent="Center/MainPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+tooltip_text = "Não há salvamento de partidas nesta versão."
+disabled = true
+text = "Saves"
+
+[node name="OptionsButton" type="Button" parent="Center/MainPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+text = "Opções"
+
+[node name="CreditsButton" type="Button" parent="Center/MainPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+text = "Créditos"
+
+[node name="ExitButton" type="Button" parent="Center/MainPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+tooltip_text = "Voltar ao menu encerra a partida atual."
+text = "Voltar ao menu"
+
+[node name="OptionsPanel" type="PanelContainer" parent="Center"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(720, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/OptionsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Center/OptionsPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="Center/OptionsPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Opções"
+horizontal_alignment = 1
+
+[node name="Description" type="Label" parent="Center/OptionsPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "As alterações são aplicadas à partida atual."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="VolumeHeading" type="HBoxContainer" parent="Center/OptionsPanel/Margin/Content"]
+layout_mode = 2
+
+[node name="VolumeLabel" type="Label" parent="Center/OptionsPanel/Margin/Content/VolumeHeading"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Volume geral"
+
+[node name="VolumeValue" type="Label" parent="Center/OptionsPanel/Margin/Content/VolumeHeading"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "100%"
+
+[node name="VolumeSlider" type="HSlider" parent="Center/OptionsPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+tooltip_text = "Ajusta o volume geral do jogo."
+value = 100.0
+
+[node name="FullscreenCheckBox" type="CheckBox" parent="Center/OptionsPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+text = "Tela cheia"
+
+[node name="OptionsBackButton" type="Button" parent="Center/OptionsPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+text = "Voltar"
+
+[node name="CreditsPanel" type="PanelContainer" parent="Center"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(720, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/CreditsPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Center/CreditsPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="Center/CreditsPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Créditos"
+horizontal_alignment = 1
+
+[node name="Project" type="Label" parent="Center/CreditsPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "ProblemaCIDADE — jogo de gestão de uma cidade"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Participants" type="Label" parent="Center/CreditsPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Beatriz Leonardo Fernandes da Silva\nCamilo Handal Batista Oliveira\nDébora Luiza de Paula Ferreira\nGuilherme Nascimento Bilibio\nHenrique Daisuke Akiyama"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Context" type="Label" parent="Center/CreditsPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Projeto acadêmico de Teoria e Desenvolvimento de Sistemas, Matemática Computacional e Desenvolvimento Web 2."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CreditsBackButton" type="Button" parent="Center/CreditsPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 84)
+layout_mode = 2
+text = "Voltar"

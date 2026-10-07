@@ -44,7 +44,7 @@ func _process(delta: float) -> void:
 
 	var seconds_per_game_day := _get_real_seconds_per_game_day()
 
-	while _accumulated_real_time >= seconds_per_game_day:
+	while not paused and _accumulated_real_time >= seconds_per_game_day:
 		_accumulated_real_time -= seconds_per_game_day
 		_advance_one_day()
 
@@ -73,16 +73,20 @@ func _advance_one_day() -> void:
 	current_day += 1
 	_total_game_seconds += 86400
 	second_tick.emit(_total_game_seconds)
+	var month_changed := false
 
 	if current_day > days_per_month:
 		current_day = 1
 		current_month += 1
-		month_passed.emit(current_month, current_year)
+		month_changed = true
 
 	if current_month > months_per_year:
 		current_month = 1
 		current_year += 1
 		year_passed.emit(current_year)
+
+	if month_changed:
+		month_passed.emit(current_month, current_year)
 
 	day_passed.emit(current_day, current_month, current_year)
 
@@ -120,7 +124,7 @@ func stop_skip() -> void:
 	_skip_until_event = false
 
 func get_date_text() -> String:
-	return "%d anos, %d meses e %d dias" % [current_year, current_month, current_day]
+	return "Dia %d / Mês %d / Ano %d" % [current_day, current_month, current_year]
 
 func get_save_data() -> Dictionary:
 	return {

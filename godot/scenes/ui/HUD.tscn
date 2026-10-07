@@ -1,11 +1,691 @@
-[gd_scene format=3 uid="uid://urur6yl7fb1r"]
+[gd_scene load_steps=25 format=3 uid="uid://urur6yl7fb1r"]
 
-[node name="Hud" type="Control" unique_id=2141179959]
+[ext_resource type="Script" path="res://scripts/game_hud.gd" id="1_hud"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/back.svg" id="icon_back"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/pause.svg" id="icon_pause"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/play.svg" id="icon_play"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/fast.svg" id="icon_fast"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/very_fast.svg" id="icon_very_fast"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/person.svg" id="icon_person"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/money.svg" id="icon_money"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/education.svg" id="icon_education"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/health.svg" id="icon_health"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/water.svg" id="icon_water"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/security.svg" id="icon_security"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/culture.svg" id="icon_culture"]
+[ext_resource type="Texture2D" path="res://assets/ui/hud/social.svg" id="icon_social"]
+
+[sub_resource type="StyleBoxFlat" id="normal"]
+content_margin_left = 14.0
+content_margin_right = 14.0
+content_margin_top = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.98, 0.99, 1, 1)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.54, 0.62, 0.67, 1)
+corner_radius_top_left = 42
+corner_radius_top_right = 42
+corner_radius_bottom_left = 42
+corner_radius_bottom_right = 42
+
+[sub_resource type="StyleBoxFlat" id="hover"]
+content_margin_left = 14.0
+content_margin_right = 14.0
+content_margin_top = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.84, 0.94, 0.98, 1)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.7, 0.9, 1)
+corner_radius_top_left = 42
+corner_radius_top_right = 42
+corner_radius_bottom_left = 42
+corner_radius_bottom_right = 42
+
+[sub_resource type="StyleBoxFlat" id="pressed"]
+content_margin_left = 14.0
+content_margin_right = 14.0
+content_margin_top = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.25, 0.72, 0.9, 1)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.22, 0.51, 0.6, 1)
+corner_radius_top_left = 42
+corner_radius_top_right = 42
+corner_radius_bottom_left = 42
+corner_radius_bottom_right = 42
+
+[sub_resource type="StyleBoxFlat" id="focus"]
+content_margin_left = 0.0
+content_margin_right = 0.0
+content_margin_top = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.1, 0.48, 0.68, 1)
+corner_radius_top_left = 42
+corner_radius_top_right = 42
+corner_radius_bottom_left = 42
+corner_radius_bottom_right = 42
+
+[sub_resource type="StyleBoxFlat" id="disabled"]
+content_margin_left = 14.0
+content_margin_right = 14.0
+content_margin_top = 14.0
+content_margin_bottom = 14.0
+bg_color = Color(0.93, 0.95, 0.96, 1)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.84, 0.86, 1)
+corner_radius_top_left = 42
+corner_radius_top_right = 42
+corner_radius_bottom_left = 42
+corner_radius_bottom_right = 42
+
+[sub_resource type="StyleBoxFlat" id="panel"]
+content_margin_left = 28.0
+content_margin_right = 28.0
+content_margin_top = 28.0
+content_margin_bottom = 28.0
+bg_color = Color(0.98, 0.99, 1, 0.98)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.4, 0.51, 0.57, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_left = 12
+corner_radius_bottom_right = 12
+
+[sub_resource type="StyleBoxFlat" id="track"]
+content_margin_left = 0.0
+content_margin_right = 0.0
+content_margin_top = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.79, 0.84, 0.87, 1)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.79, 0.84, 0.87, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+
+[sub_resource type="StyleBoxFlat" id="fill"]
+content_margin_left = 0.0
+content_margin_right = 0.0
+content_margin_top = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.25, 0.72, 0.9, 1)
+border_width_left = 2
+border_width_right = 2
+border_width_top = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.72, 0.9, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_left = 4
+corner_radius_bottom_right = 4
+
+[sub_resource type="Theme" id="theme"]
+default_font_size = 30
+Label/colors/font_color = Color(0.15, 0.2, 0.24, 1)
+Button/colors/font_color = Color(0.15, 0.2, 0.24, 1)
+Button/colors/font_hover_color = Color(0.15, 0.2, 0.24, 1)
+Button/colors/font_pressed_color = Color(0.08, 0.18, 0.22, 1)
+Button/colors/font_focus_color = Color(0.15, 0.2, 0.24, 1)
+Button/colors/font_disabled_color = Color(0.48, 0.55, 0.59, 1)
+Button/constants/icon_max_width = 44
+Button/styles/normal = SubResource("normal")
+Button/styles/hover = SubResource("hover")
+Button/styles/pressed = SubResource("pressed")
+Button/styles/focus = SubResource("focus")
+Button/styles/disabled = SubResource("disabled")
+PanelContainer/styles/panel = SubResource("panel")
+AcceptDialog/styles/panel = SubResource("panel")
+AcceptDialog/constants/buttons_min_height = 68
+AcceptDialog/constants/buttons_separation = 22
+ProgressBar/styles/background = SubResource("track")
+ProgressBar/styles/fill = SubResource("fill")
+
+[sub_resource type="ButtonGroup" id="speed"]
+
+[node name="HUD" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+theme = SubResource("theme")
+script = ExtResource("1_hud")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1673257309]
+[node name="Footer" type="ColorRect" parent="."]
+layout_mode = 1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -160.0
+mouse_filter = 2
+color = Color(0.97, 0.98, 0.99, 0.97)
+
+[node name="Divider" type="ColorRect" parent="Footer"]
+layout_mode = 1
+anchor_right = 1.0
+offset_bottom = 2.0
+mouse_filter = 2
+color = Color(0.5, 0.58, 0.62, 0.8)
+
+[node name="MenuButton" type="Button" parent="."]
+layout_mode = 1
+anchor_left = 0.0
+anchor_right = 0.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = 32.0
+offset_top = 28.0
+offset_right = 116.0
+offset_bottom = 112.0
+icon = ExtResource("icon_back")
+expand_icon = true
+tooltip_text = "Menu da partida (Esc)"
+
+[node name="Calendar" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = -520.0
+offset_top = 30.0
+offset_right = -32.0
+offset_bottom = 128.0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="MonthProgress" type="ProgressBar" parent="Calendar"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+mouse_filter = 2
+show_percentage = false
+tooltip_text = "Progresso do mês • 30 dias"
+
+[node name="DateLabel" type="Label" parent="Calendar"]
+layout_mode = 2
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0.1, 0.2, 0.15, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+text = "Dia 1 / Mês 1 / Ano 1"
+
+[node name="Occurrences" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.0
+anchor_right = 0.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = 32.0
+offset_top = 190.0
+offset_right = 154.0
+offset_bottom = 474.0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="HighButton" type="Button" parent="Occurrences"]
+custom_minimum_size = Vector2(120, 84)
+layout_mode = 2
+text = "!   0"
+tooltip_text = "Ocorrências importantes"
+self_modulate = Color(1, 0.82, 0.27, 1)
+
+[node name="MediumButton" type="Button" parent="Occurrences"]
+custom_minimum_size = Vector2(120, 84)
+layout_mode = 2
+text = "!   0"
+tooltip_text = "Ocorrências comuns"
+self_modulate = Color(0.6, 0.78, 0.33, 1)
+
+[node name="LowButton" type="Button" parent="Occurrences"]
+custom_minimum_size = Vector2(120, 84)
+layout_mode = 2
+text = "!   0"
+tooltip_text = "Ocorrências opcionais"
+self_modulate = Color(0.25, 0.72, 0.9, 1)
+
+[node name="TimeDock" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -186.0
+offset_top = -134.0
+offset_right = 186.0
+offset_bottom = -16.0
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="TimeControls" type="HBoxContainer" parent="TimeDock"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="PauseButton" type="Button" parent="TimeDock/TimeControls"]
+custom_minimum_size = Vector2(84, 84)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+icon = ExtResource("icon_pause")
+expand_icon = true
+tooltip_text = "Pausar (Espaço)"
+
+[node name="NormalButton" type="Button" parent="TimeDock/TimeControls"]
+custom_minimum_size = Vector2(84, 84)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("speed")
+button_pressed = true
+icon = ExtResource("icon_play")
+expand_icon = true
+tooltip_text = "Velocidade normal • 1 mês = 3 min"
+
+[node name="FastButton" type="Button" parent="TimeDock/TimeControls"]
+custom_minimum_size = Vector2(84, 84)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("speed")
+icon = ExtResource("icon_fast")
+expand_icon = true
+tooltip_text = "Velocidade rápida • 1 mês = 1 min 30 s"
+
+[node name="VeryFastButton" type="Button" parent="TimeDock/TimeControls"]
+custom_minimum_size = Vector2(84, 84)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_group = SubResource("speed")
+icon = ExtResource("icon_very_fast")
+expand_icon = true
+tooltip_text = "Velocidade muito rápida • 1 mês = 30 s"
+
+[node name="StatusLabel" type="Label" parent="TimeDock"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+text = "1 mês = 3 min"
+
+[node name="ReputationButton" type="Button" parent="."]
+layout_mode = 1
+anchor_left = 0.0
+anchor_right = 0.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -138.0
+offset_right = 144.0
+offset_bottom = -26.0
+icon = ExtResource("icon_person")
+expand_icon = true
+theme_override_constants/icon_max_width = 60
+tooltip_text = "Reputação e finanças"
+
+[node name="ReputationInfo" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.0
+anchor_right = 0.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 166.0
+offset_top = -132.0
+offset_right = 420.0
+offset_bottom = -32.0
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="ReputationInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Reputação"
+
+[node name="ValueLabel" type="Label" parent="ReputationInfo"]
+layout_mode = 2
+text = "—"
+theme_override_font_sizes/font_size = 24
+
+[node name="ReputationBar" type="ProgressBar" parent="ReputationInfo"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 12)
+mouse_filter = 2
+show_percentage = false
+
+[node name="FundsButton" type="Button" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -144.0
+offset_top = -138.0
+offset_right = -32.0
+offset_bottom = -26.0
+icon = ExtResource("icon_money")
+expand_icon = true
+theme_override_constants/icon_max_width = 68
+tooltip_text = "Investimentos"
+
+[node name="FundsLabel" type="Label" parent="."]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -434.0
+offset_top = -136.0
+offset_right = -166.0
+offset_bottom = -40.0
+mouse_filter = 2
+text = "R$ —"
+horizontal_alignment = 2
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 40
+
+[node name="InvestmentPanel" type="PanelContainer" parent="."]
+mouse_force_pass_scroll_events = false
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = -644.0
+offset_top = 148.0
+offset_right = -32.0
+offset_bottom = 838.0
+visible = false
+
+[node name="Content" type="VBoxContainer" parent="InvestmentPanel"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Header" type="HBoxContainer" parent="InvestmentPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="InvestmentPanel/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+text = "Investimentos"
+
+[node name="CloseButton" type="Button" parent="InvestmentPanel/Content/Header"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+text = "×"
+tooltip_text = "Fechar (Esc)"
+
+[node name="AmountLabel" type="Label" parent="InvestmentPanel/Content"]
+layout_mode = 2
+text = "Valor: R$ —"
+
+[node name="AmountSlider" type="HSlider" parent="InvestmentPanel/Content"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+editable = false
+tooltip_text = "O saldo da cidade ainda não foi definido."
+
+[node name="EmptyBalance" type="Label" parent="InvestmentPanel/Content"]
+layout_mode = 2
+text = "O saldo da cidade ainda não foi definido."
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 26
+
+[node name="Categories" type="GridContainer" parent="InvestmentPanel/Content"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 16
+
+[node name="EducationCell" type="VBoxContainer" parent="InvestmentPanel/Content/Categories"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="EducationButton" type="Button" parent="InvestmentPanel/Content/Categories/EducationCell"]
+custom_minimum_size = Vector2(240, 84)
+layout_mode = 2
+disabled = true
+icon = ExtResource("icon_education")
+expand_icon = true
+theme_override_constants/icon_max_width = 60
+tooltip_text = "É necessário um saldo disponível para investir."
+
+[node name="Label" type="Label" parent="InvestmentPanel/Content/Categories/EducationCell"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+text = "Educação"
+
+[node name="HealthCell" type="VBoxContainer" parent="InvestmentPanel/Content/Categories"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="HealthButton" type="Button" parent="InvestmentPanel/Content/Categories/HealthCell"]
+custom_minimum_size = Vector2(240, 84)
+layout_mode = 2
+disabled = true
+icon = ExtResource("icon_health")
+expand_icon = true
+theme_override_constants/icon_max_width = 60
+tooltip_text = "É necessário um saldo disponível para investir."
+
+[node name="Label" type="Label" parent="InvestmentPanel/Content/Categories/HealthCell"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+text = "Saúde"
+
+[node name="WaterCell" type="VBoxContainer" parent="InvestmentPanel/Content/Categories"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="WaterButton" type="Button" parent="InvestmentPanel/Content/Categories/WaterCell"]
+custom_minimum_size = Vector2(240, 84)
+layout_mode = 2
+disabled = true
+icon = ExtResource("icon_water")
+expand_icon = true
+theme_override_constants/icon_max_width = 60
+tooltip_text = "É necessário um saldo disponível para investir."
+
+[node name="Label" type="Label" parent="InvestmentPanel/Content/Categories/WaterCell"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+text = "Saneamento"
+
+[node name="SecurityCell" type="VBoxContainer" parent="InvestmentPanel/Content/Categories"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="SecurityButton" type="Button" parent="InvestmentPanel/Content/Categories/SecurityCell"]
+custom_minimum_size = Vector2(240, 84)
+layout_mode = 2
+disabled = true
+icon = ExtResource("icon_security")
+expand_icon = true
+theme_override_constants/icon_max_width = 60
+tooltip_text = "É necessário um saldo disponível para investir."
+
+[node name="Label" type="Label" parent="InvestmentPanel/Content/Categories/SecurityCell"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+text = "Segurança"
+
+[node name="CultureCell" type="VBoxContainer" parent="InvestmentPanel/Content/Categories"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="CultureButton" type="Button" parent="InvestmentPanel/Content/Categories/CultureCell"]
+custom_minimum_size = Vector2(240, 84)
+layout_mode = 2
+disabled = true
+icon = ExtResource("icon_culture")
+expand_icon = true
+theme_override_constants/icon_max_width = 60
+tooltip_text = "É necessário um saldo disponível para investir."
+
+[node name="Label" type="Label" parent="InvestmentPanel/Content/Categories/CultureCell"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+text = "Cultura"
+
+[node name="SocialCell" type="VBoxContainer" parent="InvestmentPanel/Content/Categories"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="SocialButton" type="Button" parent="InvestmentPanel/Content/Categories/SocialCell"]
+custom_minimum_size = Vector2(240, 84)
+layout_mode = 2
+disabled = true
+icon = ExtResource("icon_social")
+expand_icon = true
+theme_override_constants/icon_max_width = 60
+tooltip_text = "É necessário um saldo disponível para investir."
+
+[node name="Label" type="Label" parent="InvestmentPanel/Content/Categories/SocialCell"]
+layout_mode = 2
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+text = "Assistência"
+
+[node name="StatisticsScrim" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_force_pass_scroll_events = false
+color = Color(0, 0, 0, 0.45)
+
+[node name="StatisticsPanel" type="PanelContainer" parent="."]
+mouse_force_pass_scroll_events = false
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -438.0
+offset_top = -245.0
+offset_right = 438.0
+offset_bottom = 245.0
+visible = false
+
+[node name="Content" type="VBoxContainer" parent="StatisticsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Header" type="HBoxContainer" parent="StatisticsPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="StatisticsPanel/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+text = "Reputação e finanças"
+
+[node name="CloseButton" type="Button" parent="StatisticsPanel/Content/Header"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+text = "×"
+tooltip_text = "Fechar (Esc)"
+
+[node name="Description" type="Label" parent="StatisticsPanel/Content"]
+layout_mode = 2
+text = "Acompanhe a evolução da cidade ao longo dos meses."
+autowrap_mode = 3
+
+[node name="EconomyTitle" type="Label" parent="StatisticsPanel/Content"]
+layout_mode = 2
+text = "Economia"
+theme_override_colors/font_color = Color(0.1, 0.45, 0.64, 1)
+
+[node name="EconomyEmpty" type="Label" parent="StatisticsPanel/Content"]
+layout_mode = 2
+text = "Ainda não há registros financeiros."
+theme_override_font_sizes/font_size = 26
+
+[node name="ApprovalTitle" type="Label" parent="StatisticsPanel/Content"]
+layout_mode = 2
+text = "Popularidade"
+theme_override_colors/font_color = Color(0.55, 0.29, 0.62, 1)
+
+[node name="ApprovalEmpty" type="Label" parent="StatisticsPanel/Content"]
+layout_mode = 2
+text = "Ainda não há registros de reputação."
+theme_override_font_sizes/font_size = 26
+
+[node name="OccurrencePanel" type="PanelContainer" parent="."]
+mouse_force_pass_scroll_events = false
+layout_mode = 1
+anchor_left = 0.0
+anchor_right = 0.0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = 176.0
+offset_top = 190.0
+offset_right = 786.0
+offset_bottom = 470.0
+visible = false
+
+[node name="Content" type="VBoxContainer" parent="OccurrencePanel"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Header" type="HBoxContainer" parent="OccurrencePanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="OccurrencePanel/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 40
+text = "Ocorrências"
+
+[node name="CloseButton" type="Button" parent="OccurrencePanel/Content/Header"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+text = "×"
+tooltip_text = "Fechar (Esc)"
+
+[node name="EmptyMessage" type="Label" parent="OccurrencePanel/Content"]
+layout_mode = 2
+text = "Nenhuma ocorrência disponível nesta categoria."
+autowrap_mode = 3
