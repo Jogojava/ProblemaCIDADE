@@ -18,8 +18,13 @@ func _ready() -> void:
 	hud.panels_changed.connect(_on_panels_changed)
 	pause_menu.resume_requested.connect(_on_resume_requested)
 	pause_menu.exit_requested.connect(_on_exit_requested)
+	pause_menu.save_requested.connect(_on_save_requested)
 	return_dialog.confirmed.connect(_on_return_confirmed)
 	return_dialog.canceled.connect(_on_return_canceled)
+	var saved_game := SaveManager.consume_pending_save()
+	if not saved_game.is_empty():
+		time_manager.load_save_data(saved_game.get("time", {}))
+		event_manager.load_save_data(saved_game.get("events", {}))
 
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
@@ -66,6 +71,12 @@ func _on_exit_requested() -> void:
 	if return_dialog.visible:
 		return
 	return_dialog.popup_centered(Vector2i(520, 180))
+
+func _on_save_requested() -> void:
+	var slot := SaveManager.get_next_slot()
+	if SaveManager.save_game(time_manager, event_manager, slot):
+		pause_menu.saves_button.text = "Salvo no slot %d" % slot
+		pause_menu.saves_button.tooltip_text = "Calendário e eventos salvos."
 
 func _on_return_canceled() -> void:
 	return_dialog.hide()

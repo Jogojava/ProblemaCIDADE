@@ -152,9 +152,8 @@ text = "Continuar"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 84)
 layout_mode = 2
-tooltip_text = "Não há salvamento de partidas nesta versão."
-disabled = true
-text = "Saves"
+tooltip_text = "Salva o calendário e os eventos em um slot."
+text = "Salvar partida"
 
 [node name="OptionsButton" type="Button" parent="Center/MainPanel/Margin/Content"]
 unique_name_in_owner = true

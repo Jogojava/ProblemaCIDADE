@@ -1,12 +1,16 @@
 extends Control
 
 func _ready() -> void:
+	$SoundButton.pressed.connect(_on_sound_pressed)
+	$ExitButton.pressed.connect(func() -> void: get_tree().quit())
+	_sync_sound_button()
 	$Menu/VBoxContainer/jogar.pressed.connect(_on_btjogar_pressed)
 	$Menu/VBoxContainer/continuar.pressed.connect(_on_btcontinuar_pressed)
 	$Menu/VBoxContainer/opcoes.pressed.connect(_on_btopcoes_pressed)
 	$Menu/VBoxContainer/creditos.pressed.connect(_on_btcreditos_pressed)
-	$Menu/VBoxContainer/continuar.disabled = true
-	$Menu/VBoxContainer/continuar.tooltip_text = "Não há uma partida salva para carregar."
+	$Menu/VBoxContainer/continuar.disabled = false
+	$Menu/VBoxContainer/continuar.text = "Partidas salvas"
+	$Menu/VBoxContainer/continuar.tooltip_text = "Abrir slots de salvamento."
 
 func _on_btjogar_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/game/Game.tscn")
@@ -19,3 +23,14 @@ func _on_btopcoes_pressed() -> void:
 	
 func _on_btcreditos_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/creditos.tscn")
+
+func _on_sound_pressed() -> void:
+	var master := AudioServer.get_bus_index("Master")
+	if master >= 0:
+		AudioServer.set_bus_mute(master, not AudioServer.is_bus_mute(master))
+	_sync_sound_button()
+
+func _sync_sound_button() -> void:
+	var master := AudioServer.get_bus_index("Master")
+	var muted := master >= 0 and AudioServer.is_bus_mute(master)
+	$SoundButton.text = "Som: desligado" if muted else "Som: ligado"

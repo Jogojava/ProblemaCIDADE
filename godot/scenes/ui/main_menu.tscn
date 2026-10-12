@@ -23,11 +23,6 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.6864179, 0.92125535, 0.99788123, 1)
 
-[node name="bgImg" type="TextureRect" parent="." unique_id=1311402072]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
 [node name="TitleGroup" type="CenterContainer" parent="." unique_id=65278687]
 layout_mode = 1
 anchors_preset = -1
@@ -107,25 +102,34 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "Créditos"
 
-[node name="SoundButton" type="TextureButton" parent="." unique_id=1257913032]
+[node name="SoundButton" type="Button" parent="." unique_id=1257913032]
+custom_minimum_size = Vector2(180, 56)
 layout_mode = 1
-anchors_preset = 2
+anchors_preset = 1
+anchor_left = 0.0
 anchor_top = 1.0
+anchor_right = 0.0
 anchor_bottom = 1.0
-offset_top = -40.0
-offset_right = 40.0
+offset_left = 28.0
+offset_top = -84.0
+offset_right = 208.0
+offset_bottom = -28.0
+grow_horizontal = 0
 grow_vertical = 0
+text = "Som: ligado"
 
-[node name="ExitButton" type="TextureButton" parent="." unique_id=353378696]
+[node name="ExitButton" type="Button" parent="." unique_id=353378696]
+custom_minimum_size = Vector2(140, 56)
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -58.30603
-offset_top = -63.295288
-offset_right = -16.33545
-offset_bottom = -22.226318
+offset_left = -168.0
+offset_top = -84.0
+offset_right = -28.0
+offset_bottom = -28.0
 grow_horizontal = 0
 grow_vertical = 0
+text = "Sair"

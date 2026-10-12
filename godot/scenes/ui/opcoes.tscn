@@ -1,50 +1,78 @@
-[gd_scene format=3 uid="uid://cmy8ti66fabp6"]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" uid="uid://crkpbkj5nhd4g" path="res://scenes/ui/opcoes.gd" id="1_0x4op"]
+[ext_resource type="Script" path="res://scenes/ui/opcoes.gd" id="1"]
 
-[node name="OptionsScreen" type="Control" unique_id=823850283]
+[node name="OptionsScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1")
 
-[node name="bg" type="ColorRect" parent="." unique_id=49016169]
+[node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.8398224, 0.87307954, 0.9911191, 1)
+color = Color(0.12, 0.17, 0.19, 1)
 
-[node name="Label" type="Label" parent="bg" unique_id=1084928628]
+[node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -300.0
-offset_top = -69.5
-offset_right = 300.0
-offset_bottom = 69.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 90
-text = "SIM OU NADA"
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=257108589]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="Button" type="Button" parent="MarginContainer" unique_id=152036979]
-custom_minimum_size = Vector2(100, 100)
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(720, 0)
 layout_mode = 2
-text = "Voltar"
-script = ExtResource("1_0x4op")
 
-[connection signal="pressed" from="MarginContainer/Button" to="MarginContainer/Button" method="voltar_on_pressed"]
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 32
+
+[node name="Content" type="VBoxContainer" parent="Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Opções"
+horizontal_alignment = 1
+
+[node name="VolumeHeading" type="HBoxContainer" parent="Center/Panel/Margin/Content"]
+layout_mode = 2
+
+[node name="VolumeLabel" type="Label" parent="Center/Panel/Margin/Content/VolumeHeading"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Volume geral"
+
+[node name="VolumeValue" type="Label" parent="Center/Panel/Margin/Content/VolumeHeading"]
+layout_mode = 2
+text = "100%"
+
+[node name="VolumeSlider" type="HSlider" parent="Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+
+[node name="FullscreenCheckBox" type="CheckBox" parent="Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+text = "Tela cheia"
+
+[node name="BackButton" type="Button" parent="Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "Voltar ao menu"

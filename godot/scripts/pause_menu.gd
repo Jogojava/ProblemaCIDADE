@@ -3,6 +3,7 @@ extends Control
 
 signal resume_requested()
 signal exit_requested()
+signal save_requested()
 
 @onready var resume_button: Button = %ResumeButton
 @onready var exit_button: Button = %ExitButton
@@ -25,6 +26,7 @@ var _master_bus_index: int = -1
 
 func _ready() -> void:
 	resume_button.pressed.connect(func() -> void: resume_requested.emit())
+	saves_button.pressed.connect(func() -> void: save_requested.emit())
 	exit_button.pressed.connect(func() -> void: exit_requested.emit())
 	options_button.pressed.connect(_open_options)
 	credits_button.pressed.connect(_open_credits)
