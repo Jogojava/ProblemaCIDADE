@@ -207,6 +207,63 @@ icon = ExtResource("icon_back")
 expand_icon = true
 tooltip_text = "Menu da partida (Esc)"
 
+[node name="UrgentAlertLayer" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="ProblemTabs" type="PanelContainer" parent="UrgentAlertLayer"]
+visible = false
+custom_minimum_size = Vector2(760, 84)
+layout_mode = 1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -380.0
+offset_top = 16.0
+offset_right = 380.0
+offset_bottom = 100.0
+theme = SubResource("theme")
+
+[node name="UrgentLayout" type="HBoxContainer" parent="UrgentAlertLayer/ProblemTabs"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="UrgentOpenButton" type="Button" parent="UrgentAlertLayer/ProblemTabs/UrgentLayout"]
+custom_minimum_size = Vector2(440, 64)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 21
+text = "!  Problema urgente"
+text_overrun_behavior = 3
+
+[node name="UrgentTimer" type="VBoxContainer" parent="UrgentAlertLayer/ProblemTabs/UrgentLayout"]
+custom_minimum_size = Vector2(270, 0)
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="UrgentPhase" type="Label" parent="UrgentAlertLayer/ProblemTabs/UrgentLayout/UrgentTimer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "PARA ABRIR"
+horizontal_alignment = 1
+
+[node name="UrgentTimerRow" type="HBoxContainer" parent="UrgentAlertLayer/ProblemTabs/UrgentLayout/UrgentTimer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="UrgentProgress" type="ProgressBar" parent="UrgentAlertLayer/ProblemTabs/UrgentLayout/UrgentTimer/UrgentTimerRow"]
+custom_minimum_size = Vector2(196, 22)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+show_percentage = false
+
+[node name="UrgentCountdown" type="Label" parent="UrgentAlertLayer/ProblemTabs/UrgentLayout/UrgentTimer/UrgentTimerRow"]
+custom_minimum_size = Vector2(62, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "03:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="Calendar" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchor_left = 1.0
@@ -236,7 +293,7 @@ theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 2
 text = "Dia 1 / Mês 1 / Ano 1"
 
-[node name="Occurrences" type="VBoxContainer" parent="."]
+[node name="Occurrences" type="Control" parent="."]
 layout_mode = 1
 anchor_left = 0.0
 anchor_right = 0.0
@@ -244,31 +301,92 @@ anchor_top = 0.0
 anchor_bottom = 0.0
 offset_left = 32.0
 offset_top = 190.0
-offset_right = 154.0
-offset_bottom = 474.0
-mouse_filter = 2
-theme_override_constants/separation = 12
+offset_right = 470.0
+offset_bottom = 850.0
+mouse_filter = 0
 
 [node name="HighButton" type="Button" parent="Occurrences"]
-custom_minimum_size = Vector2(120, 84)
-layout_mode = 2
-text = "!   0"
+custom_minimum_size = Vector2(84, 72)
+layout_mode = 0
+offset_right = 84.0
+offset_bottom = 72.0
+theme_override_font_sizes/font_size = 24
+text = "!  0"
 tooltip_text = "Ocorrências importantes"
 self_modulate = Color(1, 0.82, 0.27, 1)
 
 [node name="MediumButton" type="Button" parent="Occurrences"]
-custom_minimum_size = Vector2(120, 84)
-layout_mode = 2
-text = "!   0"
+custom_minimum_size = Vector2(84, 72)
+layout_mode = 0
+offset_top = 25.0
+offset_right = 84.0
+offset_bottom = 97.0
+theme_override_font_sizes/font_size = 24
+text = "!  0"
 tooltip_text = "Ocorrências comuns"
 self_modulate = Color(0.6, 0.78, 0.33, 1)
 
 [node name="LowButton" type="Button" parent="Occurrences"]
-custom_minimum_size = Vector2(120, 84)
-layout_mode = 2
-text = "!   0"
+custom_minimum_size = Vector2(84, 72)
+layout_mode = 0
+offset_top = 50.0
+offset_right = 84.0
+offset_bottom = 122.0
+theme_override_font_sizes/font_size = 24
+text = "!  0"
 tooltip_text = "Ocorrências opcionais"
 self_modulate = Color(0.25, 0.72, 0.9, 1)
+
+[node name="HighCount" type="PanelContainer" parent="Occurrences"]
+custom_minimum_size = Vector2(38, 28)
+layout_mode = 0
+offset_left = 88.0
+offset_top = 22.0
+offset_right = 126.0
+offset_bottom = 50.0
+mouse_filter = 2
+
+[node name="Value" type="Label" parent="Occurrences/HighCount"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MediumCount" type="PanelContainer" parent="Occurrences"]
+custom_minimum_size = Vector2(38, 28)
+layout_mode = 0
+offset_left = 88.0
+offset_top = 62.0
+offset_right = 126.0
+offset_bottom = 90.0
+mouse_filter = 2
+
+[node name="Value" type="Label" parent="Occurrences/MediumCount"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LowCount" type="PanelContainer" parent="Occurrences"]
+custom_minimum_size = Vector2(38, 28)
+layout_mode = 0
+offset_left = 88.0
+offset_top = 102.0
+offset_right = 126.0
+offset_bottom = 130.0
+mouse_filter = 2
+
+[node name="Value" type="Label" parent="Occurrences/LowCount"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="TimeDock" type="VBoxContainer" parent="."]
 layout_mode = 1

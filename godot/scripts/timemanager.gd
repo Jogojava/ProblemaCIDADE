@@ -29,6 +29,7 @@ var current_year: int = 1
 
 var current_speed: int = Speed.NORMAL
 var paused: bool = false
+var challenge_active: bool = false
 
 var _accumulated_real_time: float = 0.0
 var _total_game_seconds: int = 0
@@ -69,6 +70,17 @@ func _get_real_seconds_per_game_day() -> float:
 
 	return month_duration / float(days_per_month)
 
+func get_game_speed_multiplier() -> float:
+	var current_month_duration := normal_month_duration_real_seconds
+	match current_speed:
+		Speed.FAST:
+			current_month_duration = fast_month_duration_real_seconds
+		Speed.VERY_FAST:
+			current_month_duration = very_fast_month_duration_real_seconds
+	if current_month_duration <= 0.0:
+		return 1.0
+	return maxf(0.0, normal_month_duration_real_seconds) / current_month_duration
+
 func _advance_one_day() -> void:
 	current_day += 1
 	_total_game_seconds += 86400
@@ -91,11 +103,14 @@ func _advance_one_day() -> void:
 	day_passed.emit(current_day, current_month, current_year)
 
 func set_speed(speed: int) -> void:
-	current_speed = clampi(speed, Speed.NORMAL, Speed.VERY_FAST)
+	var requested_speed := clampi(speed, Speed.NORMAL, Speed.VERY_FAST)
+	if challenge_active and requested_speed != Speed.NORMAL:
+		return
+	current_speed = requested_speed
 	speed_changed.emit(current_speed)
 
 func pause_game() -> void:
-	if paused:
+	if paused or challenge_active:
 		return
 	paused = true
 	paused_changed.emit(paused)
@@ -107,8 +122,17 @@ func resume_game() -> void:
 	paused_changed.emit(paused)
 
 func toggle_pause() -> void:
+	if challenge_active:
+		return
 	paused = not paused
 	paused_changed.emit(paused)
+
+func set_challenge_active(value: bool) -> void:
+	challenge_active = value
+	if not challenge_active:
+		return
+	set_speed(Speed.NORMAL)
+	resume_game()
 
 func skip_until_next_event(event_checker: Callable) -> void:
 	if not event_checker.is_valid():
@@ -164,6 +188,7 @@ func reset_time() -> void:
 	_total_game_seconds = 0
 	_skip_until_event = false
 	_event_checker = Callable()
+	challenge_active = false
 
 	paused_changed.emit(paused)
 	speed_changed.emit(current_speed)

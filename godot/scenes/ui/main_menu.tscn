@@ -1,27 +1,34 @@
 [gd_scene format=3 uid="uid://83w7bu1cy0ss"]
 
 [ext_resource type="Script" uid="uid://oa87qvchjlvh" path="res://scenes/ui/main_menu.gd" id="1_sl1te"]
+[ext_resource type="Texture2D" uid="uid://urj72jqu74f2" path="res://assets/ui/pixilart-drawing.png" id="2_fe2o3"]
+[ext_resource type="AudioStream" uid="uid://htt18cmjx7my" path="res://assets/soundtrack/src_aud_lobby-classic-game.mp3" id="3_m1kxf"]
+[ext_resource type="Script" uid="uid://bdt4niw76wyj0" path="res://scripts/kkkkkkkk.gd" id="4_x2yvf"]
 
 [node name="TittleScreen" type="Control" unique_id=1596576623]
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_right = 1.0007015
+anchor_bottom = 0.9983232
+offset_right = -1.3469238
+offset_bottom = 1.8109131
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(1.0007015, 0.99832326)
 script = ExtResource("1_sl1te")
 metadata/_edit_group_ = true
 metadata/_edit_lock_ = true
+metadata/_edit_use_anchors_ = true
 
-[node name="bg" type="ColorRect" parent="." unique_id=629084801]
+[node name="Background" type="TextureRect" parent="." unique_id=1853580191]
+modulate = Color(1, 1, 1, 0.5882353)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.6864179, 0.92125535, 0.99788123, 1)
+texture = ExtResource("2_fe2o3")
+expand_mode = 2
 
 [node name="TitleGroup" type="CenterContainer" parent="." unique_id=65278687]
 layout_mode = 1
@@ -43,7 +50,7 @@ layout_mode = 2
 [node name="Label" type="Label" parent="TitleGroup/HBoxContainer" unique_id=928557985]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 100
 text = "Problema"
 vertical_alignment = 1
@@ -105,10 +112,8 @@ text = "Créditos"
 [node name="SoundButton" type="Button" parent="." unique_id=1257913032]
 custom_minimum_size = Vector2(180, 56)
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 0.0
+anchors_preset = 2
 anchor_top = 1.0
-anchor_right = 0.0
 anchor_bottom = 1.0
 offset_left = 28.0
 offset_top = -84.0
@@ -133,3 +138,13 @@ offset_bottom = -28.0
 grow_horizontal = 0
 grow_vertical = 0
 text = "Sair"
+
+[node name="QuitConfirmation" type="ConfirmationDialog" parent="." unique_id=865635462]
+title = "Sair do ProblemaCIDADE?"
+initial_position = 1
+dialog_text = "Deseja mesmo sair do jogo?"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=684694698]
+stream = ExtResource("3_m1kxf")
+autoplay = true
+script = ExtResource("4_x2yvf")

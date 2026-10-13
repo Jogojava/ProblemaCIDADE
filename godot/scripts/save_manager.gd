@@ -38,10 +38,12 @@ func get_next_slot() -> int:
 			oldest_slot = slot
 	return oldest_slot
 
-func save_game(time_manager: Node, event_manager: Node, slot: int = 1) -> bool:
+func save_game(time_manager: Node, event_manager: Node, slot: int = 1, event_database: Node = null) -> bool:
 	if slot < 1 or slot > SLOT_COUNT:
 		return false
 	var data := {"date": Time.get_datetime_string_from_system(), "time": time_manager.get_save_data(), "events": event_manager.get_save_data()}
+	if event_database != null and event_database.has_method("get_usage_save_data"):
+		data["event_database_usage"] = event_database.get_usage_save_data()
 	var file := FileAccess.open(slot_path(slot), FileAccess.WRITE)
 	if file == null:
 		return false

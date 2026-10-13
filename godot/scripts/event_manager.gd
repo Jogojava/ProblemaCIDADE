@@ -12,10 +12,10 @@ signal event_resolved(runtime_event: Dictionary)
 signal event_expired(runtime_event: Dictionary)
 signal monthly_schedule_created(month: int, year: int, created_counts: Dictionary)
 
-@export var optional_events_per_month: int = 0
-@export var common_events_per_month: int = 2
-@export var important_events_per_month: int = 0
-@export var urgent_events_per_month: int = 0
+@export var optional_events_per_month: int = 2
+@export var common_events_per_month: int = 4
+@export var important_events_per_month: int = 2
+const URGENT_EVENTS_PER_MONTH := 1
 
 @export var min_day_for_optional: int = 2
 @export var max_day_for_optional: int = 28
@@ -88,7 +88,9 @@ func _trigger_scheduled_for_day(day: int, month: int, year: int) -> void:
 		if _event_database == null:
 			continue
 
-		var runtime_event = _event_database.call("build_runtime_event", event_id, day, month, year)
+		var days_per_month := int(_time_manager.get("days_per_month")) if _time_manager != null else 30
+		var months_per_year := int(_time_manager.get("months_per_year")) if _time_manager != null else 12
+		var runtime_event = _event_database.call("build_runtime_event", event_id, day, month, year, days_per_month, months_per_year)
 
 		if typeof(runtime_event) != TYPE_DICTIONARY:
 			continue
@@ -147,9 +149,6 @@ func _create_month_schedule(month: int, year: int) -> void:
 
 	_remove_old_scheduled_events(month, year)
 
-	if _event_database != null and _event_database.has_method("reset_all_category_usage"):
-		_event_database.call("reset_all_category_usage")
-
 	var used_days: Array[int] = []
 	var created_counts := {
 		CATEGORY_OPTIONAL: 0,
@@ -193,7 +192,7 @@ func _create_month_schedule(month: int, year: int) -> void:
 
 	_schedule_category(
 		CATEGORY_URGENT,
-		urgent_events_per_month,
+		URGENT_EVENTS_PER_MONTH if not _has_urgent_for_month(month, year) else 0,
 		min_day_for_urgent,
 		max_day_for_urgent,
 		month,
@@ -203,6 +202,16 @@ func _create_month_schedule(month: int, year: int) -> void:
 	)
 
 	monthly_schedule_created.emit(month, year, created_counts)
+
+func _has_urgent_for_month(month: int, year: int) -> bool:
+	var expected_key := "%d-%d" % [year, month]
+	for event_list in [scheduled_events, active_events, resolved_events, expired_events]:
+		for event_data in event_list:
+			if String(event_data.get("category", "")) != CATEGORY_URGENT:
+				continue
+			if _get_urgent_month_key(event_data) == expected_key:
+				return true
+	return false
 
 func _schedule_category(
 	category: String,
@@ -350,3 +359,49 @@ func load_save_data(data: Dictionary) -> void:
 	expired_events = data.get("expired_events", [])
 	_last_scheduled_month = int(data.get("last_scheduled_month", -1))
 	_last_scheduled_year = int(data.get("last_scheduled_year", -1))
+
+func enforce_one_urgent_per_month() -> void:
+	# Older saves could contain multiple urgent problems in a month. Treat any
+	# already resolved/expired urgent as the month's one, then keep only the
+	# first active or scheduled urgent for each remaining month.
+	var occupied_months: Dictionary = {}
+	for runtime_event in resolved_events + expired_events:
+		if String(runtime_event.get("category", "")) == CATEGORY_URGENT:
+			var key := _get_urgent_month_key(runtime_event)
+			if not key.is_empty():
+				occupied_months[key] = true
+
+	var retained_active: Array[Dictionary] = []
+	for runtime_event in active_events:
+		if String(runtime_event.get("category", "")) != CATEGORY_URGENT:
+			retained_active.append(runtime_event)
+			continue
+		var key := _get_urgent_month_key(runtime_event)
+		if key.is_empty() or not occupied_months.has(key):
+			retained_active.append(runtime_event)
+			if not key.is_empty():
+				occupied_months[key] = true
+		else:
+			runtime_event["status"] = "expired"
+			expired_events.append(runtime_event)
+	active_events = retained_active
+
+	var retained_scheduled: Array[Dictionary] = []
+	for scheduled_event in scheduled_events:
+		if String(scheduled_event.get("category", "")) != CATEGORY_URGENT:
+			retained_scheduled.append(scheduled_event)
+			continue
+		var key := _get_urgent_month_key(scheduled_event)
+		if key.is_empty() or not occupied_months.has(key):
+			retained_scheduled.append(scheduled_event)
+			if not key.is_empty():
+				occupied_months[key] = true
+	scheduled_events = retained_scheduled
+
+func _get_urgent_month_key(event_data: Dictionary) -> String:
+	var date_data: Dictionary = event_data.get("available_from", event_data)
+	var month := int(date_data.get("month", -1))
+	var year := int(date_data.get("year", -1))
+	if month < 1 or year < 1:
+		return ""
+	return "%d-%d" % [year, month]

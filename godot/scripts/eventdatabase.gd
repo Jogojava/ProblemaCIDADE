@@ -9,6 +9,7 @@ const CATEGORY_URGENT := "urgent"
 const INTERACTION_CHOICE := "choice"
 const INTERACTION_NUMBER_INPUT := "number_input"
 const INTERACTION_TEXT_INPUT := "text_input"
+const PROBLEM_AVAILABILITY_DAYS := 30
 
 var events: Dictionary = {}
 
@@ -51,7 +52,155 @@ func register_event(event_id: String, data: Dictionary) -> void:
 	if not event_data.has("availability_duration_days"):
 		event_data["availability_duration_days"] = null
 
+	# Optional image resource for a problem statement; leave null until artwork is added.
+	if not event_data.has("image"):
+		event_data["image"] = null
+
 	events[event_id] = event_data
+
+func register_default_problems() -> void:
+	var problems := {
+		"aura_travessia": {
+			"title": "Ajude AURA na travessia",
+			"image": "res://assets/problems/aura.png",
+			"description": "Uma senhora precisa atravessar uma rua de 8 metros. Ela anda a 1 metro por segundo e descansa por 3 segundos a cada 4 metros. O sinal fica aberto por 15 segundos; ela leva 2 segundos para interpretar a luz e mais 1 para começar a andar. Ela consegue atravessar?",
+			"category": CATEGORY_OPTIONAL,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "sim", "text": "Sim"},
+				{"id": "nao", "text": "Não"}
+			]},
+			"correct_answer": "sim",
+			"explanation": "Ela gasta 8 segundos andando, 3 descansando uma vez e 3 para reagir ao sinal: 14 segundos, menos que os 15 disponíveis."
+		},
+		"merenda_escolar": {
+			"title": "Comer comer para poder crescer",
+			"image": "res://assets/problems/merenda_escolar.png",
+			"description": "A prefeitura paga R$ 500 de transporte fixo e R$ 12 por refeição. A escola tem 80 alunos e deve incluir uma margem de 25% para quem repete a refeição. Qual verba é necessária?",
+			"category": CATEGORY_COMMON,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"prompt": "Digite o valor sem símbolos", "correct_value": 1700, "placeholder": "Ex.: 1700"},
+			"explanation": "25% de 80 são 20 refeições extras. Então, 500 + 12 × (80 + 20) = R$ 1.700."
+		},
+		"transporte_proporcional": {
+			"title": "Abastecimento e proporcionalidade",
+			"image": "res://assets/problems/onibus.png",
+			"description": "Uma verba de R$ 300 mil será distribuída proporcionalmente entre bairros com 50, 30 e 70 famílias. Quanto cada bairro deve receber, respectivamente?",
+			"category": CATEGORY_COMMON,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "R$ 100 mil, R$ 80 mil e R$ 120 mil"},
+				{"id": "b", "text": "R$ 100 mil, R$ 60 mil e R$ 140 mil"},
+				{"id": "c", "text": "R$ 50 mil, R$ 30 mil e R$ 70 mil"},
+				{"id": "d", "text": "R$ 75 mil, R$ 50 mil e R$ 175 mil"}
+			]},
+			"correct_answer": "b",
+			"explanation": "São 150 famílias ao todo. Cada família corresponde a R$ 2 mil, resultando em R$ 100 mil, R$ 60 mil e R$ 140 mil."
+		},
+		"juros_bancos": {
+			"title": "Juros pelo meu milhão",
+			"description": "Um empréstimo de R$ 1 milhão será quitado em 24 meses. O Banco Grotesco cobra juros simples de 25% ao ano; o NuhBanho cobra juros compostos de 20% ao ano. Qual banco custa menos ao final de dois anos?",
+			"category": CATEGORY_COMMON,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "grotesco", "text": "Banco Grotesco"},
+				{"id": "nuhbanho", "text": "NuhBanho"}
+			]},
+			"correct_answer": "nuhbanho",
+			"explanation": "O Grotesco cobra 1 × (1 + 0,25 × 2) = R$ 1,5 milhão. O NuhBanho cobra 1 × 1,2² = R$ 1,44 milhão."
+		},
+		"rota_medicamentos": {
+			"title": "MedicaMOVImentos",
+			"description": "A Rota A tem 120 km, média de 60 km/h e custo de R$ 600. A Rota B tem 90 km, média de 60 km/h e custo de R$ 800. Some 30 minutos para carga e descarga. Escolha uma rota e compare tempo e custo.",
+			"category": CATEGORY_IMPORTANT,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "rota_a", "text": "Rota A: 2h30, R$ 600 (mais barata)"},
+				{"id": "rota_b", "text": "Rota B: 2h, R$ 800 (mais rápida)"}
+			]},
+			"accepted_answers": ["rota_a", "rota_b"],
+			"explanation": "A Rota A leva 2h30 e custa menos. A Rota B leva 2h e custa mais. A escolha depende de priorizar economia ou rapidez."
+		},
+		"moradias_enchente": {
+			"title": "Tsente: moradias após a enchente",
+			"image": "res://assets/problems/tsente.png",
+			"description": "Uma enchente deixou 120 sobreviventes sem moradia. Qual modelo atende a todos pelo menor custo? A: 4 pessoas por R$ 78.829,91; B: 6 pessoas por R$ 108.182,34; C: 10 pessoas por R$ 155.330,72.",
+			"category": CATEGORY_URGENT,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": null,
+			"payload": {"options": [
+				{"id": "a", "text": "Modelo A"},
+				{"id": "b", "text": "Modelo B"},
+				{"id": "c", "text": "Modelo C"}
+			]},
+			"correct_answer": "c",
+			"explanation": "O modelo C precisa de 12 unidades. Mesmo com o custo unitário maior, o total aproximado é R$ 1,86 milhão, menor que os modelos A e B."
+		},
+		"verba_imss": {
+			"title": "Verba IMSS",
+			"description": "25% da população continua elegível ao IMSS. A população passou de 25.932 para 28.484 pessoas. O orçamento disponível é R$ 17,8 milhões e a verba do ano passado foi R$ 1,36 milhão. A verba aumentará quando P e Q forem verdadeiros: P, elegíveis cresceram pelo menos 8%; Q, a verba não passa de 10% do orçamento. A verba aumentará?",
+			"category": CATEGORY_IMPORTANT,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "sim", "text": "Sim"},
+				{"id": "nao", "text": "Não"}
+			]},
+			"correct_answer": "sim",
+			"explanation": "Elegíveis cresceram cerca de 9,84%, então P é verdadeiro. O aumento para aproximadamente R$ 1,49 milhão fica abaixo de 10% de R$ 17,8 milhões (R$ 1,78 milhão), então Q também é verdadeiro."
+		},
+		"rota_presidio": {
+			"title": "Intriga do Carroeios",
+			"description": "A polícia precisa transportar presos de H ao presídio R antes do fechamento, em 30 minutos. O pedágio total não pode passar de R$ 6; o combustível custa R$ 2 por quilômetro. Estradas (km, min, pedágio): H-A (4, 6, 0); H-B (2, 10, 2); A-C (5, 5, 1); A-D (3, 12, 0); B-C (6, 4, 3); B-E (4, 7, 1); C-F (2, 3, 2); D-F (7, 8, 0); E-R (3, 5, 1); F-R (5, 6, 2); D-R (9, 15, 0). Existe um caminho que atende às restrições?",
+			"category": CATEGORY_URGENT,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": null,
+			"payload": {"options": [
+				{"id": "sim", "text": "Sim"},
+				{"id": "nao", "text": "Não"}
+			]},
+			"correct_answer": "sim",
+			"explanation": "A viagem leva 22 minutos e paga R$ 4 de pedágio. O combustível custa R$ 18, totalizando R$ 22; as duas restrições são atendidas."
+		},
+		"pesquisa_satisfacao": {
+			"title": "Pesquisa satisfatória",
+			"description": "O instituto DataCidade entrevistou 1.200 cidadãos: 540 aprovam, 420 desaprovam e 240 são neutros. Qual é o percentual de aprovação e desaprovação, respectivamente?",
+			"category": CATEGORY_OPTIONAL,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "45% e 35%"},
+				{"id": "b", "text": "30% e 50%"},
+				{"id": "c", "text": "20% e 45%"},
+				{"id": "d", "text": "20% e 35%"}
+			]},
+			"correct_answer": "a",
+			"explanation": "540 ÷ 1.200 = 45% de aprovação; 420 ÷ 1.200 = 35% de desaprovação."
+		},
+		"obras_combinacoes": {
+			"title": "Obra-primarial",
+			"description": "A prefeitura tem 5 obras prioritárias, mas o orçamento permite executar 2 no mesmo período. A ordem não importa. Quantas combinações diferentes de obras existem?",
+			"category": CATEGORY_COMMON,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "5"},
+				{"id": "b", "text": "10"},
+				{"id": "c", "text": "20"},
+				{"id": "d", "text": "25"}
+			]},
+			"correct_answer": "b",
+			"explanation": "A combinação é C(5, 2) = 5 × 4 ÷ 2 = 10."
+		}
+	}
+
+	for event_id in problems:
+		register_event(String(event_id), problems[event_id])
 
 func has_event(event_id: String) -> bool:
 	return events.has(event_id)
@@ -66,6 +215,15 @@ func remove_event(event_id: String) -> void:
 
 	for category in _used_ids_by_category.keys():
 		_used_ids_by_category[category].erase(event_id)
+
+func mark_event_used(event_id: String) -> void:
+	if not events.has(event_id):
+		return
+	var category := String(events[event_id].get("category", CATEGORY_COMMON))
+	var used_ids: Array = _used_ids_by_category.get(category, [])
+	if not used_ids.has(event_id):
+		used_ids.append(event_id)
+		_used_ids_by_category[category] = used_ids
 
 func clear_all() -> void:
 	events.clear()
@@ -118,8 +276,7 @@ func get_random_event_id_by_category(category: String) -> String:
 			available.append(candidate)
 
 	if available.is_empty():
-		available = candidates.duplicate()
-		used_ids.clear()
+		return ""
 
 	var chosen_id := available[_rng.randi_range(0, available.size() - 1)]
 	used_ids.append(chosen_id)
@@ -135,7 +292,24 @@ func reset_all_category_usage() -> void:
 	for category in _used_ids_by_category.keys():
 		_used_ids_by_category[category].clear()
 
-func build_runtime_event(event_id: String, start_day: int, start_month: int, start_year: int) -> Dictionary:
+func get_usage_save_data() -> Dictionary:
+	return {"used_ids_by_category": _used_ids_by_category.duplicate(true)}
+
+func load_usage_save_data(data: Dictionary) -> void:
+	var saved_usage: Variant = data.get("used_ids_by_category", {})
+	if not saved_usage is Dictionary:
+		return
+	for category in _used_ids_by_category.keys():
+		var saved_ids: Variant = saved_usage.get(category, [])
+		if saved_ids is Array:
+			var validated_ids: Array[String] = []
+			for event_id in saved_ids:
+				var id := String(event_id)
+				if events.has(id) and String(events[id].get("category", "")) == category and not validated_ids.has(id):
+					validated_ids.append(id)
+			_used_ids_by_category[category] = validated_ids
+
+func build_runtime_event(event_id: String, start_day: int, start_month: int, start_year: int, days_per_month: int = 30, months_per_year: int = 12) -> Dictionary:
 	var base_event := get_event(event_id)
 	if base_event.is_empty():
 		return {}
@@ -144,14 +318,11 @@ func build_runtime_event(event_id: String, start_day: int, start_month: int, sta
 	var expires_on = null
 
 	if duration != null:
-		expires_on = {
-			"day": start_day + int(duration),
-			"month": start_month,
-			"year": start_year
-		}
+		expires_on = _add_days_to_date(start_day, start_month, start_year, int(duration), days_per_month, months_per_year)
 
 	return {
 		"event_id": event_id,
+		"title": String(base_event.get("title", event_id)),
 		"category": base_event.get("category", CATEGORY_COMMON),
 		"interaction_type": base_event.get("interaction_type", INTERACTION_CHOICE),
 		"status": "pending",
@@ -163,6 +334,17 @@ func build_runtime_event(event_id: String, start_day: int, start_month: int, sta
 		"availability_duration_days": duration,
 		"expires_on": expires_on
 	}
+
+func _add_days_to_date(day: int, month: int, year: int, days_to_add: int, days_per_month: int, months_per_year: int) -> Dictionary:
+	var safe_days_per_month := maxi(1, days_per_month)
+	var safe_months_per_year := maxi(1, months_per_year)
+	var days_per_year := safe_days_per_month * safe_months_per_year
+	var absolute_day := (year - 1) * days_per_year + (month - 1) * safe_days_per_month + (day - 1) + days_to_add
+	var result_year := floori(float(absolute_day) / float(days_per_year)) + 1
+	var day_of_year := absolute_day % days_per_year
+	var result_month := floori(float(day_of_year) / float(safe_days_per_month)) + 1
+	var result_day := day_of_year % safe_days_per_month + 1
+	return {"day": result_day, "month": result_month, "year": result_year}
 
 func validate_event_structure(event_data: Dictionary) -> bool:
 	if not event_data.has("id"):
