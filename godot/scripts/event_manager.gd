@@ -135,7 +135,7 @@ func _is_event_expired(runtime_event: Dictionary, current_day: int, current_mont
 	if current_year == exp_year and current_month > exp_month:
 		return true
 
-	if current_year == exp_year and current_month == exp_month and current_day > exp_day:
+	if current_year == exp_year and current_month == exp_month and current_day >= exp_day:
 		return true
 
 	return false
@@ -146,6 +146,8 @@ func _create_month_schedule(month: int, year: int) -> void:
 
 	_last_scheduled_month = month
 	_last_scheduled_year = year
+	if _event_database != null and _event_database.has_method("ensure_month_content"):
+		_event_database.ensure_month_content(month, year)
 
 	_remove_old_scheduled_events(month, year)
 
@@ -353,10 +355,10 @@ func get_save_data() -> Dictionary:
 
 func load_save_data(data: Dictionary) -> void:
 	can_trigger_event = bool(data.get("can_trigger_event", true))
-	scheduled_events = data.get("scheduled_events", [])
-	active_events = data.get("active_events", [])
-	resolved_events = data.get("resolved_events", [])
-	expired_events = data.get("expired_events", [])
+	scheduled_events.assign(data.get("scheduled_events", []))
+	active_events.assign(data.get("active_events", []))
+	resolved_events.assign(data.get("resolved_events", []))
+	expired_events.assign(data.get("expired_events", []))
 	_last_scheduled_month = int(data.get("last_scheduled_month", -1))
 	_last_scheduled_year = int(data.get("last_scheduled_year", -1))
 

@@ -22,6 +22,7 @@ signal save_requested()
 
 var detail_visible: bool = false
 var _master_bus_index: int = -1
+var _settings_dialog: Control
 
 
 func _ready() -> void:
@@ -43,6 +44,9 @@ func open_menu() -> void:
 
 
 func close_menu() -> void:
+	if is_instance_valid(_settings_dialog):
+		_settings_dialog.queue_free()
+	_settings_dialog = null
 	hide()
 	detail_visible = false
 	_main_panel.show()
@@ -51,6 +55,11 @@ func close_menu() -> void:
 
 
 func back_or_resume() -> void:
+	if is_instance_valid(_settings_dialog):
+		_settings_dialog.queue_free()
+		_settings_dialog = null
+		_show_main_menu()
+		return
 	if detail_visible:
 		_show_main_menu()
 	else:
@@ -67,15 +76,16 @@ func _show_main_menu() -> void:
 
 
 func _open_options() -> void:
-	_sync_options()
+	if is_instance_valid(_settings_dialog):
+		return
 	detail_visible = true
 	_main_panel.hide()
 	_credits_panel.hide()
-	_options_panel.show()
-	if _volume_slider.editable:
-		_volume_slider.grab_focus()
-	else:
-		_fullscreen_checkbox.grab_focus()
+	_options_panel.hide()
+	var dialog := UIFactory.dialog(self, tr("Opções"), 880)
+	_settings_dialog = dialog.overlay
+	SettingsService.build_options(dialog.content)
+	dialog.content.add_child(UIFactory.button(tr("Voltar"), back_or_resume))
 
 
 func _open_credits() -> void:

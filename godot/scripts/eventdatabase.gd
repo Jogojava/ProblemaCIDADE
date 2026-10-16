@@ -200,6 +200,8 @@ func register_default_problems() -> void:
 	}
 
 	for event_id in problems:
+		if event_id == "rota_medicamentos":
+			problems[event_id]["choice_effects"] = {"rota_a": {"funds": -600.0, "health": 1.0}, "rota_b": {"funds": -800.0, "health": 2.0}}
 		register_event(String(event_id), problems[event_id])
 
 func has_event(event_id: String) -> bool:
@@ -293,9 +295,14 @@ func reset_all_category_usage() -> void:
 		_used_ids_by_category[category].clear()
 
 func get_usage_save_data() -> Dictionary:
-	return {"used_ids_by_category": _used_ids_by_category.duplicate(true)}
+	return {"used_ids_by_category": _used_ids_by_category.duplicate(true), "definitions": events.duplicate(true)}
 
 func load_usage_save_data(data: Dictionary) -> void:
+	var definitions: Variant = data.get("definitions", {})
+	if definitions is Dictionary:
+		for event_id in definitions:
+			if definitions[event_id] is Dictionary:
+				register_event(String(event_id), definitions[event_id])
 	var saved_usage: Variant = data.get("used_ids_by_category", {})
 	if not saved_usage is Dictionary:
 		return
@@ -308,6 +315,86 @@ func load_usage_save_data(data: Dictionary) -> void:
 				if events.has(id) and String(events[id].get("category", "")) == category and not validated_ids.has(id):
 					validated_ids.append(id)
 			_used_ids_by_category[category] = validated_ids
+
+func ensure_month_content(month: int, year: int) -> void:
+	var index := (year - 1) * 12 + month
+	var categories := [CATEGORY_OPTIONAL, CATEGORY_COMMON, CATEGORY_IMPORTANT, CATEGORY_COMMON, CATEGORY_IMPORTANT, CATEGORY_OPTIONAL, CATEGORY_URGENT, CATEGORY_COMMON]
+	for i in range(categories.size()):
+		var event_id := "municipal_%d_%d" % [index, i]
+		if has_event(event_id):
+			continue
+		var n := 4 + (index * 7 + i * 3) % 15
+		var definition := {"category": categories[i], "interaction_type": INTERACTION_NUMBER_INPUT, "availability_duration_days": 28, "allow_board": true, "payload": {}}
+		match i:
+			0:
+				definition.title = "Pesquisa de aprovação"
+				definition.description_pattern = "Em uma amostra de 200 moradores, %d aprovam a gestão. Qual é a aprovação em porcentagem?"
+				definition.description_values = [(n * 10)]
+				definition.description = definition.description_pattern % definition.description_values
+				definition.payload = {"correct_value": n * 5, "placeholder": "Percentual, sem o símbolo %"}
+				definition.explanation = "Divida os moradores que aprovam por 200 e multiplique por 100."
+			1:
+				definition.title = "Planejamento de obra"
+				definition.construction_days_saved = 5
+				definition.description_pattern = "Uma obra custa R$ 5.000 fixos e R$ 200 por metro. O orçamento é R$ %d. Quantos metros podem ser construídos? Resolva 5000 + 200x = orçamento."
+				definition.description_values = [(5000 + n * 200)]
+				definition.description = definition.description_pattern % definition.description_values
+				definition.payload = {"correct_value": n}
+				definition.explanation = "Subtraia R$ 5.000 do orçamento e divida o restante por R$ 200. Uma resposta correta reduz em 5 dias as obras em andamento."
+			2:
+				definition.title = "Área da nova praça"
+				definition.description_pattern = "Uma praça quadrada terá área de %d m². Resolva x² = %d: qual é o lado positivo, em metros?"
+				definition.description_values = [n * n, n * n]
+				definition.description = definition.description_pattern % definition.description_values
+				definition.payload = {"correct_value": n}
+				definition.explanation = "O lado é a raiz quadrada positiva da área."
+			3:
+				definition.title = "Orçamento e juros simples"
+				definition.description_pattern = "Uma reserva de R$ 10.000 rende juros simples de 1%% por mês durante %d meses. Qual é o montante final, em reais?"
+				definition.description_values = [n]
+				definition.description = definition.description_pattern % definition.description_values
+				definition.payload = {"correct_value": 10000 + n * 100}
+				definition.explanation = "Use M = C × (1 + i × t), com C = 10000 e i = 0,01."
+			4:
+				definition.title = "Rotas de abastecimento"
+				definition.description_pattern = "Escolha a rota de menor distância entre a prefeitura P e o hospital H. Trechos: P–A = %d km; A–H = 4 km; P–B = %d km; B–H = 7 km. O veículo anda a 30 km/h e gasta R$ 2 por km."
+				definition.description_values = [n, n + 2]
+				definition.description = definition.description_pattern % definition.description_values
+				definition.interaction_type = INTERACTION_CHOICE
+				definition.payload = {"options": [{"id": "a", "text": "P → A → H · %d km · R$ %d · %d min" % [n + 4, (n + 4) * 2, (n + 4) * 2]}, {"id": "b", "text": "P → B → H · %d km · R$ %d · %d min" % [n + 9, (n + 9) * 2, (n + 9) * 2]}]}
+				definition.correct_answer = "a"
+				definition.explanation = "Some as distâncias de cada caminho. A rota por A é 5 km menor; a 30 km/h cada quilômetro leva 2 minutos."
+				definition.graph = {"a": n, "b": n + 2}
+			5:
+				definition.title = "Média de atendimentos"
+				definition.description_pattern = "Uma unidade atendeu %d, %d e %d pessoas em três dias. Qual é a média diária?"
+				definition.description_values = [n * 10, n * 10 + 10, n * 10 + 20]
+				definition.description = definition.description_pattern % definition.description_values
+				definition.payload = {"correct_value": n * 10 + 10}
+				definition.explanation = "Some os três valores e divida por três."
+			6:
+				definition.title = "Plano de emergência"
+				definition.description_pattern = "O plano é aprovado quando P e Q são verdadeiros. P: há pelo menos 20 leitos. Q: o custo não supera R$ 50.000. A proposta tem %d leitos e custa R$ 45.000. P ∧ Q é verdadeiro?"
+				definition.description_values = [(n + 10)]
+				definition.description = definition.description_pattern % definition.description_values
+				definition.interaction_type = INTERACTION_CHOICE
+				definition.payload = {"options": [{"id": "sim", "text": "Sim"}, {"id": "nao", "text": "Não"}]}
+				definition.correct_answer = "sim" if n >= 10 else "nao"
+				definition.explanation = "A conjunção só é verdadeira quando as duas condições são satisfeitas. O custo atende Q; compare os leitos com o mínimo de 20."
+				definition.availability_duration_days = null
+			7:
+				definition.title = "Distribuição de recursos"
+				definition.description_pattern = "Um orçamento de R$ %d será dividido igualmente entre 4 bairros. Quanto cada bairro receberá?"
+				definition.description_values = [(n * 4000)]
+				definition.description = definition.description_pattern % definition.description_values
+				definition.payload = {"correct_value": n * 1000}
+				definition.explanation = "Divida o orçamento total por quatro."
+		var area: String = ["social", "education", "culture", "water", "health", "education", "health", "social"][i]
+		definition.success_effects = {area: 2.0}
+		definition.failure_effects = {area: -1.0}
+		definition.expiration_effects = {} if String(categories[i]) == CATEGORY_OPTIONAL else {area: -1.0}
+		register_event(event_id, definition)
+
 
 func build_runtime_event(event_id: String, start_day: int, start_month: int, start_year: int, days_per_month: int = 30, months_per_year: int = 12) -> Dictionary:
 	var base_event := get_event(event_id)

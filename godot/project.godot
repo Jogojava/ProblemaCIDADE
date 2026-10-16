@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+SettingsService="*res://core/settings/settings_service.gd"
 SaveManager="*res://scripts/save_manager.gd"
 
 [display]
@@ -26,6 +27,13 @@ window/size/viewport_height=1080
 window/size/mode=2
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+window/size/min_width=1024
+window/size/min_height=720
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://localization/en.po")
+locale/fallback="pt_BR"
 
 [physics]
 
@@ -34,3 +42,6 @@ window/stretch/aspect="expand"
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.08, 0.17, 0.19, 1)

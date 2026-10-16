@@ -30,6 +30,8 @@ var current_year: int = 1
 var current_speed: int = Speed.NORMAL
 var paused: bool = false
 var challenge_active: bool = false
+var _manual_paused := false
+var _pause_reasons: Dictionary = {}
 
 var _accumulated_real_time: float = 0.0
 var _total_game_seconds: int = 0
@@ -68,7 +70,7 @@ func _get_real_seconds_per_game_day() -> float:
 		Speed.VERY_FAST:
 			month_duration = very_fast_month_duration_real_seconds
 
-	return month_duration / float(days_per_month)
+	return maxf(0.001, month_duration / float(maxi(1, days_per_month)))
 
 func get_game_speed_multiplier() -> float:
 	var current_month_duration := normal_month_duration_real_seconds
@@ -110,29 +112,39 @@ func set_speed(speed: int) -> void:
 	speed_changed.emit(current_speed)
 
 func pause_game() -> void:
-	if paused or challenge_active:
-		return
-	paused = true
-	paused_changed.emit(paused)
+	_manual_paused = true
+	_update_pause()
 
 func resume_game() -> void:
-	if not paused:
-		return
-	paused = false
-	paused_changed.emit(paused)
+	_manual_paused = false
+	_update_pause()
 
 func toggle_pause() -> void:
 	if challenge_active:
 		return
-	paused = not paused
-	paused_changed.emit(paused)
+	_manual_paused = not _manual_paused
+	_update_pause()
+
+func hold(reason: String) -> void:
+	_pause_reasons[reason] = true
+	_update_pause()
+
+func release(reason: String) -> void:
+	_pause_reasons.erase(reason)
+	_update_pause()
+
+func _update_pause() -> void:
+	var next := _manual_paused or not _pause_reasons.is_empty()
+	if paused != next:
+		paused = next
+		paused_changed.emit(paused)
 
 func set_challenge_active(value: bool) -> void:
 	challenge_active = value
-	if not challenge_active:
-		return
-	set_speed(Speed.NORMAL)
-	resume_game()
+	if challenge_active:
+		hold("challenge")
+	else:
+		release("challenge")
 
 func skip_until_next_event(event_checker: Callable) -> void:
 	if not event_checker.is_valid():
@@ -140,9 +152,19 @@ func skip_until_next_event(event_checker: Callable) -> void:
 
 	_event_checker = event_checker
 	_skip_until_event = true
-	paused = false
 	skip_started.emit()
-	paused_changed.emit(paused)
+	# Bounded simulation: pass actual game days, including income, projects and elections.
+	# Never bypass an existing manual pause or a modal dialog.
+	if paused:
+		_skip_until_event = false
+		skip_finished.emit()
+		return
+	for _day in range(360):
+		if _event_checker.call() or paused:
+			break
+		_advance_one_day()
+	_skip_until_event = false
+	skip_finished.emit()
 
 func stop_skip() -> void:
 	_skip_until_event = false
@@ -156,18 +178,20 @@ func get_save_data() -> Dictionary:
 		"current_month": current_month,
 		"current_year": current_year,
 		"current_speed": current_speed,
-		"paused": paused,
+		"paused": _manual_paused,
 		"accumulated_real_time": _accumulated_real_time,
 		"total_game_seconds": _total_game_seconds
 	}
 
 func load_save_data(data: Dictionary) -> void:
-	current_day = data.get("current_day", 1)
-	current_month = data.get("current_month", 1)
-	current_year = data.get("current_year", 1)
-	current_speed = data.get("current_speed", Speed.NORMAL)
-	paused = data.get("paused", false)
-	_accumulated_real_time = data.get("accumulated_real_time", 0.0)
+	current_day = clampi(int(data.get("current_day", 1)), 1, days_per_month)
+	current_month = clampi(int(data.get("current_month", 1)), 1, months_per_year)
+	current_year = maxi(1, int(data.get("current_year", 1)))
+	current_speed = clampi(int(data.get("current_speed", Speed.NORMAL)), Speed.NORMAL, Speed.VERY_FAST)
+	_manual_paused = bool(data.get("paused", false))
+	_pause_reasons.clear()
+	paused = _manual_paused
+	_accumulated_real_time = maxf(0.0, float(data.get("accumulated_real_time", 0.0)))
 	_total_game_seconds = data.get("total_game_seconds", 0)
 
 	paused_changed.emit(paused)
@@ -189,6 +213,8 @@ func reset_time() -> void:
 	_skip_until_event = false
 	_event_checker = Callable()
 	challenge_active = false
+	_manual_paused = false
+	_pause_reasons.clear()
 
 	paused_changed.emit(paused)
 	speed_changed.emit(current_speed)

@@ -3,6 +3,9 @@ extends Control
 @onready var quit_confirmation: ConfirmationDialog = $QuitConfirmation
 
 func _ready() -> void:
+	theme = SettingsService.game_theme
+	$AudioStreamPlayer.stop()
+	$AudioStreamPlayer.set_process(false)
 	$SoundButton.pressed.connect(_on_sound_pressed)
 	$ExitButton.pressed.connect(_on_exit_pressed)
 	quit_confirmation.confirmed.connect(func() -> void: get_tree().quit())
@@ -21,7 +24,31 @@ func _on_exit_pressed() -> void:
 	quit_confirmation.popup_centered()
 
 func _on_btjogar_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/game/Game.tscn")
+	if has_node("GameDialog"):
+		return
+	var dialog := UIFactory.dialog(self, tr("Nova gestão"), 820)
+	var column: VBoxContainer = dialog.content
+	column.add_child(UIFactory.label(tr("Nome da cidade")))
+	var city_name := LineEdit.new()
+	city_name.name = "CityName"
+	city_name.text = tr("Vila Esperança")
+	city_name.max_length = 36
+	city_name.custom_minimum_size.y = 54
+	column.add_child(city_name)
+	column.add_child(UIFactory.label(tr("Dificuldade")))
+	var difficulty := OptionButton.new()
+	difficulty.name = "Difficulty"
+	for item in ["Fácil", "Médio", "Difícil"]:
+		difficulty.add_item(tr(item))
+	difficulty.selected = 1
+	column.add_child(difficulty)
+	column.add_child(UIFactory.label(tr("Fácil: 65% de reputação inicial. Médio: 55%. Difícil: 45%. A dificuldade também altera ganhos, perdas, orçamento e frequência de problemas."), 23))
+	column.add_child(UIFactory.label(tr("Objetivo: reeleição com pelo menos 50% de reputação após quatro anos; depois, concluir o segundo mandato."), 23))
+	column.add_child(UIFactory.button(tr("Começar"), func():
+		SaveManager.start_new(city_name.text, ["easy", "medium", "hard"][difficulty.selected])
+		get_tree().change_scene_to_file("res://scenes/game/Game.tscn")))
+	column.add_child(UIFactory.button(tr("Cancelar"), func(): dialog.overlay.queue_free()))
+	city_name.grab_focus()
 
 func _on_btcontinuar_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/carregar.tscn")
@@ -33,9 +60,7 @@ func _on_btcreditos_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/creditos.tscn")
 
 func _on_sound_pressed() -> void:
-	var master := AudioServer.get_bus_index("Master")
-	if master >= 0:
-		AudioServer.set_bus_mute(master, not AudioServer.is_bus_mute(master))
+	SettingsService.update("muted", not bool(SettingsService.values.muted))
 	_sync_sound_button()
 
 func _sync_sound_button() -> void:

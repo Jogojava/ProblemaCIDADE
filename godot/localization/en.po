@@ -1,0 +1,773 @@
+msgid ""
+msgstr ""
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Jogar"
+msgstr "Play"
+
+msgid "Continuar"
+msgstr "Continue"
+
+msgid "Opções"
+msgstr "Options"
+
+msgid "Créditos"
+msgstr "Credits"
+
+msgid "Partidas salvas"
+msgstr "Saved games"
+
+msgid "Abrir slots de salvamento."
+msgstr "Open save slots."
+
+msgid "Som: ligado"
+msgstr "Sound: on"
+
+msgid "Som: desligado"
+msgstr "Sound: off"
+
+msgid "Sair"
+msgstr "Quit"
+
+msgid "Continuar jogando"
+msgstr "Keep playing"
+
+msgid "Deseja mesmo sair do jogo?"
+msgstr "Do you want to quit the game?"
+
+msgid "Nova gestão"
+msgstr "New administration"
+
+msgid "Nome da cidade"
+msgstr "City name"
+
+msgid "Vila Esperança"
+msgstr "Hopeville"
+
+msgid "Dificuldade"
+msgstr "Difficulty"
+
+msgid "Fácil"
+msgstr "Easy"
+
+msgid "Médio"
+msgstr "Medium"
+
+msgid "Difícil"
+msgstr "Hard"
+
+msgid "Fácil: 65% de reputação inicial. Médio: 55%. Difícil: 45%. A dificuldade também altera ganhos, perdas, orçamento e frequência de problemas."
+msgstr "Easy: 65% initial reputation. Medium: 55%. Hard: 45%. Difficulty also changes gains, losses, budget and problem frequency."
+
+msgid "Objetivo: reeleição com pelo menos 50% de reputação após quatro anos; depois, concluir o segundo mandato."
+msgstr "Goal: win re-election with at least 50% reputation after four years, then complete the second term."
+
+msgid "Começar"
+msgstr "Start"
+
+msgid "Cancelar"
+msgstr "Cancel"
+
+msgid "Voltar"
+msgstr "Back"
+
+msgid "Carregar"
+msgstr "Load"
+
+msgid "Excluir"
+msgstr "Delete"
+
+msgid "Salvamentos"
+msgstr "Saved games"
+
+msgid "Carregar partida"
+msgstr "Load game"
+
+msgid "Excluir salvamento?"
+msgstr "Delete save?"
+
+msgid "Confirmar exclusão"
+msgstr "Confirm deletion"
+
+msgid "O slot %d e seu backup serão removidos."
+msgstr "Slot %d and its backup will be removed."
+
+msgid "Vazio"
+msgstr "Empty"
+
+msgid "Cidade"
+msgstr "City"
+
+msgid "Slot %d · %s"
+msgstr "Slot %d · %s"
+
+msgid "Dia %d / Mês %d / Ano %d"
+msgstr "Day %d / Month %d / Year %d"
+
+msgid "Reputação: %.0f%% · Saldo: R$ %.0f"
+msgstr "Reputation: %.0f%% · Funds: R$ %.0f"
+
+msgid "Menu da partida (Esc)"
+msgstr "Game menu (Esc)"
+
+msgid "Mandato"
+msgstr "Term"
+
+msgid "Prefeitura"
+msgstr "City hall"
+
+msgid "Restaurar posição e zoom da câmera"
+msgstr "Restore camera position and zoom"
+
+msgid "Até a próxima ocorrência"
+msgstr "Until the next event"
+
+msgid "Avançar os dias até o próximo problema, mantendo receitas, obras e eleições."
+msgstr "Advance days until the next problem, including income, construction and elections."
+
+msgid "Retome o tempo antes de avançar até uma ocorrência."
+msgstr "Resume time before advancing to the next event."
+
+msgid "Tempo pausado"
+msgstr "Time paused"
+
+msgid "Pausar (Espaço)"
+msgstr "Pause (Space)"
+
+msgid "Retomar (Espaço)"
+msgstr "Resume (Space)"
+
+msgid "1 mês = 3 min"
+msgstr "1 month = 3 min"
+
+msgid "1 mês = 1,5 min"
+msgstr "1 month = 1.5 min"
+
+msgid "1 mês = 30 s"
+msgstr "1 month = 30 s"
+
+msgid "Reputação"
+msgstr "Reputation"
+
+msgid "Saldo"
+msgstr "Funds"
+
+msgid "Investimentos"
+msgstr "Investments"
+
+msgid "Educação"
+msgstr "Education"
+
+msgid "Saúde"
+msgstr "Health"
+
+msgid "Saneamento"
+msgstr "Sanitation"
+
+msgid "Segurança"
+msgstr "Security"
+
+msgid "Cultura"
+msgstr "Culture"
+
+msgid "Assistência"
+msgstr "Social services"
+
+msgid "Assistência social"
+msgstr "Social services"
+
+msgid "Desemprego"
+msgstr "Unemployment"
+
+msgid "Fome"
+msgstr "Hunger"
+
+msgid "Economia"
+msgstr "Economy"
+
+msgid "Popularidade"
+msgstr "Public approval"
+
+msgid "Escola"
+msgstr "School"
+
+msgid "Unidade de saúde"
+msgstr "Health centre"
+
+msgid "Estação de saneamento"
+msgstr "Sanitation station"
+
+msgid "Posto de segurança"
+msgstr "Security station"
+
+msgid "Centro cultural"
+msgstr "Cultural centre"
+
+msgid "Centro de assistência"
+msgstr "Social services centre"
+
+msgid "Obra"
+msgstr "Construction"
+
+msgid "Investir em serviços"
+msgstr "Invest in services"
+
+msgid "Construir instalação · R$ 35.000 · 20 dias"
+msgstr "Build a facility · R$ 35,000 · 20 days"
+
+msgid "Valor: R$ %.0f"
+msgstr "Amount: R$ %.0f"
+
+msgid "Clique em uma área para aplicar. Obras: %d/3 em andamento."
+msgstr "Click an area to apply. Construction: %d/3 in progress."
+
+msgid "Investimento indisponível."
+msgstr "Investment unavailable."
+
+msgid "Escolha um valor entre R$ 5.000 e o saldo disponível."
+msgstr "Choose an amount between R$ 5,000 and the available funds."
+
+msgid "Esta área já atingiu 100 pontos."
+msgstr "This area has already reached 100 points."
+
+msgid "Construção indisponível."
+msgstr "Construction unavailable."
+
+msgid "Saldo insuficiente para a obra."
+msgstr "Insufficient funds for construction."
+
+msgid "Conclua uma das três obras em andamento."
+msgstr "Complete one of the three current projects first."
+
+msgid "A cidade já possui 30 instalações. Invista nos serviços existentes."
+msgstr "The city already has 30 facilities. Invest in existing services."
+
+msgid "Já existe uma obra em andamento nesta área."
+msgstr "Construction is already in progress in this area."
+
+msgid "Investimento aplicado em %s."
+msgstr "Investment applied to %s."
+
+msgid "Obra iniciada: %s. Conclusão em 20 dias."
+msgstr "Construction started: %s. Completion in 20 days."
+
+msgid "Obra concluída: %s. Serviços e reputação atualizados."
+msgstr "Construction complete: %s. Services and reputation updated."
+
+msgid "Reputação e finanças"
+msgstr "Reputation and finances"
+
+msgid "Mês %d/96 · %d respostas corretas em %d problemas · %d expirados."
+msgstr "Month %d/96 · %d correct answers out of %d problems · %d expired."
+
+msgid "Saldo: R$ %.0f · Obras concluídas: %d"
+msgstr "Funds: R$ %.0f · Completed facilities: %d"
+
+msgid " · Estimativa em 6 meses: R$ %.0f"
+msgstr " · Estimate in 6 months: R$ %.0f"
+
+msgid "Reputação: %.1f%% · Educação: %.0f · Saúde: %.0f · Segurança: %.0f\nDesemprego: %.1f%% · Fome: %.1f%%"
+msgstr "Reputation: %.1f%% · Education: %.0f · Health: %.0f · Security: %.0f\nUnemployment: %.1f%% · Hunger: %.1f%%"
+
+msgid "Dados insuficientes: são necessárias 12 observações mensais."
+msgstr "Insufficient data: 12 monthly observations are required."
+
+msgid "12 observações · linha contínua: histórico · tracejada: estimativa de 6 meses"
+msgstr "12 observations · solid line: history · dashed: 6-month estimate"
+
+msgid "Estimativa por tendência linear; não é uma garantia. Reage às decisões futuras."
+msgstr "Linear trend estimate; not a guarantee. Future decisions affect outcomes."
+
+msgid "Fechar (Esc)"
+msgstr "Close (Esc)"
+
+msgid "Opcional"
+msgstr "Optional"
+
+msgid "Comum"
+msgstr "Common"
+
+msgid "Prioritário"
+msgstr "Priority"
+
+msgid "Urgente"
+msgstr "Urgent"
+
+msgid "Problema"
+msgstr "Problem"
+
+msgid "Nenhum problema nesta categoria."
+msgstr "No problems in this category."
+
+msgid "PARA RESPONDER"
+msgstr "TO ANSWER"
+
+msgid "PARA ABRIR"
+msgstr "TO OPEN"
+
+msgid "DIGITE SUA RESPOSTA"
+msgstr "ENTER YOUR ANSWER"
+
+msgid "ESCOLHA UMA RESPOSTA"
+msgstr "CHOOSE AN ANSWER"
+
+msgid "Confira os dados do enunciado antes de enviar."
+msgstr "Check the problem data before submitting."
+
+msgid "Selecione a alternativa que considera correta."
+msgstr "Select the answer you consider correct."
+
+msgid "Leia o enunciado e escolha sua resposta"
+msgstr "Read the problem and choose your answer"
+
+msgid "ENUNCIADO"
+msgstr "PROBLEM"
+
+msgid "Enviar resposta"
+msgstr "Submit answer"
+
+msgid "Digite sua resposta"
+msgstr "Enter your answer"
+
+msgid "Sim"
+msgstr "Yes"
+
+msgid "Não"
+msgstr "No"
+
+msgid "Sim!"
+msgstr "Yes!"
+
+msgid "Não..."
+msgstr "No..."
+
+msgid "Lousa"
+msgstr "Drawing board"
+
+msgid "Abrir lousa"
+msgstr "Open drawing board"
+
+msgid "Limpar"
+msgstr "Clear"
+
+msgid "Fechar"
+msgstr "Close"
+
+msgid "Sua gestão começa agora"
+msgstr "Your administration starts now"
+
+msgid "Administre a cidade por quatro anos e alcance pelo menos 50% de reputação para a reeleição. Complete o segundo mandato para concluir a campanha."
+msgstr "Manage the city for four years and reach at least 50% reputation to win re-election. Complete the second term to finish the campaign."
+
+msgid "Resolva problemas pela barra lateral, confira as explicações e invista em serviços ou obras pelo botão de dinheiro. Obras custam R$ 35.000 e levam 20 dias."
+msgstr "Open problems in the sidebar, read the explanations and invest in services or construction using the money button. Facilities cost R$ 35,000 and take 20 days."
+
+msgid "Abaixo de 10% de reputação por três meses, ou ao chegar a zero, ocorre impeachment. Os valores são regras desta simulação."
+msgstr "Reputation below 10% for three months, or reaching zero, leads to impeachment. These thresholds are rules of this simulation."
+
+msgid "Use as velocidades ou avance até a próxima ocorrência. Espaço pausa; Esc abre o menu. Problemas, painéis e menus pausam o calendário e os prazos."
+msgstr "Choose a speed or advance to the next event. Space pauses; Esc opens the menu. Problems, panels and menus pause the calendar and deadlines."
+
+msgid "Iniciar mandato"
+msgstr "Start term"
+
+msgid "Resposta correta"
+msgstr "Correct answer"
+
+msgid "Vamos conferir o resultado"
+msgstr "Let's review the result"
+
+msgid "Consequências: R$ %+.0f · reputação %+.1f pontos."
+msgstr "Consequences: R$ %+.0f · reputation %+.1f points."
+
+msgid "Continuar gestão"
+msgstr "Continue administration"
+
+msgid "Prazo encerrado: %s. Consulte os indicadores da cidade."
+msgstr "Deadline reached: %s. Check the city indicators."
+
+msgid "Você foi reeleito"
+msgstr "You won re-election"
+
+msgid "Dois mandatos concluídos"
+msgstr "Two terms completed"
+
+msgid "A reeleição não foi alcançada"
+msgstr "Re-election was not achieved"
+
+msgid "Mandato encerrado por impeachment"
+msgstr "Term ended by impeachment"
+
+msgid "Fim de mandato"
+msgstr "End of term"
+
+msgid "Cidade: %s\nMeses de gestão: %d · Reputação: %.1f%% · Saldo: R$ %.0f\nProblemas: %d corretos de %d respondidos · Obras concluídas: %d"
+msgstr "City: %s\nMonths in office: %d · Reputation: %.1f%% · Funds: R$ %.0f\nProblems: %d correct out of %d answered · Completed facilities: %d"
+
+msgid "A população aprovou a continuidade da gestão. Seu próximo objetivo é completar os quatro anos do segundo mandato."
+msgstr "The population approved continuing your administration. Your next goal is to complete four years in the second term."
+
+msgid "Iniciar segundo mandato"
+msgstr "Start second term"
+
+msgid "Os indicadores apresentados resultam das regras da simulação e das suas decisões durante a partida."
+msgstr "These indicators result from the simulation rules and your decisions during the game."
+
+msgid "Salvar resultado"
+msgstr "Save result"
+
+msgid "Voltar ao menu"
+msgstr "Return to menu"
+
+msgid "Escolha um dos três salvamentos"
+msgstr "Choose one of three save slots"
+
+msgid "Arquivos existentes só serão substituídos após confirmação."
+msgstr "Existing files will only be replaced after confirmation."
+
+msgid "Confirmar substituição do slot %d"
+msgstr "Confirm replacement of slot %d"
+
+msgid "Partida salva no slot %d."
+msgstr "Game saved in slot %d."
+
+msgid "Slot %d · Salvo"
+msgstr "Slot %d · Saved"
+
+msgid "Partida recuperada do backup anterior."
+msgstr "Game restored from the previous backup."
+
+msgid "Save antigo recuperado. O estado da cidade foi inicializado porque não existia nesta versão."
+msgstr "Old save restored. City state was initialized because this version did not store it."
+
+msgid "Dados de salvamento inválidos."
+msgstr "Invalid save data."
+
+msgid "Não foi possível gravar o salvamento."
+msgstr "Could not write the save file."
+
+msgid "A verificação do arquivo temporário falhou."
+msgstr "Temporary file validation failed."
+
+msgid "Não foi possível preservar o backup anterior."
+msgstr "Could not preserve the previous backup."
+
+msgid "Não foi possível concluir o salvamento."
+msgstr "Could not complete the save."
+
+msgid "Salvamento vazio ou inválido."
+msgstr "Empty or invalid save."
+
+msgid "Volume geral"
+msgstr "Master volume"
+
+msgid "Música"
+msgstr "Music"
+
+msgid "Efeitos sonoros"
+msgstr "Sound effects"
+
+msgid "Silenciar áudio"
+msgstr "Mute audio"
+
+msgid "Modo de exibição"
+msgstr "Display mode"
+
+msgid "Janela"
+msgstr "Windowed"
+
+msgid "Tela cheia"
+msgstr "Fullscreen"
+
+msgid "Janela sem borda"
+msgstr "Borderless window"
+
+msgid "Resolução"
+msgstr "Resolution"
+
+msgid "Qualidade gráfica"
+msgstr "Graphics quality"
+
+msgid "Baixa"
+msgstr "Low"
+
+msgid "Alta"
+msgstr "High"
+
+msgid "Idioma"
+msgstr "Language"
+
+msgid "Pausar quando a janela estiver inativa"
+msgstr "Pause when the window is inactive"
+
+msgid "Pesquisa de aprovação"
+msgstr "Approval survey"
+
+msgid "Em uma amostra de 200 moradores, %d aprovam a gestão. Qual é a aprovação em porcentagem?"
+msgstr "In a sample of 200 residents, %d approve of the administration. What is the approval percentage?"
+
+msgid "Percentual, sem o símbolo %"
+msgstr "Percentage, without the % sign"
+
+msgid "Divida os moradores que aprovam por 200 e multiplique por 100."
+msgstr "Divide approving residents by 200 and multiply by 100."
+
+msgid "Planejamento de obra"
+msgstr "Construction planning"
+
+msgid "Uma obra custa R$ 5.000 fixos e R$ 200 por metro. O orçamento é R$ %d. Quantos metros podem ser construídos? Resolva 5000 + 200x = orçamento."
+msgstr "Construction costs R$ 5,000 plus R$ 200 per metre. The budget is R$ %d. How many metres can be built? Solve 5000 + 200x = budget."
+
+msgid "Subtraia R$ 5.000 do orçamento e divida o restante por R$ 200. Uma resposta correta reduz em 5 dias as obras em andamento."
+msgstr "Subtract R$ 5,000 from the budget and divide the remainder by R$ 200. A correct answer reduces current construction by 5 days."
+
+msgid "Área da nova praça"
+msgstr "Area of the new square"
+
+msgid "Uma praça quadrada terá área de %d m². Resolva x² = %d: qual é o lado positivo, em metros?"
+msgstr "A square park will have an area of %d m². Solve x² = %d: what is the positive side length in metres?"
+
+msgid "O lado é a raiz quadrada positiva da área."
+msgstr "The side length is the positive square root of the area."
+
+msgid "Orçamento e juros simples"
+msgstr "Budget and simple interest"
+
+msgid "Uma reserva de R$ 10.000 rende juros simples de 1%% por mês durante %d meses. Qual é o montante final, em reais?"
+msgstr "A reserve of R$ 10,000 earns simple interest at 1%% per month for %d months. What is the final amount in reais?"
+
+msgid "Use M = C × (1 + i × t), com C = 10000 e i = 0,01."
+msgstr "Use M = C × (1 + i × t), with C = 10000 and i = 0.01."
+
+msgid "Rotas de abastecimento"
+msgstr "Supply routes"
+
+msgid "Escolha a rota de menor distância entre a prefeitura P e o hospital H. Trechos: P–A = %d km; A–H = 4 km; P–B = %d km; B–H = 7 km. O veículo anda a 30 km/h e gasta R$ 2 por km."
+msgstr "Choose the shortest route from city hall P to hospital H. Edges: P–A = %d km; A–H = 4 km; P–B = %d km; B–H = 7 km. The vehicle travels at 30 km/h and costs R$ 2 per km."
+
+msgid "Some as distâncias de cada caminho. A rota por A é 5 km menor; a 30 km/h cada quilômetro leva 2 minutos."
+msgstr "Add the distances along each path. The route via A is 5 km shorter; at 30 km/h each kilometre takes 2 minutes."
+
+msgid "Média de atendimentos"
+msgstr "Average daily service"
+
+msgid "Uma unidade atendeu %d, %d e %d pessoas em três dias. Qual é a média diária?"
+msgstr "A centre served %d, %d and %d people over three days. What is the daily mean?"
+
+msgid "Some os três valores e divida por três."
+msgstr "Add the three values and divide by three."
+
+msgid "Plano de emergência"
+msgstr "Emergency plan"
+
+msgid "O plano é aprovado quando P e Q são verdadeiros. P: há pelo menos 20 leitos. Q: o custo não supera R$ 50.000. A proposta tem %d leitos e custa R$ 45.000. P ∧ Q é verdadeiro?"
+msgstr "The plan is approved when P and Q are true. P: there are at least 20 beds. Q: the cost does not exceed R$ 50,000. The proposal has %d beds and costs R$ 45,000. Is P ∧ Q true?"
+
+msgid "A conjunção só é verdadeira quando as duas condições são satisfeitas. O custo atende Q; compare os leitos com o mínimo de 20."
+msgstr "The conjunction is true only when both conditions hold. The cost satisfies Q; compare the bed count with the minimum of 20."
+
+msgid "Distribuição de recursos"
+msgstr "Resource allocation"
+
+msgid "Um orçamento de R$ %d será dividido igualmente entre 4 bairros. Quanto cada bairro receberá?"
+msgstr "A budget of R$ %d will be split equally between 4 neighbourhoods. How much will each receive?"
+
+msgid "Divida o orçamento total por quatro."
+msgstr "Divide the total budget by four."
+
+msgid "Ajude AURA na travessia"
+msgstr "Help AURA cross the street"
+
+msgid "Uma senhora precisa atravessar uma rua de 8 metros. Ela anda a 1 metro por segundo e descansa por 3 segundos a cada 4 metros. O sinal fica aberto por 15 segundos; ela leva 2 segundos para interpretar a luz e mais 1 para começar a andar. Ela consegue atravessar?"
+msgstr "A woman needs to cross an 8-metre street. She walks at 1 metre per second and rests for 3 seconds after every 4 metres. The crossing signal lasts 15 seconds; she takes 2 seconds to interpret the light and 1 to start walking. Can she cross?"
+
+msgid "Comer comer para poder crescer"
+msgstr "School meal budget"
+
+msgid "A prefeitura paga R$ 500 de transporte fixo e R$ 12 por refeição. A escola tem 80 alunos e deve incluir uma margem de 25% para quem repete a refeição. Qual verba é necessária?"
+msgstr "The city pays a fixed R$ 500 transport fee and R$ 12 per meal. The school has 80 students and needs a 25% margin for second servings. What budget is needed?"
+
+msgid "Abastecimento e proporcionalidade"
+msgstr "Supplies and proportional allocation"
+
+msgid "Uma verba de R$ 300 mil será distribuída proporcionalmente entre bairros com 50, 30 e 70 famílias. Quanto cada bairro deve receber, respectivamente?"
+msgstr "R$ 300,000 will be distributed proportionally among neighbourhoods with 50, 30 and 70 families. How much should each receive, respectively?"
+
+msgid "Juros pelo meu milhão"
+msgstr "Interest on a million"
+
+msgid "Um empréstimo de R$ 1 milhão será quitado em 24 meses. O Banco Grotesco cobra juros simples de 25% ao ano; o NuhBanho cobra juros compostos de 20% ao ano. Qual banco custa menos ao final de dois anos?"
+msgstr "A R$ 1 million loan will be repaid after 24 months. Banco Grotesco charges 25% annual simple interest; NuhBanho charges 20% annual compound interest. Which bank costs less after two years?"
+
+msgid "MedicaMOVImentos"
+msgstr "Medicine deliveries"
+
+msgid "A Rota A tem 120 km, média de 60 km/h e custo de R$ 600. A Rota B tem 90 km, média de 60 km/h e custo de R$ 800. Some 30 minutos para carga e descarga. Escolha uma rota e compare tempo e custo."
+msgstr "Route A is 120 km, averages 60 km/h and costs R$ 600. Route B is 90 km, averages 60 km/h and costs R$ 800. Add 30 minutes for loading and unloading. Choose a route and compare time and cost."
+
+msgid "Rota A: 2h30, R$ 600 (mais barata)"
+msgstr "Route A: 2h30, R$ 600 (cheaper)"
+
+msgid "Rota B: 2h, R$ 800 (mais rápida)"
+msgstr "Route B: 2h, R$ 800 (faster)"
+
+msgid "Tsente: moradias após a enchente"
+msgstr "Tsente: housing after the flood"
+
+msgid "Uma enchente deixou 120 sobreviventes sem moradia. Qual modelo atende a todos pelo menor custo? A: 4 pessoas por R$ 78.829,91; B: 6 pessoas por R$ 108.182,34; C: 10 pessoas por R$ 155.330,72."
+msgstr "A flood left 120 survivors without housing. Which model houses everyone at the lowest cost? A: 4 people for R$ 78,829.91; B: 6 for R$ 108,182.34; C: 10 for R$ 155,330.72."
+
+msgid "Modelo A"
+msgstr "Model A"
+
+msgid "Modelo B"
+msgstr "Model B"
+
+msgid "Modelo C"
+msgstr "Model C"
+
+msgid "Verba IMSS"
+msgstr "IMSS budget"
+
+msgid "25% da população continua elegível ao IMSS. A população passou de 25.932 para 28.484 pessoas. O orçamento disponível é R$ 17,8 milhões e a verba do ano passado foi R$ 1,36 milhão. A verba aumentará quando P e Q forem verdadeiros: P, elegíveis cresceram pelo menos 8%; Q, a verba não passa de 10% do orçamento. A verba aumentará?"
+msgstr "25% of the population remains eligible for IMSS. Population grew from 25,932 to 28,484. The available budget is R$ 17.8 million and last year's allocation was R$ 1.36 million. Funding increases when P and Q are true: P, eligible residents grew by at least 8%; Q, the allocation does not exceed 10% of the budget. Will funding increase?"
+
+msgid "Intriga do Carroeios"
+msgstr "Prison transport routes"
+
+msgid "A polícia precisa transportar presos de H ao presídio R antes do fechamento, em 30 minutos. O pedágio total não pode passar de R$ 6; o combustível custa R$ 2 por quilômetro. Estradas (km, min, pedágio): H-A (4, 6, 0); H-B (2, 10, 2); A-C (5, 5, 1); A-D (3, 12, 0); B-C (6, 4, 3); B-E (4, 7, 1); C-F (2, 3, 2); D-F (7, 8, 0); E-R (3, 5, 1); F-R (5, 6, 2); D-R (9, 15, 0). Existe um caminho que atende às restrições?"
+msgstr "Police must transport prisoners from H to prison R within 30 minutes. Total tolls cannot exceed R$ 6; fuel costs R$ 2 per kilometre. Roads (km, min, toll): H-A (4, 6, 0); H-B (2, 10, 2); A-C (5, 5, 1); A-D (3, 12, 0); B-C (6, 4, 3); B-E (4, 7, 1); C-F (2, 3, 2); D-F (7, 8, 0); E-R (3, 5, 1); F-R (5, 6, 2); D-R (9, 15, 0). Does a path satisfy the constraints?"
+
+msgid "Pesquisa satisfatória"
+msgstr "Satisfaction survey"
+
+msgid "O instituto DataCidade entrevistou 1.200 cidadãos: 540 aprovam, 420 desaprovam e 240 são neutros. Qual é o percentual de aprovação e desaprovação, respectivamente?"
+msgstr "DataCidade interviewed 1,200 citizens: 540 approve, 420 disapprove and 240 are neutral. What are the approval and disapproval percentages, respectively?"
+
+msgid "Obra-primarial"
+msgstr "Choosing public works"
+
+msgid "A prefeitura tem 5 obras prioritárias, mas o orçamento permite executar 2 no mesmo período. A ordem não importa. Quantas combinações diferentes de obras existem?"
+msgstr "The city has 5 priority projects but can fund 2 at a time. Order does not matter. How many different combinations of projects are possible?"
+
+msgid "Ela gasta 8 segundos andando, 3 descansando uma vez e 3 para reagir ao sinal: 14 segundos, menos que os 15 disponíveis."
+msgstr "She spends 8 seconds walking, 3 resting once and 3 reacting to the signal: 14 seconds, less than the 15 available."
+
+msgid "25% de 80 são 20 refeições extras. Então, 500 + 12 × (80 + 20) = R$ 1.700."
+msgstr "25% of 80 is 20 extra meals. Therefore, 500 + 12 × (80 + 20) = R$ 1,700."
+
+msgid "São 150 famílias ao todo. Cada família corresponde a R$ 2 mil, resultando em R$ 100 mil, R$ 60 mil e R$ 140 mil."
+msgstr "There are 150 families in total. Each family corresponds to R$ 2,000, resulting in R$ 100,000, R$ 60,000 and R$ 140,000."
+
+msgid "O Grotesco cobra 1 × (1 + 0,25 × 2) = R$ 1,5 milhão. O NuhBanho cobra 1 × 1,2² = R$ 1,44 milhão."
+msgstr "Grotesco charges 1 × (1 + 0.25 × 2) = R$ 1.5 million. NuhBanho charges 1 × 1.2² = R$ 1.44 million."
+
+msgid "A Rota A leva 2h30 e custa menos. A Rota B leva 2h e custa mais. A escolha depende de priorizar economia ou rapidez."
+msgstr "Route A takes 2h30 and costs less. Route B takes 2h and costs more. The choice depends on prioritizing savings or speed."
+
+msgid "O modelo C precisa de 12 unidades. Mesmo com o custo unitário maior, o total aproximado é R$ 1,86 milhão, menor que os modelos A e B."
+msgstr "Model C requires 12 units. Despite a higher unit cost, the total is about R$ 1.86 million, less than models A and B."
+
+msgid "Elegíveis cresceram cerca de 9,84%, então P é verdadeiro. O aumento para aproximadamente R$ 1,49 milhão fica abaixo de 10% de R$ 17,8 milhões (R$ 1,78 milhão), então Q também é verdadeiro."
+msgstr "Eligible residents increased by about 9.84%, so P is true. Increasing funding to approximately R$ 1.49 million stays below 10% of R$ 17.8 million (R$ 1.78 million), so Q is also true."
+
+msgid "A viagem leva 22 minutos e paga R$ 4 de pedágio. O combustível custa R$ 18, totalizando R$ 22; as duas restrições são atendidas."
+msgstr "The trip takes 22 minutes and pays R$ 4 in tolls. Fuel costs R$ 18, bringing the total to R$ 22; both constraints are met."
+
+msgid "540 ÷ 1.200 = 45% de aprovação; 420 ÷ 1.200 = 35% de desaprovação."
+msgstr "540 ÷ 1,200 = 45% approval; 420 ÷ 1,200 = 35% disapproval."
+
+msgid "A combinação é C(5, 2) = 5 × 4 ÷ 2 = 10."
+msgstr "The combination is C(5, 2) = 5 × 4 ÷ 2 = 10."
+
+msgid "Use Salvar no menu de pausa para preencher um slot de partida."
+msgstr "Use Save in the pause menu to fill a save slot."
+
+msgid "Apagar"
+msgstr "Delete"
+
+msgid "!  Problema urgente"
+msgstr "!  Urgent problem"
+
+msgid "Acompanhe a evolução da cidade ao longo dos meses."
+msgstr "Track the city's progress over the months."
+
+msgid "Ocorrências"
+msgstr "Events"
+
+msgid "Nenhuma ocorrência disponível nesta categoria."
+msgstr "No events available in this category."
+
+msgid "Partida pausada"
+msgstr "Game paused"
+
+msgid "Salvar partida"
+msgstr "Save game"
+
+msgid "ProblemaCIDADE — jogo de gestão de uma cidade"
+msgstr "ProblemaCIDADE — city management game"
+
+msgid "Projeto acadêmico de Teoria e Desenvolvimento de Sistemas, Matemática Computacional e Desenvolvimento Web 2."
+msgstr "Academic project in systems theory and development, computational mathematics and web development."
+
+msgid "Rascunho"
+msgstr "Drawing board"
+
+msgid "1 mês = 1 min 30 s"
+msgstr "1 month = 1 min 30 s"
+
+msgid "PROBLEMA %s"
+msgstr "%s PROBLEM"
+
+msgid "Opção %d"
+msgstr "Option %d"
+
+msgid "Abrir investimentos."
+msgstr "Open investments."
+
+msgid "Consultar reputação e finanças."
+msgstr "View reputation and finances."
+
+msgid "Abrir problema urgente%s"
+msgstr "Open urgent problem%s"
+
+msgid " • %d na fila"
+msgstr " · %d queued"
+
+msgid "Pausar ou retomar o tempo (Espaço)"
+msgstr "Pause or resume time (Space)"
+
+msgid "Velocidade normal: 1 mês em 3 minutos"
+msgstr "Normal speed: 1 month in 3 minutes"
+
+msgid "Velocidade rápida: 1 mês em 1 minuto e 30 segundos"
+msgstr "Fast speed: 1 month in 1 minute 30 seconds"
+
+msgid "Velocidade muito rápida: 1 mês em 30 segundos"
+msgstr "Very fast speed: 1 month in 30 seconds"
+
+msgid "Voltar ao menu principal?"
+msgstr "Return to the main menu?"
+
+msgid "O progresso desta partida será perdido.\nDeseja voltar ao menu principal?"
+msgstr "Unsaved progress will be lost.\nReturn to the main menu?"
+
+msgid "Fechar problema sem responder (Esc)"
+msgstr "Close the problem without answering (Esc)"
+
+msgid "Rascunho · tela inteira"
+msgstr "Drawing board · full screen"
+
+msgid "Voltar ao problema"
+msgstr "Back to the problem"
+
+msgid "Guardar o rascunho e voltar ao problema (Esc)"
+msgstr "Keep the drawing and return to the problem (Esc)"
+
+msgid "Apagar todos os traços do rascunho"
+msgstr "Clear all drawing strokes"
+
+msgid "Até a próxima ocorrência: avançar os dias até o próximo problema, mantendo receitas, obras e eleições."
+msgstr "Until the next event: advance days until the next problem, including income, construction and elections."

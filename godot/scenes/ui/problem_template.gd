@@ -2,6 +2,7 @@ extends Control
 class_name ProblemTemplate
 
 signal answer_selected(option_id: String)
+signal close_requested()
 
 @onready var title_label: Label = $Center/Panel/Margin/Content/Title
 @onready var category_badge: PanelContainer = $Center/Panel/Margin/Content/Header/CategoryBadge
@@ -11,8 +12,8 @@ signal answer_selected(option_id: String)
 @onready var answer_hint: Label = $Center/Panel/Margin/Content/Body/Answers/AnswerHint
 @onready var illustration_panel: Panel = $Center/Panel/Margin/Content/Body/Illustration
 @onready var illustration: TextureRect = $Center/Panel/Margin/Content/Body/Illustration/Texture
-@onready var board_overlay: PanelContainer = $BoardOverlay
-@onready var drawing_area: Control = $BoardOverlay/Center/Panel/Margin/Content/DrawingArea
+@onready var board_overlay: Control = $BoardOverlay
+@onready var drawing_area: Control = $BoardOverlay/DrawingArea
 @onready var answers_container: VBoxContainer = $Center/Panel/Margin/Content/Body/Answers
 @onready var answer_input: LineEdit = $Center/Panel/Margin/Content/Body/Answers/AnswerInput
 @onready var submit_button: Button = $Center/Panel/Margin/Content/Body/Answers/SubmitButton
@@ -25,8 +26,9 @@ func _ready() -> void:
 	for index in range(option_buttons.size()):
 		option_buttons[index].pressed.connect(_on_option_pressed.bind(index))
 	$Center/Panel/Margin/Content/Body/BoardButton.pressed.connect(_show_board)
-	$BoardOverlay/Center/Panel/Margin/Content/Header/ClearButton.pressed.connect(_clear_board)
-	$BoardOverlay/Center/Panel/Margin/Content/Header/CloseButton.pressed.connect(_hide_board)
+	$Center/Panel/Margin/Content/Header/CloseButton.pressed.connect(func(): close_requested.emit())
+	$BoardOverlay/Toolbar/Content/ClearButton.pressed.connect(_clear_board)
+	$BoardOverlay/Toolbar/Content/CloseButton.pressed.connect(_hide_board)
 	submit_button.pressed.connect(_submit_typed_answer)
 	answer_input.text_submitted.connect(func(_text: String): _submit_typed_answer())
 
@@ -35,7 +37,7 @@ func configure(problem_title: String, problem_description: String, problem_image
 		await ready
 	title_label.text = problem_title
 	description_label.text = problem_description
-	category_label.text = "PROBLEMA %s" % _category_label(category).to_upper()
+	category_label.text = tr("PROBLEMA %s") % tr(_category_label(category)).to_upper()
 	_apply_category_style(category)
 	illustration.texture = problem_image
 	illustration_panel.visible = problem_image != null
@@ -57,15 +59,33 @@ func configure(problem_title: String, problem_description: String, problem_image
 			button.hide()
 			continue
 		var option: Dictionary = options[index]
-		button.text = String(option.get("text", "Opção %d" % (index + 1)))
+		button.text = tr(String(option.get("text", "Opção %d" % (index + 1))))
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		button.tooltip_text = button.text
 		_option_ids[index] = String(option.get("id", option.get("text", "opcao_%d" % (index + 1))))
 		button.show()
 		button.disabled = false
 	if answer_input.visible:
 		for button in option_buttons:
 			button.hide()
+		answer_input.grab_focus()
+	elif not option_buttons.is_empty():
+		option_buttons[0].grab_focus()
+
+func show_route_graph(distances: Dictionary) -> void:
+	var graph := RouteGraph.new()
+	graph.distances = distances
+	graph.custom_minimum_size = Vector2(440, 230)
+	illustration_panel.show()
+	illustration.hide()
+	illustration_panel.add_child(graph)
+	graph.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func _apply_popup_styles() -> void:
+	var image_style := StyleBoxFlat.new()
+	image_style.bg_color = Color("e6f0f1")
+	image_style.set_corner_radius_all(10)
+	illustration_panel.add_theme_stylebox_override("panel", image_style)
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = Color(0.98, 0.99, 1.0, 1.0)
 	panel_style.border_color = Color(0.45, 0.58, 0.65, 1.0)
@@ -106,6 +126,9 @@ func _apply_popup_styles() -> void:
 		button.add_theme_font_size_override("font_size", 22)
 		button.custom_minimum_size = Vector2(button.custom_minimum_size.x, 70)
 		button.add_theme_color_override("font_color", Color(0.13, 0.22, 0.27, 1.0))
+		button.add_theme_color_override("font_focus_color", Color(0.13, 0.22, 0.27, 1.0))
+		button.add_theme_color_override("font_hover_color", Color(0.13, 0.22, 0.27, 1.0))
+		button.add_theme_color_override("font_pressed_color", Color(0.13, 0.22, 0.27, 1.0))
 
 	var board_normal := StyleBoxFlat.new()
 	board_normal.bg_color = Color(0.87, 0.94, 0.97, 1.0)
@@ -159,13 +182,22 @@ func _submit_typed_answer() -> void:
 
 func _show_board() -> void:
 	board_overlay.show()
-	$Center.offset_left = -180.0
-	$Center.offset_right = -180.0
 
 func _hide_board() -> void:
 	board_overlay.hide()
-	$Center.offset_left = 0.0
-	$Center.offset_right = 0.0
+
+func dismiss() -> void:
+	if board_overlay.visible:
+		_hide_board()
+	else:
+		close_requested.emit()
+
+func export_draft() -> Array:
+	return drawing_area.export_strokes()
+
+func restore_draft(strokes: Array, answer: String) -> void:
+	drawing_area.import_strokes(strokes)
+	answer_input.text = answer
 
 func _clear_board() -> void:
 	if drawing_area.has_method("clear"):

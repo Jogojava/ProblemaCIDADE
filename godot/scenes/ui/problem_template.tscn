@@ -69,6 +69,12 @@ theme_override_font_sizes/font_size = 17
 text = "Leia o enunciado e escolha sua resposta"
 vertical_alignment = 1
 
+[node name="CloseButton" type="Button" parent="Center/Panel/Margin/Content/Header"]
+custom_minimum_size = Vector2(56, 52)
+layout_mode = 2
+text = "×"
+tooltip_text = "Fechar problema sem responder (Esc)"
+
 [node name="Title" type="Label" parent="Center/Panel/Margin/Content" unique_id=1939942105]
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
@@ -189,68 +195,58 @@ size_flags_vertical = 8
 tooltip_text = "Abrir lousa para rascunhos"
 text = "Rascunho"
 
-[node name="BoardOverlay" type="PanelContainer" parent="." unique_id=901404333]
+[node name="BoardOverlay" type="Control" parent="." unique_id=901404333]
 visible = false
-custom_minimum_size = Vector2(380, 700)
-layout_mode = 1
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -404.0
-offset_top = -350.0
-offset_right = -24.0
-offset_bottom = 350.0
-grow_horizontal = 0
-grow_vertical = 2
-mouse_filter = 0
-
-[node name="Center" type="CenterContainer" parent="BoardOverlay" unique_id=1352144891]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 0
 
-[node name="Panel" type="PanelContainer" parent="BoardOverlay/Center" unique_id=685314413]
-custom_minimum_size = Vector2(0, 0)
+[node name="DrawingArea" type="Control" parent="BoardOverlay" unique_id=1136667816]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("2")
+
+[node name="Toolbar" type="PanelContainer" parent="BoardOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -470.0
+offset_top = -116.0
+offset_right = 470.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Content" type="HBoxContainer" parent="BoardOverlay/Toolbar"]
 layout_mode = 2
+theme_override_constants/separation = 18
 
-[node name="Margin" type="MarginContainer" parent="BoardOverlay/Center/Panel" unique_id=2142910784]
-layout_mode = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 22
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 22
-
-[node name="Content" type="VBoxContainer" parent="BoardOverlay/Center/Panel/Margin" unique_id=1193975237]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="Header" type="HBoxContainer" parent="BoardOverlay/Center/Panel/Margin/Content" unique_id=1519212477]
-layout_mode = 2
-
-[node name="Title" type="Label" parent="BoardOverlay/Center/Panel/Margin/Content/Header" unique_id=159373490]
+[node name="Title" type="Label" parent="BoardOverlay/Toolbar/Content" unique_id=159373490]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 30
-text = "Lousa"
+theme_override_font_sizes/font_size = 24
+text = "Rascunho · tela inteira"
+vertical_alignment = 1
 
-[node name="ClearButton" type="Button" parent="BoardOverlay/Center/Panel/Margin/Content/Header" unique_id=305981843]
+[node name="ClearButton" type="Button" parent="BoardOverlay/Toolbar/Content" unique_id=305981843]
 custom_minimum_size = Vector2(120, 52)
 layout_mode = 2
 text = "Limpar"
+tooltip_text = "Apagar todos os traços do rascunho"
 
-[node name="CloseButton" type="Button" parent="BoardOverlay/Center/Panel/Margin/Content/Header" unique_id=775628715]
-custom_minimum_size = Vector2(120, 52)
+[node name="CloseButton" type="Button" parent="BoardOverlay/Toolbar/Content" unique_id=775628715]
+custom_minimum_size = Vector2(270, 52)
 layout_mode = 2
-text = "Fechar"
-
-[node name="DrawingArea" type="Control" parent="BoardOverlay/Center/Panel/Margin/Content" unique_id=1136667816]
-custom_minimum_size = Vector2(300, 560)
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-mouse_filter = 0
-script = ExtResource("2")
+text = "Voltar ao problema"
+tooltip_text = "Guardar o rascunho e voltar ao problema (Esc)"

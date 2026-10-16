@@ -2,6 +2,10 @@ extends Control
 class_name GameHUD
 
 signal menu_requested()
+signal investment_requested(area: String, amount: float)
+signal construction_requested(area: String)
+signal skip_requested()
+signal map_center_requested()
 signal panels_changed(is_open: bool)
 signal problem_open_requested(event_id: String)
 
@@ -46,8 +50,18 @@ var _urgent_event_id := ""
 var _hovered_category := ""
 var _sidebar_expanded := false
 var _problem_mode := false
+var _sidebar_panel: PanelContainer
+var _problem_list: VBoxContainer
+var _city: CityState
+var _investment_mode: OptionButton
+var _chart: ProjectionChart
+var _projection_key := "funds"
+var _city_label: Label
+var _notice_label: Label
 
 func _ready() -> void:
+	_setup_sidebar()
+	_setup_city_panels()
 	menu_button.pressed.connect(func(): menu_requested.emit())
 	pause_button.pressed.connect(_on_pause_pressed)
 	normal_button.pressed.connect(_on_speed_pressed.bind(TimeManager.Speed.NORMAL))
@@ -162,10 +176,10 @@ func _rebuild_problem_buttons(events: Array[Dictionary], categories_by_id: Dicti
 		button.pressed.connect(_on_problem_button_pressed.bind(event_id))
 		button.mouse_entered.connect(_on_category_mouse_entered.bind(category))
 		var title := String(runtime_event.get("title", "Problema"))
-		button.text = "!   " + title
-		button.tooltip_text = "%s • %s" % [_category_label(category), title]
+		button.text = tr(title)
+		button.tooltip_text = "%s • %s" % [tr(_category_label(category)), tr(title)]
 		_style_problem_button(button, category)
-		occurrences.add_child(button)
+		_problem_list.add_child(button)
 		_problem_buttons[event_id] = button
 		_problem_button_titles[event_id] = title
 
@@ -179,69 +193,45 @@ func _update_category_counts() -> void:
 		var count_label: Label = count_labels[index]
 		var count_badge: PanelContainer = [high_count, medium_count, low_count][index]
 		var category_events: Array = _events_by_category.get(category, [])
-		button.text = ("!  %d" % category_events.size()) if _sidebar_expanded else "!"
+		button.text = "!"
 		count_label.text = str(category_events.size())
-		count_badge.visible = not _sidebar_expanded
-		button.tooltip_text = "%s • %d problema(s)" % [_category_label(category), category_events.size()]
+		count_badge.visible = true
+		button.tooltip_text = "%s · %d" % [tr(_category_label(category)), category_events.size()]
 
 func _update_sidebar_layout() -> void:
-	if not is_node_ready():
+	if not is_node_ready() or _sidebar_panel == null:
 		return
 	var categories := [EventDatabase.CATEGORY_IMPORTANT, EventDatabase.CATEGORY_COMMON, EventDatabase.CATEGORY_OPTIONAL]
 	var category_buttons := [high_button, medium_button, low_button]
 	var count_badges := [high_count, medium_count, low_count]
-	# Keep the category hitboxes fixed while expanding. Moving them under the
-	# pointer caused mouse_entered to alternate between categories indefinitely.
-	var icon_step := 92.0
-	var category_first_row := {
-		EventDatabase.CATEGORY_IMPORTANT: 0,
-		EventDatabase.CATEGORY_COMMON: 2,
-		EventDatabase.CATEGORY_OPTIONAL: 6
-	}
+	var expanded := _sidebar_expanded and not _hovered_category.is_empty()
+	_sidebar_panel.visible = expanded
+	occurrences.size = Vector2(570 if expanded else 126, 400 if expanded else 270)
 	for index in range(categories.size()):
 		var button: Button = category_buttons[index]
-		var count_badge: PanelContainer = count_badges[index]
-		button.position = Vector2(0, icon_step * index)
+		var badge: PanelContainer = count_badges[index]
+		button.position = Vector2(0, index * 92)
 		button.size = Vector2(84, 72)
-		button.add_theme_font_size_override("font_size", 38 if not _sidebar_expanded else 24)
-		button.z_index = (10 if categories[index] == _hovered_category else 0) + index
-		count_badge.position = Vector2(88, icon_step * index + 22)
-		count_badge.size = Vector2(38, 28)
-		count_badge.z_index = 20
-		count_badge.visible = not _sidebar_expanded
-	for event_id in _problem_buttons.keys():
+		button.add_theme_font_size_override("font_size", 28)
+		button.text = "!"
+		badge.position = Vector2(88, index * 92 + 22)
+		badge.visible = true
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for event_id in _problem_buttons:
 		var button: Button = _problem_buttons[event_id]
-		var category := String(_problem_button_categories.get(event_id, ""))
-		var category_events: Array = _events_by_category.get(category, [])
-		var row_index := 0
-		for runtime_event in category_events:
-			if String(runtime_event.get("event_id", "")) == String(event_id):
-				break
-			row_index += 1
-		var first_row := int(category_first_row.get(category, 0))
-		if _sidebar_expanded:
-			button.visible = _hovered_category.is_empty() or category == _hovered_category
-			button.custom_minimum_size = Vector2(312, 68)
-			button.size = Vector2(312, 68)
-			button.position = Vector2(96, (first_row + row_index) * 76)
-			button.text = "!   " + String(_problem_button_titles.get(event_id, "Problema"))
-			button.add_theme_font_size_override("font_size", 19)
-			button.mouse_filter = Control.MOUSE_FILTER_STOP
-		else:
-			# Show the problem markers as a compact overlapping stack while the
-			# sidebar is closed, with enough of each icon exposed to identify it.
-			button.visible = true
-			button.custom_minimum_size = Vector2(42, 44)
-			button.size = Vector2(42, 44)
-			var category_index := categories.find(category)
-			button.position = Vector2(132, icon_step * category_index + 14 + row_index * 24)
-			button.text = "!"
-			button.add_theme_font_size_override("font_size", 22)
-			button.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.visible = expanded and String(_problem_button_categories[event_id]) == _hovered_category
+		button.custom_minimum_size = Vector2(360, 64)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.text = tr(String(_problem_button_titles[event_id]))
+		button.mouse_filter = Control.MOUSE_FILTER_STOP
+	var heading := _sidebar_panel.get_node("Content/Heading") as Label
+	heading.text = tr(_category_label(_hovered_category))
+	var empty := _sidebar_panel.get_node("Content/Empty") as Label
+	empty.visible = (_events_by_category.get(_hovered_category, []) as Array).is_empty()
 
 func _update_urgent_alert(runtime_event: Dictionary) -> void:
 	_urgent_event_id = String(runtime_event.get("event_id", ""))
-	problem_tabs.visible = not _urgent_event_id.is_empty()
+	problem_tabs.visible = not _urgent_event_id.is_empty() and not _problem_mode
 	if _urgent_event_id.is_empty():
 		urgent_open_button.text = "!  Problema urgente"
 		return
@@ -271,7 +261,10 @@ func set_problem_mode(active: bool) -> void:
 	pause_button.disabled = active
 	fast_button.disabled = active
 	very_fast_button.disabled = active
-	normal_button.disabled = false
+	funds_button.disabled = active
+	reputation_button.disabled = active
+	$TimeDock/TimeControls/SkipButton.disabled = active
+	normal_button.disabled = active
 	if active and _time_manager != null:
 		normal_button.set_pressed_no_signal(true)
 		fast_button.set_pressed_no_signal(false)
@@ -297,6 +290,8 @@ func _style_problem_button(button: Button, category: String) -> void:
 	button.add_theme_stylebox_override("pressed", hover)
 	button.add_theme_color_override("font_color", Color.WHITE)
 	button.add_theme_color_override("font_hover_color", Color.WHITE)
+	button.add_theme_color_override("font_pressed_color", Color.WHITE)
+	button.add_theme_color_override("font_focus_color", Color.WHITE)
 
 func _on_problem_button_pressed(event_id: String) -> void:
 	problem_open_requested.emit(event_id)
@@ -306,25 +301,16 @@ func _on_urgent_button_pressed() -> void:
 		problem_open_requested.emit(_urgent_event_id)
 
 func _on_sidebar_mouse_entered() -> void:
-	_sidebar_expanded = true
-	var pointer := occurrences.get_local_mouse_position()
-	if pointer.x <= 84.0:
-		if pointer.y >= 0.0 and pointer.y < 72.0:
-			_hovered_category = EventDatabase.CATEGORY_IMPORTANT
-		elif pointer.y >= 92.0 and pointer.y < 164.0:
-			_hovered_category = EventDatabase.CATEGORY_COMMON
-		elif pointer.y >= 184.0 and pointer.y < 256.0:
-			_hovered_category = EventDatabase.CATEGORY_OPTIONAL
-	else:
-		_hovered_category = ""
-	_update_category_counts()
-	_update_sidebar_layout()
+	pass
 
 func _on_sidebar_mouse_exited() -> void:
-	_sidebar_expanded = false
-	_hovered_category = ""
-	_update_category_counts()
-	_update_sidebar_layout()
+	call_deferred("_check_sidebar_pointer")
+
+func _check_sidebar_pointer() -> void:
+	if not occurrences.get_global_rect().has_point(get_global_mouse_position()):
+		_sidebar_expanded = false
+		_hovered_category = ""
+		_update_sidebar_layout()
 
 func _on_category_mouse_entered(category: String) -> void:
 	_sidebar_expanded = true
@@ -372,7 +358,7 @@ func _on_day_passed(_day: int, _month: int, _year: int) -> void:
 	_refresh_date()
 
 func _refresh_date() -> void:
-	date_label.text = _time_manager.get_date_text()
+	date_label.text = tr("Dia %d / Mês %d / Ano %d") % [_time_manager.current_day, _time_manager.current_month, _time_manager.current_year]
 	$Calendar/MonthProgress.value = float(_time_manager.current_day - 1) / float(_time_manager.days_per_month) * 100.0
 
 func _on_pause_pressed() -> void:
@@ -408,3 +394,151 @@ func _refresh_status() -> void:
 			status_label.text = "1 mês = 1 min 30 s"
 		TimeManager.Speed.VERY_FAST:
 			status_label.text = "1 mês = 30 s"
+
+func _setup_sidebar() -> void:
+	theme = SettingsService.game_theme
+	_sidebar_panel = PanelContainer.new()
+	_sidebar_panel.name = "ProblemList"
+	_sidebar_panel.position = Vector2(144, 0)
+	_sidebar_panel.custom_minimum_size = Vector2(410, 0)
+	_sidebar_panel.size = Vector2(410, 380)
+	occurrences.add_child(_sidebar_panel)
+	var column := VBoxContainer.new()
+	column.name = "Content"
+	column.add_theme_constant_override("separation", 12)
+	_sidebar_panel.add_child(column)
+	var heading := UIFactory.label("", 24)
+	heading.name = "Heading"
+	column.add_child(heading)
+	var empty := UIFactory.label(tr("Nenhum problema nesta categoria."), 21)
+	empty.name = "Empty"
+	column.add_child(empty)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(370, 280)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	column.add_child(scroll)
+	_problem_list = VBoxContainer.new()
+	_problem_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_problem_list.add_theme_constant_override("separation", 10)
+	scroll.add_child(_problem_list)
+	_sidebar_panel.hide()
+	for pair in [[high_button, "important"], [medium_button, "common"], [low_button, "optional"]]:
+		pair[0].pressed.connect(_on_category_mouse_entered.bind(pair[1]))
+		pair[0].focus_entered.connect(_on_category_mouse_entered.bind(pair[1]))
+	for badge in [high_count_label, medium_count_label, low_count_label]:
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_update_sidebar_layout()
+
+func _setup_city_panels() -> void:
+	_city_label = UIFactory.label("", 25)
+	add_child(_city_label)
+	_city_label.position = Vector2(260, 34)
+	_city_label.size = Vector2(900, 40)
+	_city_label.add_theme_color_override("font_color", Color.WHITE)
+	_city_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_notice_label = UIFactory.label("", 22)
+	add_child(_notice_label)
+	_notice_label.position = Vector2(230, 96)
+	_notice_label.size = Vector2(1100, 54)
+	_notice_label.add_theme_color_override("font_color", Color("f1dc9c"))
+	_notice_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var skip := UIFactory.button("", func(): skip_requested.emit(), tr("Até a próxima ocorrência: avançar os dias até o próximo problema, mantendo receitas, obras e eleições."))
+	skip.name = "SkipButton"
+	skip.custom_minimum_size = Vector2(84, 84)
+	skip.icon = preload("res://assets/ui/hud/skip_next.svg")
+	skip.expand_icon = true
+	skip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	$TimeDock/TimeControls.add_child(skip)
+	$TimeDock.offset_left = -234
+	$TimeDock.offset_right = 234
+	$TimeDock.offset_top = -134
+	$TimeDock.offset_bottom = -16
+	$Footer.offset_top = -160
+	var center_button := UIFactory.button("⌖", func(): map_center_requested.emit(), tr("Restaurar posição e zoom da câmera"))
+	center_button.name = "CenterMapButton"
+	center_button.position = Vector2(136, 28)
+	center_button.size = Vector2(84, 84)
+	center_button.add_theme_font_size_override("font_size", 36)
+	add_child(center_button)
+	_investment_mode = OptionButton.new()
+	_investment_mode.add_item(tr("Investir em serviços"))
+	_investment_mode.add_item(tr("Construir instalação · R$ 35.000 · 20 dias"))
+	_investment_mode.add_theme_font_size_override("font_size", 22)
+	$InvestmentPanel/Content.add_child(_investment_mode)
+	$InvestmentPanel/Content.move_child(_investment_mode, 1)
+	_investment_mode.item_selected.connect(func(index: int):
+		$InvestmentPanel/Content/AmountSlider.visible = index == 0
+		refresh_city())
+	$InvestmentPanel/Content.add_theme_constant_override("separation", 10)
+	$InvestmentPanel/Content/Header/Title.add_theme_font_size_override("font_size", 32)
+	var slider := $InvestmentPanel/Content/AmountSlider as HSlider
+	slider.min_value = 5000
+	slider.max_value = 50000
+	slider.step = 5000
+	slider.value = 10000
+	slider.editable = true
+	slider.value_changed.connect(func(value: float): $InvestmentPanel/Content/AmountLabel.text = tr("Valor: R$ %.0f") % value)
+	for area in GameRules.AREAS:
+		var cell_name: String = {"education": "Education", "health": "Health", "water": "Water", "security": "Security", "culture": "Culture", "social": "Social"}[area]
+		var cell := $InvestmentPanel/Content/Categories.get_node(cell_name + "Cell")
+		var button := cell.get_node(cell_name + "Button") as Button
+		button.custom_minimum_size = Vector2(230, 60)
+		button.pressed.connect(_request_investment.bind(area))
+		cell.get_node("Label").add_theme_font_size_override("font_size", 21)
+	$InvestmentPanel/Content/EmptyBalance.add_theme_font_size_override("font_size", 20)
+	$StatisticsPanel.offset_top = -370
+	$StatisticsPanel.offset_bottom = 370
+	$StatisticsPanel/Content.add_theme_constant_override("separation", 10)
+	$StatisticsPanel/Content/Header/Title.add_theme_font_size_override("font_size", 32)
+	var selector := OptionButton.new()
+	for heading in ["Saldo", "Reputação", "Educação", "Saúde", "Segurança", "Desemprego", "Fome", "Saneamento", "Cultura", "Assistência social"]:
+		selector.add_item(tr(heading))
+	selector.item_selected.connect(func(index: int):
+		_projection_key = ["funds", "reputation", "education", "health", "security", "unemployment", "hunger", "water", "culture", "social"][index]
+		refresh_city())
+	$StatisticsPanel/Content.add_child(selector)
+	_chart = ProjectionChart.new()
+	_chart.custom_minimum_size = Vector2(0, 200)
+	$StatisticsPanel/Content.add_child(_chart)
+	$StatisticsPanel/Content.add_child(UIFactory.label(tr("Estimativa por tendência linear; não é uma garantia. Reage às decisões futuras."), 19))
+	$StatisticsPanel/Content/Description.add_theme_font_size_override("font_size", 22)
+	for node_name in ["EconomyEmpty", "ApprovalEmpty"]:
+		$StatisticsPanel/Content.get_node(node_name).add_theme_font_size_override("font_size", 22)
+
+func _request_investment(area: String) -> void:
+	if _investment_mode.selected == 1:
+		construction_requested.emit(area)
+	else:
+		investment_requested.emit(area, $InvestmentPanel/Content/AmountSlider.value)
+
+func bind_city(city: CityState) -> void:
+	_city = city
+	city.changed.connect(refresh_city)
+	refresh_city()
+
+func refresh_city() -> void:
+	if _city == null:
+		return
+	set_city_indicators(_city.funds, _city.reputation)
+	_city_label.text = "%s · %s %d/2 · %s" % [_city.city_name, tr("Mandato"), _city.term, tr(GameRules.DIFFICULTIES[_city.difficulty].name)]
+	$InvestmentPanel/Content/AmountLabel.text = (tr("Valor: R$ %.0f") % $InvestmentPanel/Content/AmountSlider.value) if _investment_mode.selected == 0 else tr("Obra: R$ 35.000 · prazo de 20 dias")
+	$InvestmentPanel/Content/EmptyBalance.text = tr("Clique em uma área para aplicar. Obras: %d/3 em andamento.") % _city.projects.size()
+	for area in GameRules.AREAS:
+		var cell_name: String = {"education": "Education", "health": "Health", "water": "Water", "security": "Security", "culture": "Culture", "social": "Social"}[area]
+		var cell := $InvestmentPanel/Content/Categories.get_node(cell_name + "Cell")
+		var button := cell.get_node(cell_name + "Button") as Button
+		button.disabled = _city.outcome != "playing"
+		button.text = "%.0f/100" % float(_city.indicators[area])
+		button.tooltip_text = "%s · %.0f/100" % [tr(GameRules.AREA_NAMES[area]), float(_city.indicators[area])]
+	var description := tr("Mês %d/96 · %d respostas corretas em %d problemas · %d expirados.") % [_city.completed_months, _city.correct_count, _city.solved_count, _city.expired_count]
+	$StatisticsPanel/Content/Description.text = description
+	var next_funds: Dictionary = _city.projection("funds")
+	$StatisticsPanel/Content/EconomyEmpty.text = tr("Saldo: R$ %.0f · Obras concluídas: %d") % [_city.funds, _city.buildings.size()]
+	if bool(next_funds.get("ready", false)):
+		$StatisticsPanel/Content/EconomyEmpty.text += tr(" · Estimativa em 6 meses: R$ %.0f") % float(next_funds.forecast[-1])
+	$StatisticsPanel/Content/ApprovalEmpty.text = tr("Reputação: %.1f%% · Educação: %.0f · Saúde: %.0f · Segurança: %.0f\nDesemprego: %.1f%% · Fome: %.1f%%") % [_city.reputation, _city.indicators.education, _city.indicators.health, _city.indicators.security, _city.indicators.unemployment, _city.indicators.hunger]
+	_chart.series = _city.projection(_projection_key)
+	_chart.queue_redraw()
+
+func show_notice(message: String) -> void:
+	_notice_label.text = message
