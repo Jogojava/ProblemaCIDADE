@@ -27,6 +27,22 @@ func _run() -> void:
 	root.size = Vector2i(1280, 720)
 	change_scene_to_file("res://scenes/ui/main_menu.tscn")
 	await _frames()
+	var design_settings := root.get_node("SettingsService")
+	var menu_play: Button = current_scene.get_node("Menu/VBoxContainer/jogar")
+	check(menu_play.get_theme_stylebox("normal").texture.resource_path.ends_with("debora/play.png"), "Menu usa a arte Jogar da Debora.")
+	var sound: Button = current_scene.get_node("SoundButton")
+	var was_muted: bool = design_settings.values.muted
+	await _click(sound)
+	check(bool(design_settings.values.muted) != was_muted, "Botao desenhado alterna o som.")
+	check(sound.get_theme_stylebox("normal").texture.resource_path.ends_with("sound_off.png" if not was_muted else "sound_on.png"), "Arte do som acompanha o estado.")
+	check(current_scene.get_global_rect().encloses(sound.get_global_rect()), "Botao de som fica inteiro na tela.")
+	await _click(sound)
+	design_settings.update("locale", "en")
+	check(menu_play.get_theme_color("font_color").a > 0.9, "Menu ingles exibe o texto traduzido.")
+	check(menu_play.get_theme_stylebox("normal").texture.resource_path.ends_with("button_blue.png"), "Menu ingles usa moldura sem texto portugues.")
+	design_settings.update("locale", "pt_BR")
+	await _frames()
+	check(menu_play.get_theme_color("font_color").a == 0.0, "Texto nativo nao duplica a legenda da arte portuguesa.")
 	await _capture("01-menu.png")
 	await _click(current_scene.get_node("Menu/VBoxContainer/jogar"))
 	check(current_scene.has_node("GameDialog"), "Jogar abre configuração de partida.")
@@ -46,6 +62,8 @@ func _run() -> void:
 	await _click(_find_button(game._modal, "Iniciar mandato"))
 	await _frames()
 	game.time_manager.pause_game()
+	for pair in [[game.hud.high_button, "important"], [game.hud.medium_button, "common"], [game.hud.low_button, "optional"], [game.hud.urgent_open_button, "urgent"]]:
+		check(pair[0].icon.resource_path.ends_with("debora/" + pair[1] + ".png"), "Ocorrencia usa arte da categoria " + pair[1])
 	await _capture("04-cidade.png")
 	var controls: HBoxContainer = game.hud.get_node("TimeDock/TimeControls")
 	var skip := controls.get_node("SkipButton") as Button
@@ -292,6 +310,7 @@ func _draw_stroke(area: Control, from: Vector2, to: Vector2) -> void:
 	await _frames()
 
 func _frames() -> void:
+	await create_timer(0.05).timeout
 	for _i in range(4):
 		await process_frame
 

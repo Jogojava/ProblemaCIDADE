@@ -193,7 +193,7 @@ func _update_category_counts() -> void:
 		var count_label: Label = count_labels[index]
 		var count_badge: PanelContainer = [high_count, medium_count, low_count][index]
 		var category_events: Array = _events_by_category.get(category, [])
-		button.text = "!"
+		DeboraDesign.marker(button, category)
 		count_label.text = str(category_events.size())
 		count_badge.visible = true
 		button.tooltip_text = "%s · %d" % [tr(_category_label(category)), category_events.size()]
@@ -213,7 +213,7 @@ func _update_sidebar_layout() -> void:
 		button.position = Vector2(0, index * 92)
 		button.size = Vector2(84, 72)
 		button.add_theme_font_size_override("font_size", 28)
-		button.text = "!"
+		DeboraDesign.marker(button, categories[index])
 		badge.position = Vector2(88, index * 92 + 22)
 		badge.visible = true
 		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -233,7 +233,7 @@ func _update_urgent_alert(runtime_event: Dictionary) -> void:
 	_urgent_event_id = String(runtime_event.get("event_id", ""))
 	problem_tabs.visible = not _urgent_event_id.is_empty() and not _problem_mode
 	if _urgent_event_id.is_empty():
-		urgent_open_button.text = "!  Problema urgente"
+		urgent_open_button.text = "Problema urgente"
 		return
 	var phase := String(runtime_event.get("deadline_phase", "opening"))
 	var remaining := maxf(0.0, float(runtime_event.get("deadline_remaining_seconds", 180.0)))
@@ -242,7 +242,7 @@ func _update_urgent_alert(runtime_event: Dictionary) -> void:
 		if String(event_category) == EventDatabase.CATEGORY_URGENT:
 			urgent_count += 1
 	var title := String(runtime_event.get("title", "Problema urgente"))
-	urgent_open_button.text = "!  %s  (%d)" % [title, urgent_count]
+	urgent_open_button.text = "%s  (%d)" % [title, urgent_count]
 	urgent_open_button.tooltip_text = "Abrir problema urgente%s" % (" • %d na fila" % urgent_count if urgent_count > 1 else "")
 	urgent_phase.text = "PARA RESPONDER" if phase == "solving" else "PARA ABRIR"
 	urgent_countdown.text = _format_countdown(remaining)
@@ -273,6 +273,10 @@ func set_problem_mode(active: bool) -> void:
 		_update_urgent_alert(_find_urgent_event())
 
 func _style_problem_button(button: Button, category: String) -> void:
+	button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	button.icon = load(DeboraDesign.ROOT + category + ".png")
+	button.expand_icon = true
+	button.add_theme_constant_override("icon_max_width", 28)
 	var accent := Color(0.25, 0.72, 0.9)
 	match category:
 		"common": accent = Color(0.36, 0.66, 0.27)

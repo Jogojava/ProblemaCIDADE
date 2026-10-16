@@ -19,6 +19,8 @@ func _ready() -> void:
 	$Menu/VBoxContainer/continuar.disabled = false
 	$Menu/VBoxContainer/continuar.text = "Partidas salvas"
 	$Menu/VBoxContainer/continuar.tooltip_text = "Abrir slots de salvamento."
+	SettingsService.changed.connect(_apply_design)
+	_apply_design()
 
 func _on_exit_pressed() -> void:
 	quit_confirmation.popup_centered()
@@ -67,3 +69,27 @@ func _sync_sound_button() -> void:
 	var master := AudioServer.get_bus_index("Master")
 	var muted := master >= 0 and AudioServer.is_bus_mute(master)
 	$SoundButton.text = "Som: desligado" if muted else "Som: ligado"
+	$SoundButton.tooltip_text = tr($SoundButton.text)
+	$SoundButton.text = ""
+	$SoundButton.custom_minimum_size = Vector2(100, 83)
+	$SoundButton.offset_top = -111
+	$SoundButton.offset_right = 128
+	DeboraDesign.button($SoundButton, "sound_off" if muted else "sound_on", true)
+
+func _apply_design() -> void:
+	$Background.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	$Background.modulate = Color.WHITE
+	$TitleGroup/HBoxContainer.add_theme_constant_override("separation", 16)
+	$TitleGroup/HBoxContainer/Label.custom_minimum_size.x = 520
+	$TitleGroup/HBoxContainer/Label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	var portuguese := not String(SettingsService.values.locale).begins_with("en")
+	var names := ["jogar", "continuar", "opcoes", "creditos"]
+	var art := ["play", "continue", "options", "credits"]
+	var blanks := ["blue", "gray", "green", "yellow"]
+	for index in range(names.size()):
+		var control: Button = $Menu/VBoxContainer.get_node(names[index])
+		control.custom_minimum_size = Vector2(440, 104)
+		DeboraDesign.button(control, art[index] if portuguese else "button_" + blanks[index], portuguese)
+	$Menu/VBoxContainer/continuar.text = "Continuar"
+	$Menu/VBoxContainer.add_theme_constant_override("separation", 8)
+	_sync_sound_button()

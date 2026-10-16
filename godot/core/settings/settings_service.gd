@@ -173,6 +173,14 @@ func make_theme() -> Theme:
 	result.set_stylebox("focus", "OptionButton", focus)
 	result.set_stylebox("background", "ProgressBar", _style(Color("d3e1df"), Color("d3e1df"), 6, 0, 0))
 	result.set_stylebox("fill", "ProgressBar", _style(Color("28a3bb"), Color("28a3bb"), 6, 0, 0))
+	# Reuse Debora's pixel border and palette for functional controls.
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var tint := Color.WHITE
+		if state == "hover": tint = Color(1.15, 1.15, 1.15)
+		if state == "pressed": tint = Color(0.75, 0.75, 0.75)
+		result.set_stylebox(state, "Button", DeboraDesign.skin("button_gray" if state == "disabled" else "button_blue", tint, true))
+	for state in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color"]:
+		result.set_color(state, "Button", Color.WHITE)
 	return result
 
 func _style(background: Color, border: Color, radius: int, border_width: int, margin: int) -> StyleBoxFlat:
