@@ -1,6 +1,6 @@
 extends AudioStreamPlayer
 
-@export var tempo_para_ficar_grave: float = 60.0
+@export var tempo_para_ficar_grave: float = 30.0
 @export var pitch_final: float = 0.5
 
 var tempo_passado := 0.0
@@ -15,7 +15,7 @@ func _process(delta: float) -> void:
 		return
 
 	tempo_passado += delta
-	var progresso: float = clamp(tempo_passado / tempo_para_ficar_grave, -1.0, 1.0)
+	var progresso: float = clamp(tempo_passado / tempo_para_ficar_grave, -2.0, 1.0)
 
 	pitch_scale = lerp(1.0, pitch_final, progresso)
 
