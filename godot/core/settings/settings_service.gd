@@ -30,7 +30,7 @@ func _ready() -> void:
 		_music.stream = load("res://assets/soundtrack/src_aud_lobby-classic-game.mp3")
 		add_child(_music)
 		_music.finished.connect(_music.play)
-		_music.play()
+
 
 func _ensure_bus(bus_name: String) -> void:
 	if AudioServer.get_bus_index(bus_name) == -1:

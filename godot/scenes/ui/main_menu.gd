@@ -4,8 +4,6 @@ extends Control
 
 func _ready() -> void:
 	theme = SettingsService.game_theme
-	$AudioStreamPlayer.stop()
-	$AudioStreamPlayer.set_process(false)
 	$SoundButton.pressed.connect(_on_sound_pressed)
 	$ExitButton.pressed.connect(_on_exit_pressed)
 	quit_confirmation.confirmed.connect(func() -> void: get_tree().quit())
