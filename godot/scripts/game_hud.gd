@@ -4,6 +4,7 @@ class_name GameHUD
 signal menu_requested()
 signal investment_requested(area: String, amount: float)
 signal construction_requested(area: String)
+signal housing_requested()
 signal skip_requested()
 signal map_center_requested()
 signal panels_changed(is_open: bool)
@@ -52,6 +53,7 @@ var _sidebar_expanded := false
 var _problem_mode := false
 var _sidebar_panel: PanelContainer
 var _problem_list: VBoxContainer
+var _housing_button: Button
 var _city: CityState
 var _investment_mode: OptionButton
 var _chart: ProjectionChart
@@ -62,6 +64,7 @@ var _notice_label: Label
 func _ready() -> void:
 	_setup_sidebar()
 	_setup_city_panels()
+	_apply_layout()
 	menu_button.pressed.connect(func(): menu_requested.emit())
 	pause_button.pressed.connect(_on_pause_pressed)
 	normal_button.pressed.connect(_on_speed_pressed.bind(TimeManager.Speed.NORMAL))
@@ -362,6 +365,7 @@ func _on_day_passed(_day: int, _month: int, _year: int) -> void:
 	_refresh_date()
 
 func _refresh_date() -> void:
+	date_label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
 	date_label.text = tr("Dia %d / Mês %d / Ano %d") % [_time_manager.current_day, _time_manager.current_month, _time_manager.current_year]
 	$Calendar/MonthProgress.value = float(_time_manager.current_day - 1) / float(_time_manager.days_per_month) * 100.0
 
@@ -464,6 +468,14 @@ func _setup_city_panels() -> void:
 	center_button.size = Vector2(84, 84)
 	center_button.add_theme_font_size_override("font_size", 36)
 	add_child(center_button)
+	_housing_button = UIFactory.button("", func(): housing_requested.emit())
+	_housing_button.name = "HousingButton"
+	_housing_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_housing_button.offset_left = -520
+	_housing_button.offset_right = -32
+	_housing_button.offset_top = 140
+	_housing_button.offset_bottom = 206
+	add_child(_housing_button)
 	_investment_mode = OptionButton.new()
 	_investment_mode.add_item(tr("Investir em serviços"))
 	_investment_mode.add_item(tr("Construir instalação · R$ 35.000 · 20 dias"))
@@ -524,9 +536,13 @@ func refresh_city() -> void:
 	if _city == null:
 		return
 	set_city_indicators(_city.funds, _city.reputation)
+	_housing_button.text = tr("População: %d · Moradias: +%d") % [_city.population, _city.housing_requests()]
+	_housing_button.add_theme_color_override("font_disabled_color", Color("dce4dc"))
+	_housing_button.disabled = _city.housing_requests() <= 0 or _city.outcome != "playing"
+	_housing_button.tooltip_text = tr("A cada 150 novos habitantes, escolha onde construir uma moradia. Crescimento de 50 habitantes/mês quando a média dos serviços é de pelo menos 45 pontos. Sem custo adicional.")
 	_city_label.text = "%s · %s %d/2 · %s" % [_city.city_name, tr("Mandato"), _city.term, tr(GameRules.DIFFICULTIES[_city.difficulty].name)]
 	$InvestmentPanel/Content/AmountLabel.text = (tr("Valor: R$ %.0f") % $InvestmentPanel/Content/AmountSlider.value) if _investment_mode.selected == 0 else tr("Obra: R$ 35.000 · prazo de 20 dias")
-	$InvestmentPanel/Content/EmptyBalance.text = tr("Clique em uma área para aplicar. Obras: %d/3 em andamento.") % _city.projects.size()
+	$InvestmentPanel/Content/EmptyBalance.text = tr("Escolha o serviço. Para construir, selecione depois um lote no mapa. Obras: %d/3.") % _city.projects.size()
 	for area in GameRules.AREAS:
 		var cell_name: String = {"education": "Education", "health": "Health", "water": "Water", "security": "Security", "culture": "Culture", "social": "Social"}[area]
 		var cell := $InvestmentPanel/Content/Categories.get_node(cell_name + "Cell")
@@ -546,3 +562,25 @@ func refresh_city() -> void:
 
 func show_notice(message: String) -> void:
 	_notice_label.text = message
+
+func _apply_layout() -> void:
+	var header := ColorRect.new()
+	header.name = "HeaderBackground"
+	header.color = Color(0.10, 0.19, 0.20, 0.94)
+	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(header)
+	move_child(header, 0)
+	header.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	header.offset_bottom = 126
+	$Footer.color = Color("eef1e5")
+	$Calendar.offset_top = 26
+	$Calendar.offset_bottom = 110
+	problem_tabs.offset_top = 140
+	problem_tabs.offset_bottom = 250
+	$Occurrences.offset_top = 226
+	_city_label.size = Vector2(850, 40)
+	_notice_label.position = Vector2(260, 78)
+	_notice_label.size = Vector2(1030, 38)
+	_notice_label.add_theme_font_size_override("font_size", 20)
+	for button in [menu_button, funds_button, reputation_button, pause_button, normal_button, fast_button, very_fast_button]:
+		button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

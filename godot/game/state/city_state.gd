@@ -5,6 +5,14 @@ signal changed()
 signal building_completed(project: Dictionary)
 signal campaign_event(kind: String)
 
+const INITIAL_HOMES := 18
+const RESIDENTS_PER_HOME := 150
+const MONTHLY_POPULATION_GROWTH := 50
+var residences: Array[Dictionary] = []
+var town_hall := {"x": -1, "y": -1}
+var layout_initialized := false
+var grass_lots: Array[Dictionary] = []
+
 var city_name := "Vila Esperança"
 var difficulty := "medium"
 var funds := GameRules.INITIAL_FUNDS
@@ -27,6 +35,10 @@ var last_result: Dictionary = {}
 var played_seconds := 0.0
 
 func start(name_value: String, difficulty_value: String) -> void:
+	population = GameRules.INITIAL_POPULATION
+	residences.clear()
+	layout_initialized = false
+	grass_lots.clear()
 	projects.clear()
 	buildings.clear()
 	history.clear()
@@ -73,20 +85,22 @@ func invest(area: String, amount: float) -> String:
 	changed.emit()
 	return ""
 
-func construct(area: String, day_index: int) -> String:
+func construct(area: String, day_index: int, lot: Dictionary = {}) -> String:
+	if (layout_initialized and lot.is_empty()) or (not lot.is_empty() and not can_build(lot)):
+		return "Escolha um lote livre na grama."
 	if outcome != "playing" or not GameRules.AREAS.has(area):
 		return "Construção indisponível."
 	if funds < GameRules.BUILDING_COST:
 		return "Saldo insuficiente para a obra."
 	if projects.size() >= 3:
 		return "Conclua uma das três obras em andamento."
-	if buildings.size() >= 30:
+	if buildings.size() + projects.size() >= 30:
 		return "A cidade já possui 30 instalações. Invista nos serviços existentes."
 	for project in projects:
 		if String(project.area) == area:
 			return "Já existe uma obra em andamento nesta área."
 	funds -= GameRules.BUILDING_COST
-	projects.append({"area": area, "started": day_index, "due": day_index + GameRules.BUILDING_DAYS, "cost": GameRules.BUILDING_COST})
+	projects.append({"area": area, "started": day_index, "due": day_index + GameRules.BUILDING_DAYS, "cost": GameRules.BUILDING_COST, "lot": lot.duplicate()})
 	add_ledger("Construção", -GameRules.BUILDING_COST)
 	changed.emit()
 	return ""
@@ -123,6 +137,7 @@ func advance_month() -> void:
 		crisis_months += 1
 	else:
 		crisis_months = 0
+	population += MONTHLY_POPULATION_GROWTH if service_mean >= 45.0 else 0
 	record_snapshot()
 	if crisis_months >= GameRules.CRISIS_MONTHS or reputation <= 0.0:
 		outcome = "impeachment"
@@ -205,7 +220,7 @@ func projection(key: String) -> Dictionary:
 	return {"ready": true, "history": series, "forecast": forecast, "slope": slope}
 
 func get_save_data() -> Dictionary:
-	return {"city_name": city_name, "difficulty": difficulty, "funds": funds, "reputation": reputation, "population": population, "indicators": indicators.duplicate(true), "projects": projects.duplicate(true), "buildings": buildings.duplicate(true), "history": history.duplicate(true), "ledger": ledger.duplicate(true), "completed_months": completed_months, "crisis_months": crisis_months, "term": term, "outcome": outcome, "solved_count": solved_count, "correct_count": correct_count, "expired_count": expired_count, "last_day": last_day, "played_seconds": played_seconds}
+	return {"residences": residences.duplicate(true), "layout_initialized": layout_initialized, "city_name": city_name, "difficulty": difficulty, "funds": funds, "reputation": reputation, "population": population, "indicators": indicators.duplicate(true), "projects": projects.duplicate(true), "buildings": buildings.duplicate(true), "history": history.duplicate(true), "ledger": ledger.duplicate(true), "completed_months": completed_months, "crisis_months": crisis_months, "term": term, "outcome": outcome, "solved_count": solved_count, "correct_count": correct_count, "expired_count": expired_count, "last_day": last_day, "played_seconds": played_seconds}
 
 func load_save_data(data: Dictionary) -> void:
 	start(String(data.get("city_name", "Vila Esperança")), String(data.get("difficulty", "medium")))
@@ -214,10 +229,55 @@ func load_save_data(data: Dictionary) -> void:
 			set(key, data[key])
 	if data.get("indicators") is Dictionary:
 		indicators.merge(data.indicators, true)
-	for key in ["projects", "buildings", "history", "ledger"]:
+	layout_initialized = bool(data.get("layout_initialized", false))
+	for key in ["residences", "projects", "buildings", "history", "ledger"]:
 		var items: Array[Dictionary] = []
 		for item in data.get(key, []):
 			if item is Dictionary:
 				items.append(item.duplicate(true))
 		set(key, items)
 	reputation = clampf(reputation, 0.0, 100.0)
+
+# Spatial state belongs to the save; camera motion and rendering never reshuffle it.
+func configure_lots(lots: Array[Dictionary]) -> void:
+	grass_lots = lots
+	if not layout_initialized:
+		var available := lots.duplicate(true)
+		available.shuffle()
+		for lot in available:
+			if residences.size() >= INITIAL_HOMES:
+				break
+			if absi(int(lot.x)) <= 5 and absi(int(lot.y)) <= 5 and lot != town_hall:
+				residences.append({"lot": lot.duplicate(), "variant": randi_range(0, 3)})
+		layout_initialized = true
+	# Migrate old saves with installations that did not yet have coordinates.
+	for collection in [buildings, projects]:
+		for item in collection:
+			if not item.has("lot") or item.lot.is_empty():
+				for lot in lots:
+					if can_build(lot):
+						item.lot = lot.duplicate()
+						break
+	changed.emit()
+
+func housing_requests() -> int:
+	var extra := maxi(0, population - GameRules.INITIAL_POPULATION)
+	return maxi(0, int(extra / RESIDENTS_PER_HOME) - maxi(0, residences.size() - INITIAL_HOMES))
+
+func can_build(lot: Dictionary) -> bool:
+	if not grass_lots.has(lot) or lot == town_hall:
+		return false
+	for collection in [residences, buildings, projects]:
+		for item in collection:
+			if item.get("lot", {}) == lot:
+				return false
+	return true
+
+func place_home(lot: Dictionary) -> String:
+	if outcome != "playing" or housing_requests() <= 0:
+		return "Ainda não há demanda por novas moradias."
+	if not can_build(lot):
+		return "Escolha um lote livre na grama."
+	residences.append({"lot": lot.duplicate(), "variant": randi_range(0, 3)})
+	changed.emit()
+	return ""

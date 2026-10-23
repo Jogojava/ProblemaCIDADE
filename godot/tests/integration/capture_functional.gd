@@ -121,7 +121,35 @@ func _run() -> void:
 	check(game.city.funds < before, "Clique no investimento aplica custo real.")
 	game.hud._investment_mode.select(1)
 	await _click(game.hud.get_node("InvestmentPanel/Content/Categories/EducationCell/EducationButton"))
-	check(game.city.projects.size() == 1, "Clique inicia construção.")
+	check(game.city.projects.is_empty(), "Escolher area aguarda a selecao do lote.")
+	check(game._placement_bar.visible, "Instrucao de posicionamento aparece.")
+	var placement_funds: float = game.city.funds
+	await _click(game._placement_bar.get_node("Content/CancelPlacement"))
+	check(game._placement_area.is_empty() and game.city.funds == placement_funds, "Cancelar nao cobra e sai do modo de posicionamento.")
+	await _click(game.hud.funds_button)
+	await _click(game.hud.get_node("InvestmentPanel/Content/Categories/EducationCell/EducationButton"))
+	game.get_node("Camera2D").zoom = Vector2(0.85, 0.85)
+	game.get_node("Camera2D").position += Vector2(90, -35)
+	game.get_node("Camera2D").force_update_scroll()
+	await _frames()
+	await _click_map_lot({"x": 0, "y": 0})
+	check(game.city.projects.is_empty() and game.city.funds == placement_funds, "Clicar na rua nao inicia nem cobra obra.")
+	var chosen := _visible_free_lot()
+	await _hover_map_lot(chosen)
+	await _capture("21-posicionamento.png")
+	await _click_map_lot(chosen)
+	check(game.city.projects.size() == 1, "Clique em lote livre inicia construcao.")
+	check(game.city.projects[0].lot == chosen, "Obra registra o lote escolhido.")
+	check(not game._placement_bar.visible, "Confirmar fecha o posicionamento.")
+	game.city.population += CityState.RESIDENTS_PER_HOME
+	game.city.changed.emit()
+	await _frames()
+	await _click(game.hud.get_node("HousingButton"))
+	check(game._placement_area == "home", "Demanda populacional permite escolher moradia.")
+	await _click_map_lot(_visible_free_lot())
+	check(game.city.residences.size() == CityState.INITIAL_HOMES + 1, "Clique posiciona nova moradia.")
+	check(game.city.housing_requests() == 0, "Moradia atende a demanda pendente.")
+	game.get_node("Camera2D").reset_view()
 	await _click(game.hud.get_node("InvestmentPanel/Content/Header/CloseButton"))
 	for _month in range(12):
 		game.city.advance_month()
@@ -346,3 +374,33 @@ func _capture(filename: String) -> void:
 	check(image != null and not image.is_empty(), "Captura renderizada: " + filename)
 	if image != null:
 		check(image.save_png(output.path_join(filename)) == OK, "Captura gravada: " + filename)
+
+func _visible_free_lot() -> Dictionary:
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var lot := {"x": x, "y": y}
+			if game.city.can_build(lot):
+				return lot
+	return {}
+
+func _hover_map_lot(lot: Dictionary) -> void:
+	var point: Vector2 = root.get_screen_transform() * game.visuals.get_global_transform_with_canvas() * game.visuals.point(lot)
+	var motion := InputEventMouseMotion.new()
+	motion.position = point
+	motion.global_position = point
+	root.push_input(motion, false)
+	await _frames()
+
+func _click_map_lot(lot: Dictionary) -> void:
+	await _hover_map_lot(lot)
+	var point: Vector2 = root.get_screen_transform() * game.visuals.get_global_transform_with_canvas() * game.visuals.point(lot)
+	for pressed in [true, false]:
+		var event := InputEventMouseButton.new()
+		event.position = point
+		event.global_position = point
+		event.button_index = MOUSE_BUTTON_LEFT
+		event.pressed = pressed
+		event.button_mask = MOUSE_BUTTON_MASK_LEFT if pressed else 0
+		root.push_input(event, false)
+		await process_frame
+	await _frames()

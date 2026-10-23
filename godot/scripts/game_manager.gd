@@ -12,6 +12,10 @@ const PROBLEM_SCENE := preload("res://scenes/ui/problem_template.tscn")
 @onready var return_dialog: ConfirmationDialog = $ReturnToMenuDialog
 
 var city := CityState.new()
+var visuals: CityVisuals
+var _placement_area := ""
+var _placement_bar: PanelContainer
+var _placement_text: Label
 var _modal: Control
 var _last_refresh := 0.0
 var _current_problem_id := ""
@@ -23,6 +27,7 @@ func _ready() -> void:
 	return_dialog.theme = hud.theme
 	hud.investment_requested.connect(_invest)
 	hud.construction_requested.connect(_construct)
+	hud.housing_requested.connect(func(): _begin_placement("home"))
 	hud.skip_requested.connect(_skip_to_next)
 	hud.map_center_requested.connect($Camera2D.reset_view)
 	city.start(String(SaveManager.new_game_options.name), String(SaveManager.new_game_options.difficulty))
@@ -61,11 +66,18 @@ func _ready() -> void:
 	time_manager.day_passed.connect(_on_game_day)
 	time_manager.month_passed.connect(_on_game_month)
 	hud.bind_city(city)
-	var visuals := CityVisuals.new()
+	$Ground.hide()
+	$Road.hide()
+	RenderingServer.set_default_clear_color(Color("243d39"))
+	visuals = CityVisuals.new()
+	visuals.name = "CityVisuals"
 	visuals.origin = $Camera2D.position
 	visuals.z_index = 4
 	add_child(visuals)
 	visuals.bind(city)
+	visuals.lot_selected.connect(_place_building)
+	visuals.placement_cancelled.connect(_cancel_placement)
+	_create_placement_bar()
 	event_manager.enforce_one_urgent_per_month()
 	event_manager.start_system(time_manager.current_month, time_manager.current_year)
 	_restore_urgent_deadlines()
@@ -111,6 +123,11 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
+	if not _placement_area.is_empty():
+		if event.keycode == KEY_ESCAPE:
+			_cancel_placement()
+		get_viewport().set_input_as_handled()
+		return
 	if _modal != null or city.outcome != "playing":
 		return
 	if _current_problem_popup != null and is_instance_valid(_current_problem_popup):
@@ -139,6 +156,8 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func open_problem(event_id: String) -> void:
+	if not _placement_area.is_empty():
+		return
 	if not _current_problem_id.is_empty() or _modal != null or pause_menu.visible or city.outcome != "playing":
 		return
 	var runtime_event := _find_active_event(event_id)
@@ -332,6 +351,8 @@ func _on_problem_close_requested() -> void:
 	_close_current_problem()
 
 func _on_menu_requested() -> void:
+	if not _placement_area.is_empty():
+		_cancel_placement()
 	if not _current_problem_id.is_empty() or return_dialog.visible or pause_menu.visible or _modal != null or city.outcome != "playing":
 		return
 	hud.close_panels()
@@ -377,9 +398,19 @@ func _invest(area: String, amount: float) -> void:
 	hud.show_notice(tr(error) if not error.is_empty() else tr("Investimento aplicado em %s.") % tr(GameRules.AREA_NAMES[area]))
 
 func _construct(area: String) -> void:
+	_begin_placement(area)
+
+func _place_building(lot: Dictionary) -> void:
+	if _placement_area.is_empty():
+		return
 	var index := GameRules.date_index(time_manager.current_day, time_manager.current_month, time_manager.current_year)
-	var error := city.construct(area, index)
-	hud.show_notice(tr(error) if not error.is_empty() else tr("Obra iniciada: %s. Conclusão em 20 dias.") % tr(GameRules.BUILDING_NAMES[area]))
+	var area := _placement_area
+	var error := city.place_home(lot) if area == "home" else city.construct(area, index, lot)
+	if not error.is_empty():
+		_placement_text.text = tr(error) + " · " + tr("Escolha outro lote ou cancele.")
+		return
+	_cancel_placement()
+	hud.show_notice(tr("Moradia construída. A posição foi registrada na cidade.") if area == "home" else tr("Obra iniciada: %s. Conclusão em 20 dias.") % tr(GameRules.BUILDING_NAMES[area]))
 
 func _on_building_completed(project: Dictionary) -> void:
 	hud.show_notice(tr("Obra concluída: %s. Serviços e reputação atualizados.") % tr(GameRules.BUILDING_NAMES[project.area]))
@@ -483,3 +514,45 @@ func _notification(what: int) -> void:
 		time_manager.hold("inactive")
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		time_manager.release("inactive")
+
+func _create_placement_bar() -> void:
+	_placement_bar = PanelContainer.new()
+	_placement_bar.name = "PlacementBar"
+	hud.add_child(_placement_bar)
+	_placement_bar.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	_placement_bar.offset_left = -590
+	_placement_bar.offset_right = 590
+	_placement_bar.offset_top = -290
+	_placement_bar.offset_bottom = -184
+	var row := HBoxContainer.new()
+	row.name = "Content"
+	row.add_theme_constant_override("separation", 18)
+	_placement_bar.add_child(row)
+	_placement_text = UIFactory.label("", 23)
+	row.add_child(_placement_text)
+	var cancel := UIFactory.button(tr("Cancelar"), _cancel_placement)
+	cancel.name = "CancelPlacement"
+	row.add_child(cancel)
+	_placement_bar.hide()
+
+func _begin_placement(area: String) -> void:
+	if city.outcome != "playing" or _modal != null or pause_menu.visible or not _current_problem_id.is_empty():
+		return
+	if area == "home" and city.housing_requests() <= 0:
+		hud.show_notice(tr("O crescimento populacional liberará novas moradias."))
+		return
+	_placement_area = area
+	hud.close_panels()
+	time_manager.hold("placement")
+	$Camera2D.build_mode = true
+	visuals.begin_placement(area)
+	var title: String = tr("Nova moradia") if area == "home" else tr(GameRules.BUILDING_NAMES[area])
+	_placement_text.text = title + " · " + tr("Clique em um lote livre. Verde: disponível · Vermelho: bloqueado. Botão do meio: mover mapa.")
+	_placement_bar.show()
+
+func _cancel_placement() -> void:
+	_placement_area = ""
+	visuals.end_placement()
+	$Camera2D.build_mode = false
+	_placement_bar.hide()
+	time_manager.release("placement")

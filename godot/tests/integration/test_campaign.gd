@@ -40,6 +40,11 @@ func _run() -> void:
 	check(not game.hud.funds_button.disabled, "Investimentos acessíveis.")
 	var initial_funds: float = game.city.funds
 	game._construct("education")
+	check(game.city.projects.is_empty(), "Escolher serviço ainda não debita nem inicia obra.")
+	for lot in game.visuals.lots:
+		if game.city.can_build(lot):
+			game._place_building(lot)
+			break
 	check(game.city.projects.size() == 1, "Obra iniciada.")
 	check(game.city.funds == initial_funds - GameRules.BUILDING_COST, "Custo da obra debitado uma vez.")
 	var initial_day: int = game.time_manager.current_day
