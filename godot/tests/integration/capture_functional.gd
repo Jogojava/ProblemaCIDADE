@@ -64,13 +64,24 @@ func _run() -> void:
 	game.time_manager.pause_game()
 	for pair in [[game.hud.high_button, "important"], [game.hud.medium_button, "common"], [game.hud.low_button, "optional"], [game.hud.urgent_open_button, "urgent"]]:
 		check(pair[0].icon.resource_path.ends_with("debora/" + pair[1] + ".png"), "Ocorrencia usa arte da categoria " + pair[1])
+	await _click(game.hud.get_node("TaxesButton"))
+	check(game._modal != null, "Botao Impostos abre painel.")
+	var tax_slider := game._modal.find_child("TaxSlider", true, false) as HSlider
+	tax_slider.value = 0.5
+	var before_tax: float = game.city.funds
+	await _capture("22-impostos.png")
+	await _click(game._modal.find_child("ApplyTaxButton", true, false))
+	check(is_equal_approx(game.city.daily_tax, 0.5), "Aplicar altera imposto.")
+	check(game.city.funds == before_tax, "Alterar taxa nao cobra retroativamente.")
+	game.city.set_daily_tax(GameRules.DEFAULT_DAILY_TAX)
 	await _capture("04-cidade.png")
 	var controls: HBoxContainer = game.hud.get_node("TimeDock/TimeControls")
 	var skip := controls.get_node("SkipButton") as Button
 	check(controls.get_child_count() == 5, "Avanço é o quinto controle da mesma linha.")
 	check(skip.text.is_empty() and skip.icon != null, "Avanço usa apenas ícone.")
 	check(skip.tooltip_text.contains("próxima ocorrência"), "Descrição do avanço está no tooltip.")
-	check(game.hud.get_node("Footer").size.y <= 160.1, "Barra inferior mantém altura compacta.")
+	check(game.hud.get_node("Footer").size.y <= 108.1, "Barra inferior mantém altura compacta.")
+	check(game.hud.get_node("HeaderBackground").size.y <= 88.1, "Barra superior reduzida.")
 	for button in controls.get_children():
 		check(is_equal_approx(button.position.y, skip.position.y), "Controles de tempo compartilham a linha.")
 	await _hover(skip)
@@ -150,7 +161,8 @@ func _run() -> void:
 	check(game.city.residences.size() == CityState.INITIAL_HOMES + 1, "Clique posiciona nova moradia.")
 	check(game.city.housing_requests() == 0, "Moradia atende a demanda pendente.")
 	game.get_node("Camera2D").reset_view()
-	await _click(game.hud.get_node("InvestmentPanel/Content/Header/CloseButton"))
+	if game.hud.investment_panel.visible:
+		await _click(game.hud.get_node("InvestmentPanel/Content/Header/CloseButton"))
 	for _month in range(12):
 		game.city.advance_month()
 	await _click(game.hud.reputation_button)
@@ -175,7 +187,8 @@ func _run() -> void:
 	await _capture("13-cidade-1024.png")
 	await _click(game.hud.funds_button)
 	await _capture("14-investimentos-1024.png")
-	await _click(game.hud.get_node("InvestmentPanel/Content/Header/CloseButton"))
+	if game.hud.investment_panel.visible:
+		await _click(game.hud.get_node("InvestmentPanel/Content/Header/CloseButton"))
 	game.city.completed_months = 96
 	game.city.outcome = "completed"
 	game.city.term = 2

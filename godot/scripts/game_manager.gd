@@ -26,6 +26,7 @@ func _ready() -> void:
 	hud.theme = SettingsService.game_theme
 	return_dialog.theme = hud.theme
 	hud.investment_requested.connect(_invest)
+	hud.taxes_requested.connect(_show_taxes)
 	hud.construction_requested.connect(_construct)
 	hud.housing_requested.connect(func(): _begin_placement("home"))
 	hud.skip_requested.connect(_skip_to_next)
@@ -556,3 +557,38 @@ func _cancel_placement() -> void:
 	$Camera2D.build_mode = false
 	_placement_bar.hide()
 	time_manager.release("placement")
+
+func _show_taxes() -> void:
+	if _modal != null or pause_menu.visible or not _current_problem_id.is_empty() or city.outcome != "playing":
+		return
+	if not _placement_area.is_empty():
+		_cancel_placement()
+	hud.close_panels()
+	var column := _dialog(tr("Impostos da cidade"), 880)
+	column.add_child(UIFactory.label(tr("A arrecadação entra no saldo a cada dia do jogo. Com o tempo pausado, não há cobrança. As despesas da cidade continuam sendo pagas no fechamento mensal."), 23))
+	var estimate := UIFactory.label("", 25)
+	estimate.name = "TaxEstimate"
+	column.add_child(estimate)
+	var slider := HSlider.new()
+	slider.name = "TaxSlider"
+	slider.min_value = 0.0
+	slider.max_value = GameRules.MAX_DAILY_TAX
+	slider.step = 0.05
+	slider.value = city.daily_tax
+	slider.custom_minimum_size.y = 48
+	slider.tooltip_text = tr("Imposto diário por habitante")
+	column.add_child(slider)
+	var update_estimate := func(value: float):
+		var revenue := city.daily_tax_revenue(value)
+		estimate.text = tr("R$ %.2f por habitante/dia · %d habitantes\nArrecadação prevista: R$ %.2f/dia · R$ %.2f em 30 dias") % [value, city.population, revenue, revenue * 30.0]
+		estimate.text += tr("\nDespesas mensais atuais: R$ %.0f · Resultado previsto: R$ %.0f\nEficiência de arrecadação: %.0f%% · Pressão mensal na reputação: -%.1f") % [city.monthly_upkeep(), revenue * 30 - city.monthly_upkeep(), city.tax_efficiency(value) * 100, city.tax_pressure(value)]
+	slider.value_changed.connect(update_estimate)
+	update_estimate.call(slider.value)
+	column.add_child(UIFactory.label(tr("Acima de R$ 0,25, a eficiência da arrecadação cai e a reputação sofre pressão proporcional aos dias de cobrança. Aumentar até o máximo pode arrecadar menos. As estimativas são regras desta simulação; população, serviços e obras alteram as despesas."), 21))
+	var apply := UIFactory.button(tr("Aplicar imposto"), func():
+		city.set_daily_tax(slider.value)
+		_close_dialog()
+		hud.show_notice(tr("Imposto atualizado: R$ %.2f por habitante/dia.") % city.daily_tax))
+	apply.name = "ApplyTaxButton"
+	column.add_child(apply)
+	column.add_child(UIFactory.button(tr("Cancelar"), _close_dialog))

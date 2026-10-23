@@ -47,6 +47,7 @@ func _run() -> void:
 		city.advance_day(GameRules.BUILDING_DAYS)
 		check(city.buildings[0].lot == free and not city.can_build(free), "Conclusao preserva local e ocupacao.")
 		for month in range(3):
+			city.advance_day((month + 1) * 30)
 			city.advance_month()
 		check(city.population == GameRules.INITIAL_POPULATION + 150, "Servicos suficientes geram crescimento mensal.")
 		check(city.housing_requests() == 1, "Crescimento libera uma moradia.")
@@ -56,7 +57,7 @@ func _run() -> void:
 				break
 		money = city.funds
 		check(city.place_home(free).is_empty(), "Moradia nova ocupa o local escolhido.")
-		check(city.housing_requests() == 0 and city.funds == money, "Demanda atendida sem cobranca adicional.")
+		check(city.housing_requests() == 0 and city.funds == money - GameRules.HOME_COST, "Demanda atendida com custo de moradia.")
 		check(not city.place_home(free).is_empty(), "Moradia nao pode ser duplicada.")
 		var loaded := CityState.new()
 		loaded.load_save_data(JSON.parse_string(JSON.stringify(city.get_save_data())))

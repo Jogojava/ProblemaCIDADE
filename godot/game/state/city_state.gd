@@ -18,6 +18,9 @@ var difficulty := "medium"
 var funds := GameRules.INITIAL_FUNDS
 var reputation := 55.0
 var population := GameRules.INITIAL_POPULATION
+var daily_tax := GameRules.DEFAULT_DAILY_TAX
+var tax_pressure_sum := 0.0
+var tax_days := 0
 var indicators: Dictionary = {}
 var projects: Array[Dictionary] = []
 var buildings: Array[Dictionary] = []
@@ -35,6 +38,9 @@ var last_result: Dictionary = {}
 var played_seconds := 0.0
 
 func start(name_value: String, difficulty_value: String) -> void:
+	tax_pressure_sum = 0.0
+	tax_days = 0
+	daily_tax = GameRules.DEFAULT_DAILY_TAX
 	population = GameRules.INITIAL_POPULATION
 	residences.clear()
 	layout_initialized = false
@@ -106,7 +112,16 @@ func construct(area: String, day_index: int, lot: Dictionary = {}) -> String:
 	return ""
 
 func advance_day(day_index: int) -> void:
+	if outcome != "playing" or day_index <= last_day:
+		return
+	var elapsed := day_index - last_day
 	last_day = day_index
+	tax_pressure_sum += tax_pressure(daily_tax) * elapsed
+	tax_days += elapsed
+	var revenue := daily_tax_revenue() * elapsed
+	funds += revenue
+	if revenue > 0.0:
+		add_ledger("Impostos diários", revenue)
 	for project in projects.duplicate():
 		if day_index >= int(project.due):
 			projects.erase(project)
@@ -121,23 +136,27 @@ func advance_month() -> void:
 	if outcome != "playing":
 		return
 	completed_months += 1
-	var revenue := float(population) * GameRules.REVENUE_PER_RESIDENT * float(profile().budget)
-	var upkeep := GameRules.MONTHLY_BASE_UPKEEP + buildings.size() * GameRules.BUILDING_UPKEEP
-	funds += revenue - upkeep
-	add_ledger("Receita e despesas do mês", revenue - upkeep)
+	var upkeep := monthly_upkeep()
+	funds -= upkeep
+	add_ledger("Despesas do mês", -upkeep)
 	for area in GameRules.AREAS:
-		indicators[area] = clampf(float(indicators[area]) - GameRules.MONTHLY_SERVICE_DECAY, 0.0, 100.0)
+		var crowding := maxf(0.0, float(population - GameRules.INITIAL_POPULATION) / 1000.0 - buildings.size() * 0.15)
+		indicators[area] = clampf(float(indicators[area]) - GameRules.MONTHLY_SERVICE_DECAY - crowding * 0.15, 0.0, 100.0)
 	var service_mean := 0.0
 	for area in GameRules.AREAS:
 		service_mean += float(indicators[area]) / 6.0
 	indicators.unemployment = clampf(18.0 - float(indicators.education) * 0.1 - buildings.size() * 0.1, 2.0, 35.0)
 	indicators.hunger = clampf(20.0 - float(indicators.social) * 0.2, 0.0, 40.0)
+	var monthly_tax_pressure := tax_pressure_sum / maxf(30.0, float(tax_days))
+	tax_pressure_sum = 0.0
+	tax_days = 0
+	change_reputation(-monthly_tax_pressure - minf(2.0, housing_requests() * 0.25))
 	change_reputation((service_mean - 50.0) / 25.0 - (3.0 if funds < 0 else 0.0))
 	if reputation < GameRules.IMPEACHMENT_APPROVAL:
 		crisis_months += 1
 	else:
 		crisis_months = 0
-	population += MONTHLY_POPULATION_GROWTH if service_mean >= 45.0 else 0
+	population += MONTHLY_POPULATION_GROWTH if service_mean >= 50.0 and housing_requests() < 3 and monthly_tax_pressure <= 1.5 else 0
 	record_snapshot()
 	if crisis_months >= GameRules.CRISIS_MONTHS or reputation <= 0.0:
 		outcome = "impeachment"
@@ -220,7 +239,7 @@ func projection(key: String) -> Dictionary:
 	return {"ready": true, "history": series, "forecast": forecast, "slope": slope}
 
 func get_save_data() -> Dictionary:
-	return {"residences": residences.duplicate(true), "layout_initialized": layout_initialized, "city_name": city_name, "difficulty": difficulty, "funds": funds, "reputation": reputation, "population": population, "indicators": indicators.duplicate(true), "projects": projects.duplicate(true), "buildings": buildings.duplicate(true), "history": history.duplicate(true), "ledger": ledger.duplicate(true), "completed_months": completed_months, "crisis_months": crisis_months, "term": term, "outcome": outcome, "solved_count": solved_count, "correct_count": correct_count, "expired_count": expired_count, "last_day": last_day, "played_seconds": played_seconds}
+	return {"tax_pressure_sum": tax_pressure_sum, "tax_days": tax_days, "daily_tax": daily_tax, "residences": residences.duplicate(true), "layout_initialized": layout_initialized, "city_name": city_name, "difficulty": difficulty, "funds": funds, "reputation": reputation, "population": population, "indicators": indicators.duplicate(true), "projects": projects.duplicate(true), "buildings": buildings.duplicate(true), "history": history.duplicate(true), "ledger": ledger.duplicate(true), "completed_months": completed_months, "crisis_months": crisis_months, "term": term, "outcome": outcome, "solved_count": solved_count, "correct_count": correct_count, "expired_count": expired_count, "last_day": last_day, "played_seconds": played_seconds}
 
 func load_save_data(data: Dictionary) -> void:
 	start(String(data.get("city_name", "Vila Esperança")), String(data.get("difficulty", "medium")))
@@ -229,6 +248,10 @@ func load_save_data(data: Dictionary) -> void:
 			set(key, data[key])
 	if data.get("indicators") is Dictionary:
 		indicators.merge(data.indicators, true)
+	tax_pressure_sum = maxf(0.0, float(data.get("tax_pressure_sum", 0.0)))
+	tax_days = maxi(0, int(data.get("tax_days", 0)))
+	var saved_tax := float(data.get("daily_tax", GameRules.DEFAULT_DAILY_TAX))
+	daily_tax = clampf(saved_tax, 0.0, GameRules.MAX_DAILY_TAX) if is_finite(saved_tax) else GameRules.DEFAULT_DAILY_TAX
 	layout_initialized = bool(data.get("layout_initialized", false))
 	for key in ["residences", "projects", "buildings", "history", "ledger"]:
 		var items: Array[Dictionary] = []
@@ -278,6 +301,32 @@ func place_home(lot: Dictionary) -> String:
 		return "Ainda não há demanda por novas moradias."
 	if not can_build(lot):
 		return "Escolha um lote livre na grama."
+	if funds < GameRules.HOME_COST:
+		return "Saldo insuficiente: uma moradia custa R$ 6.000."
+	funds -= GameRules.HOME_COST
+	add_ledger("Nova moradia", -GameRules.HOME_COST)
 	residences.append({"lot": lot.duplicate(), "variant": randi_range(0, 3)})
 	changed.emit()
 	return ""
+
+func daily_tax_revenue(rate: float = -1.0) -> float:
+	var value := daily_tax if rate < 0 else rate
+	return snappedf(float(population) * value * tax_efficiency(value) * float(profile().budget), 0.01)
+
+func tax_efficiency(rate: float) -> float:
+	return clampf(1.0 - maxf(0.0, rate - GameRules.DEFAULT_DAILY_TAX) * GameRules.TAX_COLLECTION_SLOPE, 0.15, 1.0)
+
+func tax_pressure(rate: float) -> float:
+	return maxf(0.0, rate - GameRules.DEFAULT_DAILY_TAX) * GameRules.TAX_PRESSURE_PER_UNIT
+
+func monthly_upkeep() -> float:
+	var services := 0.0
+	for area in GameRules.AREAS:
+		services += maxf(0.0, float(indicators.get(area, 55.0)) - 55.0) * GameRules.SERVICE_UPKEEP_PER_POINT
+	return GameRules.MONTHLY_BASE_UPKEEP + buildings.size() * GameRules.BUILDING_UPKEEP + maxi(0, population - GameRules.INITIAL_POPULATION) * GameRules.EXTRA_RESIDENT_UPKEEP + services
+
+func set_daily_tax(value: float) -> void:
+	if outcome != "playing" or not is_finite(value):
+		return
+	daily_tax = snappedf(clampf(value, 0.0, GameRules.MAX_DAILY_TAX), 0.01)
+	changed.emit()

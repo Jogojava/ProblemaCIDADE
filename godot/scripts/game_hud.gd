@@ -5,6 +5,7 @@ signal menu_requested()
 signal investment_requested(area: String, amount: float)
 signal construction_requested(area: String)
 signal housing_requested()
+signal taxes_requested()
 signal skip_requested()
 signal map_center_requested()
 signal panels_changed(is_open: bool)
@@ -53,6 +54,7 @@ var _sidebar_expanded := false
 var _problem_mode := false
 var _sidebar_panel: PanelContainer
 var _problem_list: VBoxContainer
+var _tax_button: Button
 var _housing_button: Button
 var _city: CityState
 var _investment_mode: OptionButton
@@ -476,6 +478,14 @@ func _setup_city_panels() -> void:
 	_housing_button.offset_top = 140
 	_housing_button.offset_bottom = 206
 	add_child(_housing_button)
+	_tax_button = UIFactory.button("", func(): taxes_requested.emit())
+	_tax_button.name = "TaxesButton"
+	_tax_button.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_tax_button.offset_left = -520
+	_tax_button.offset_right = -32
+	_tax_button.offset_top = 218
+	_tax_button.offset_bottom = 282
+	add_child(_tax_button)
 	_investment_mode = OptionButton.new()
 	_investment_mode.add_item(tr("Investir em serviços"))
 	_investment_mode.add_item(tr("Construir instalação · R$ 35.000 · 20 dias"))
@@ -536,10 +546,13 @@ func refresh_city() -> void:
 	if _city == null:
 		return
 	set_city_indicators(_city.funds, _city.reputation)
+	_tax_button.text = tr("Impostos: +R$ %.2f/dia") % _city.daily_tax_revenue()
+	_tax_button.tooltip_text = tr("Ajustar imposto diário por habitante e consultar a arrecadação.")
+	_tax_button.disabled = _city.outcome != "playing"
 	_housing_button.text = tr("População: %d · Moradias: +%d") % [_city.population, _city.housing_requests()]
 	_housing_button.add_theme_color_override("font_disabled_color", Color("dce4dc"))
 	_housing_button.disabled = _city.housing_requests() <= 0 or _city.outcome != "playing"
-	_housing_button.tooltip_text = tr("A cada 150 novos habitantes, escolha onde construir uma moradia. Crescimento de 50 habitantes/mês quando a média dos serviços é de pelo menos 45 pontos. Sem custo adicional.")
+	_housing_button.tooltip_text = tr("A cada 150 novos habitantes, escolha onde construir uma moradia. Moradia: R$ 6.000. Crescimento de 50 habitantes/mês exige serviços com média de 50, demanda menor que 3 moradias e pressão tributária de até 1,5 ponto.")
 	_city_label.text = "%s · %s %d/2 · %s" % [_city.city_name, tr("Mandato"), _city.term, tr(GameRules.DIFFICULTIES[_city.difficulty].name)]
 	$InvestmentPanel/Content/AmountLabel.text = (tr("Valor: R$ %.0f") % $InvestmentPanel/Content/AmountSlider.value) if _investment_mode.selected == 0 else tr("Obra: R$ 35.000 · prazo de 20 dias")
 	$InvestmentPanel/Content/EmptyBalance.text = tr("Escolha o serviço. Para construir, selecione depois um lote no mapa. Obras: %d/3.") % _city.projects.size()
@@ -571,16 +584,64 @@ func _apply_layout() -> void:
 	add_child(header)
 	move_child(header, 0)
 	header.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	header.offset_bottom = 126
+	header.offset_bottom = 88
 	$Footer.color = Color("eef1e5")
-	$Calendar.offset_top = 26
-	$Calendar.offset_bottom = 110
+	$Calendar.offset_top = 12
+	$Calendar.offset_bottom = 78
 	problem_tabs.offset_top = 140
 	problem_tabs.offset_bottom = 250
 	$Occurrences.offset_top = 226
-	_city_label.size = Vector2(850, 40)
-	_notice_label.position = Vector2(260, 78)
+	_city_label.position = Vector2(210, 12)
+	_city_label.size = Vector2(850, 32)
+	_notice_label.position = Vector2(210, 48)
 	_notice_label.size = Vector2(1030, 38)
 	_notice_label.add_theme_font_size_override("font_size", 20)
 	for button in [menu_button, funds_button, reputation_button, pause_button, normal_button, fast_button, very_fast_button]:
 		button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+	$Footer.offset_top = -108
+	menu_button.position = Vector2(24, 12)
+	menu_button.size = Vector2(64, 64)
+	$CenterMapButton.position = Vector2(108, 12)
+	$CenterMapButton.custom_minimum_size = Vector2(64, 64)
+	$CenterMapButton.size = Vector2(64, 64)
+	$CenterMapButton.add_theme_font_size_override("font_size", 28)
+	_city_label.add_theme_font_size_override("font_size", 23)
+	_notice_label.add_theme_font_size_override("font_size", 18)
+	$TimeDock.offset_left = -176
+	$TimeDock.offset_right = 176
+	$TimeDock.offset_top = -98
+	$TimeDock.offset_bottom = -8
+	$TimeDock.add_theme_constant_override("separation", 2)
+	$TimeDock/TimeControls.add_theme_constant_override("separation", 8)
+	for button in $TimeDock/TimeControls.get_children():
+		button.custom_minimum_size = Vector2(64, 64)
+		button.add_theme_constant_override("icon_max_width", 38)
+	status_label.add_theme_font_size_override("font_size", 20)
+	for button in [reputation_button, funds_button]:
+		button.offset_top = -88
+		button.offset_bottom = -20
+		button.add_theme_constant_override("icon_max_width", 42)
+	reputation_button.offset_left = 24
+	reputation_button.offset_right = 92
+	funds_button.offset_left = -92
+	funds_button.offset_right = -24
+	$ReputationInfo.offset_left = 112
+	$ReputationInfo.offset_right = 366
+	$ReputationInfo.offset_top = -98
+	$ReputationInfo.offset_bottom = -10
+	$ReputationInfo/Title.add_theme_font_size_override("font_size", 22)
+	$ReputationInfo/ValueLabel.add_theme_font_size_override("font_size", 20)
+	$ReputationInfo/ReputationBar.custom_minimum_size.y = 8
+	$FundsLabel.offset_left = -420
+	$FundsLabel.offset_right = -112
+	$FundsLabel.offset_top = -90
+	$FundsLabel.offset_bottom = -18
+	$FundsLabel.add_theme_font_size_override("font_size", 32)
+	_housing_button.offset_top = 100
+	_housing_button.offset_bottom = 156
+	_tax_button.offset_top = 166
+	_tax_button.offset_bottom = 222
+	# Map actions stay behind open panels, including their close buttons.
+	move_child(_housing_button, 1)
+	move_child(_tax_button, 1)
