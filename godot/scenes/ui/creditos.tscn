@@ -1,50 +1,425 @@
-[gd_scene format=3 uid="uid://b6m503q1erw5u"]
+[gd_scene load_steps=14 format=3]
 
-[ext_resource type="Script" uid="uid://bw85gkk0lkplw" path="res://scenes/ui/creditos_script.gd" id="1_pgrl5"]
+[ext_resource type="Script" path="res://scenes/ui/creditos_script.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/pixilart-drawing.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/ui/credits/pato_jogos_logo.jpg" id="3_logo"]
+[ext_resource type="Texture2D" path="res://assets/ui/credits/beatriz.jpg" id="4_beatriz"]
+[ext_resource type="Texture2D" path="res://assets/ui/credits/camilo.png" id="5_camilo"]
+[ext_resource type="Texture2D" path="res://assets/ui/credits/debora.jpg" id="6_debora"]
+[ext_resource type="Texture2D" path="res://assets/ui/credits/guilherme.png" id="7_guilherme"]
+[ext_resource type="Texture2D" path="res://assets/ui/credits/henrique.jpg" id="8_henrique"]
 
-[node name="CreditsScreen" type="Control" unique_id=1944937510]
+[sub_resource type="StyleBoxFlat" id="StudioBanner"]
+bg_color = Color(0.045, 0.10, 0.13, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.247, 0.722, 0.898, 1)
+content_margin_left = 20.0
+content_margin_top = 10.0
+content_margin_right = 20.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="LogoFrame"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.91, 0.94, 0.94, 1)
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+[sub_resource type="StyleBoxFlat" id="ProfileCard"]
+bg_color = Color(0.12, 0.19, 0.21, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.247, 0.722, 0.898, 1)
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+
+[sub_resource type="StyleBoxFlat" id="PhotoFrame"]
+bg_color = Color(0.075, 0.12, 0.14, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.91, 0.94, 0.94, 1)
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="BackButton"]
+bg_color = Color(0.247, 0.722, 0.898, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.91, 0.94, 0.94, 1)
+content_margin_left = 22.0
+content_margin_top = 10.0
+content_margin_right = 22.0
+content_margin_bottom = 10.0
+
+[node name="CreditsScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_script")
 
-[node name="bg" type="ColorRect" parent="." unique_id=1140557798]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.91219676, 0.8770365, 0.7679666, 1)
+texture_filter = 1
+texture = ExtResource("2_background")
+expand_mode = 2
+stretch_mode = 6
+mouse_filter = 2
 
-[node name="Label" type="Label" parent="bg" unique_id=2117815210]
+[node name="Shade" type="ColorRect" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -156.49997
-offset_top = -69.5
-offset_right = 156.49997
-offset_bottom = 69.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 90
-text = "PATOS FODAS"
+color = Color(0.035, 0.09, 0.12, 0.58)
+mouse_filter = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1474633879]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 22.0
+offset_right = -40.0
+offset_bottom = -22.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
 
-[node name="Button" type="Button" parent="MarginContainer" unique_id=2120485167]
-custom_minimum_size = Vector2(100, 100)
+[node name="StudioHeader" type="PanelContainer" parent="Content"]
+custom_minimum_size = Vector2(680, 132)
 layout_mode = 2
-text = "Voltar"
-script = ExtResource("1_pgrl5")
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StudioBanner")
 
-[connection signal="pressed" from="MarginContainer/Button" to="MarginContainer/Button" method="voltar_on_pressed"]
+[node name="HeaderLayout" type="HBoxContainer" parent="Content/StudioHeader"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="LogoFrame" type="PanelContainer" parent="Content/StudioHeader/HeaderLayout"]
+custom_minimum_size = Vector2(112, 112)
+layout_mode = 2
+theme_override_styles/panel = SubResource("LogoFrame")
+
+[node name="LogoImage" type="TextureRect" parent="Content/StudioHeader/HeaderLayout/LogoFrame"]
+custom_minimum_size = Vector2(104, 104)
+layout_mode = 2
+texture = ExtResource("3_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StudioWordmark" type="VBoxContainer" parent="Content/StudioHeader/HeaderLayout"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="StudioName" type="Label" parent="Content/StudioHeader/HeaderLayout/StudioWordmark"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 48
+text = "PATO JOGOS"
+
+[node name="StudioSubtitle" type="Label" parent="Content/StudioHeader/HeaderLayout/StudioWordmark"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.875, 0.22, 1)
+theme_override_font_sizes/font_size = 21
+text = "DUCK GAMES"
+
+[node name="GameBrand" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="BrandProblema" type="Label" parent="Content/GameBrand"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 40
+text = "Problema"
+
+[node name="BrandCidade" type="Label" parent="Content/GameBrand"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.247, 0.722, 0.898, 1)
+theme_override_font_sizes/font_size = 40
+text = "CIDADE"
+
+[node name="SectionTitle" type="Label" parent="Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.91, 0.94, 0.94, 1)
+theme_override_font_sizes/font_size = 24
+text = "EQUIPE DE DESENVOLVIMENTO"
+horizontal_alignment = 1
+
+[node name="PeopleRows" type="VBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="TopRow" type="CenterContainer" parent="Content/PeopleRows"]
+custom_minimum_size = Vector2(0, 324)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TopCards" type="HBoxContainer" parent="Content/PeopleRows/TopRow"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="BottomRow" type="CenterContainer" parent="Content/PeopleRows"]
+custom_minimum_size = Vector2(0, 324)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BottomCards" type="HBoxContainer" parent="Content/PeopleRows/BottomRow"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="BeatrizCard" type="PanelContainer" parent="Content/PeopleRows/TopRow/TopCards"]
+custom_minimum_size = Vector2(335, 324)
+layout_mode = 2
+theme_override_styles/panel = SubResource("ProfileCard")
+
+[node name="BeatrizContent" type="MarginContainer" parent="Content/PeopleRows/TopRow/TopCards/BeatrizCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="BeatrizLayout" type="VBoxContainer" parent="Content/PeopleRows/TopRow/TopCards/BeatrizCard/BeatrizContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BeatrizName" type="Label" parent="Content/PeopleRows/TopRow/TopCards/BeatrizCard/BeatrizContent/BeatrizLayout"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Beatriz Leonardo\nFernandes da Silva"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BeatrizPhotoFrame" type="PanelContainer" parent="Content/PeopleRows/TopRow/TopCards/BeatrizCard/BeatrizContent/BeatrizLayout"]
+custom_minimum_size = Vector2(240, 240)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("PhotoFrame")
+
+[node name="BeatrizPhoto" type="TextureRect" parent="Content/PeopleRows/TopRow/TopCards/BeatrizCard/BeatrizContent/BeatrizLayout/BeatrizPhotoFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_beatriz")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CamiloCard" type="PanelContainer" parent="Content/PeopleRows/TopRow/TopCards"]
+custom_minimum_size = Vector2(335, 324)
+layout_mode = 2
+theme_override_styles/panel = SubResource("ProfileCard")
+
+[node name="CamiloContent" type="MarginContainer" parent="Content/PeopleRows/TopRow/TopCards/CamiloCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="CamiloLayout" type="VBoxContainer" parent="Content/PeopleRows/TopRow/TopCards/CamiloCard/CamiloContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CamiloName" type="Label" parent="Content/PeopleRows/TopRow/TopCards/CamiloCard/CamiloContent/CamiloLayout"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Camilo Handal Batista\nde Oliveira"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CamiloPhotoFrame" type="PanelContainer" parent="Content/PeopleRows/TopRow/TopCards/CamiloCard/CamiloContent/CamiloLayout"]
+custom_minimum_size = Vector2(240, 240)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("PhotoFrame")
+
+[node name="CamiloPhoto" type="TextureRect" parent="Content/PeopleRows/TopRow/TopCards/CamiloCard/CamiloContent/CamiloLayout/CamiloPhotoFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_camilo")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="DeboraCard" type="PanelContainer" parent="Content/PeopleRows/TopRow/TopCards"]
+custom_minimum_size = Vector2(335, 324)
+layout_mode = 2
+theme_override_styles/panel = SubResource("ProfileCard")
+
+[node name="DeboraContent" type="MarginContainer" parent="Content/PeopleRows/TopRow/TopCards/DeboraCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="DeboraLayout" type="VBoxContainer" parent="Content/PeopleRows/TopRow/TopCards/DeboraCard/DeboraContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DeboraName" type="Label" parent="Content/PeopleRows/TopRow/TopCards/DeboraCard/DeboraContent/DeboraLayout"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Débora Luiza de Paula\nFerreira"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DeboraPhotoFrame" type="PanelContainer" parent="Content/PeopleRows/TopRow/TopCards/DeboraCard/DeboraContent/DeboraLayout"]
+custom_minimum_size = Vector2(240, 240)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("PhotoFrame")
+
+[node name="DeboraPhoto" type="TextureRect" parent="Content/PeopleRows/TopRow/TopCards/DeboraCard/DeboraContent/DeboraLayout/DeboraPhotoFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_debora")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="GuilhermeCard" type="PanelContainer" parent="Content/PeopleRows/BottomRow/BottomCards"]
+custom_minimum_size = Vector2(335, 324)
+layout_mode = 2
+theme_override_styles/panel = SubResource("ProfileCard")
+
+[node name="GuilhermeContent" type="MarginContainer" parent="Content/PeopleRows/BottomRow/BottomCards/GuilhermeCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="GuilhermeLayout" type="VBoxContainer" parent="Content/PeopleRows/BottomRow/BottomCards/GuilhermeCard/GuilhermeContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GuilhermeName" type="Label" parent="Content/PeopleRows/BottomRow/BottomCards/GuilhermeCard/GuilhermeContent/GuilhermeLayout"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Guilherme Nascimento\nBilibio"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="GuilhermePhotoFrame" type="PanelContainer" parent="Content/PeopleRows/BottomRow/BottomCards/GuilhermeCard/GuilhermeContent/GuilhermeLayout"]
+custom_minimum_size = Vector2(240, 240)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("PhotoFrame")
+
+[node name="GuilhermePhoto" type="TextureRect" parent="Content/PeopleRows/BottomRow/BottomCards/GuilhermeCard/GuilhermeContent/GuilhermeLayout/GuilhermePhotoFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_guilherme")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="HenriqueCard" type="PanelContainer" parent="Content/PeopleRows/BottomRow/BottomCards"]
+custom_minimum_size = Vector2(335, 324)
+layout_mode = 2
+theme_override_styles/panel = SubResource("ProfileCard")
+
+[node name="HenriqueContent" type="MarginContainer" parent="Content/PeopleRows/BottomRow/BottomCards/HenriqueCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="HenriqueLayout" type="VBoxContainer" parent="Content/PeopleRows/BottomRow/BottomCards/HenriqueCard/HenriqueContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HenriqueName" type="Label" parent="Content/PeopleRows/BottomRow/BottomCards/HenriqueCard/HenriqueContent/HenriqueLayout"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "Henrique Daisuke\nAkiyama"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HenriquePhotoFrame" type="PanelContainer" parent="Content/PeopleRows/BottomRow/BottomCards/HenriqueCard/HenriqueContent/HenriqueLayout"]
+custom_minimum_size = Vector2(240, 240)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("PhotoFrame")
+
+[node name="HenriquePhoto" type="TextureRect" parent="Content/PeopleRows/BottomRow/BottomCards/HenriqueCard/HenriqueContent/HenriqueLayout/HenriquePhotoFrame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_henrique")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="BackButton" type="Button" parent="Content"]
+custom_minimum_size = Vector2(220, 58)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/normal = SubResource("BackButton")
+theme_override_styles/hover = SubResource("BackButton")
+theme_override_styles/pressed = SubResource("BackButton")
+theme_override_colors/font_color = Color(0.04, 0.12, 0.15, 1)
+theme_override_font_sizes/font_size = 24
+text = "Voltar ao menu"
+
+[connection signal="pressed" from="Content/BackButton" to="." method="voltar_on_pressed"]

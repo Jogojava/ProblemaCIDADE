@@ -1,4 +1,8 @@
 extends Control
 
+func _ready() -> void:
+	theme = SettingsService.game_theme
+	$Background.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
 func voltar_on_pressed() -> void:
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
