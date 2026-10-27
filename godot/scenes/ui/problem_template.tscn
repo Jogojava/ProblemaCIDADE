@@ -188,12 +188,24 @@ custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "Enviar resposta"
 
-[node name="BoardButton" type="Button" parent="Center/Panel/Margin/Content/Body" unique_id=2126577535]
+[node name="ProblemTools" type="VBoxContainer" parent="Center/Panel/Margin/Content/Body"]
+custom_minimum_size = Vector2(132, 0)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BoardButton" type="Button" parent="Center/Panel/Margin/Content/Body/ProblemTools" unique_id=2126577535]
 custom_minimum_size = Vector2(112, 72)
 layout_mode = 2
 size_flags_vertical = 8
 tooltip_text = "Abrir lousa para rascunhos"
 text = "Rascunho"
+
+[node name="CalculatorButton" type="Button" parent="Center/Panel/Margin/Content/Body/ProblemTools"]
+custom_minimum_size = Vector2(132, 72)
+layout_mode = 2
+size_flags_vertical = 8
+tooltip_text = "Abrir calculadora"
+text = "Calculadora"
 
 [node name="BoardOverlay" type="Control" parent="." unique_id=901404333]
 visible = false
@@ -250,3 +262,157 @@ custom_minimum_size = Vector2(270, 52)
 layout_mode = 2
 text = "Voltar ao problema"
 tooltip_text = "Guardar o rascunho e voltar ao problema (Esc)"
+
+[node name="CalculatorOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Backdrop" type="ColorRect" parent="CalculatorOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.025, 0.055, 0.075, 0.72)
+mouse_filter = 1
+
+[node name="Center" type="CenterContainer" parent="CalculatorOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CalculatorOverlay/Center"]
+custom_minimum_size = Vector2(430, 560)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="CalculatorOverlay/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="CalculatorOverlay/Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="HBoxContainer" parent="CalculatorOverlay/Center/Panel/Margin/Content"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="CalculatorOverlay/Center/Panel/Margin/Content/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+text = "Calculadora"
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Header"]
+custom_minimum_size = Vector2(48, 44)
+layout_mode = 2
+text = "×"
+tooltip_text = "Voltar ao problema"
+
+[node name="Display" type="LineEdit" parent="CalculatorOverlay/Center/Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "0"
+editable = false
+alignment = 2
+
+[node name="Keys" type="GridContainer" parent="CalculatorOverlay/Center/Panel/Margin/Content"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 4
+
+[node name="Clear" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "C"
+
+[node name="Backspace" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "⌫"
+
+[node name="Percent" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "%"
+
+[node name="Divide" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "÷"
+
+[node name="Seven" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "7"
+
+[node name="Eight" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "8"
+
+[node name="Nine" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "9"
+
+[node name="Multiply" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "×"
+
+[node name="Four" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "4"
+
+[node name="Five" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "5"
+
+[node name="Six" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "6"
+
+[node name="Subtract" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "−"
+
+[node name="One" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "1"
+
+[node name="Two" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "2"
+
+[node name="Three" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "3"
+
+[node name="Add" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "+"
+
+[node name="Sign" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "±"
+
+[node name="Zero" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "0"
+
+[node name="Decimal" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = ","
+
+[node name="Equals" type="Button" parent="CalculatorOverlay/Center/Panel/Margin/Content/Keys"]
+layout_mode = 2
+text = "="

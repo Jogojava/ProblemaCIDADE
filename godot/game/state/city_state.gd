@@ -8,6 +8,7 @@ signal campaign_event(kind: String)
 const INITIAL_HOMES := 18
 const RESIDENTS_PER_HOME := 150
 const MONTHLY_POPULATION_GROWTH := 50
+const RESIDENTS_PER_SERVICE_IMPROVEMENT := 75.0
 var residences: Array[Dictionary] = []
 var town_hall := {"x": -1, "y": -1}
 var layout_initialized := false
@@ -24,6 +25,7 @@ var buildings: Array[Dictionary] = []
 var history: Array[Dictionary] = []
 var ledger: Array[Dictionary] = []
 var completed_months := 0
+var homes_built_this_month := 0
 var crisis_months := 0
 var term := 1
 var outcome := "playing"
@@ -44,6 +46,7 @@ func start(name_value: String, difficulty_value: String) -> void:
 	history.clear()
 	ledger.clear()
 	completed_months = 0
+	homes_built_this_month = 0
 	crisis_months = 0
 	term = 1
 	outcome = "playing"
@@ -121,6 +124,7 @@ func advance_month() -> void:
 	if outcome != "playing":
 		return
 	completed_months += 1
+	homes_built_this_month = 0
 	var revenue := float(population) * GameRules.REVENUE_PER_RESIDENT * float(profile().budget)
 	var upkeep := GameRules.MONTHLY_BASE_UPKEEP + buildings.size() * GameRules.BUILDING_UPKEEP
 	funds += revenue - upkeep
@@ -130,6 +134,7 @@ func advance_month() -> void:
 	var service_mean := 0.0
 	for area in GameRules.AREAS:
 		service_mean += float(indicators[area]) / 6.0
+	var previous_service_mean := _service_mean_from_snapshot(history.back()) if not history.is_empty() else service_mean
 	indicators.unemployment = clampf(18.0 - float(indicators.education) * 0.1 - buildings.size() * 0.1, 2.0, 35.0)
 	indicators.hunger = clampf(20.0 - float(indicators.social) * 0.2, 0.0, 40.0)
 	change_reputation((service_mean - 50.0) / 25.0 - (3.0 if funds < 0 else 0.0))
@@ -137,7 +142,14 @@ func advance_month() -> void:
 		crisis_months += 1
 	else:
 		crisis_months = 0
-	population += MONTHLY_POPULATION_GROWTH if service_mean >= 45.0 else 0
+	# Population grows while services remain healthy. New homes appear only when
+	# the service average also improves, and can_build protects occupied lots.
+	if service_mean >= 45.0:
+		var service_improvement := maxf(0.0, service_mean - previous_service_mean)
+		var monthly_growth := MONTHLY_POPULATION_GROWTH + floori(service_improvement * RESIDENTS_PER_SERVICE_IMPROVEMENT)
+		population += monthly_growth
+		if service_improvement > 0.0:
+			_spawn_growth_homes()
 	record_snapshot()
 	if crisis_months >= GameRules.CRISIS_MONTHS or reputation <= 0.0:
 		outcome = "impeachment"
@@ -220,11 +232,11 @@ func projection(key: String) -> Dictionary:
 	return {"ready": true, "history": series, "forecast": forecast, "slope": slope}
 
 func get_save_data() -> Dictionary:
-	return {"residences": residences.duplicate(true), "layout_initialized": layout_initialized, "city_name": city_name, "difficulty": difficulty, "funds": funds, "reputation": reputation, "population": population, "indicators": indicators.duplicate(true), "projects": projects.duplicate(true), "buildings": buildings.duplicate(true), "history": history.duplicate(true), "ledger": ledger.duplicate(true), "completed_months": completed_months, "crisis_months": crisis_months, "term": term, "outcome": outcome, "solved_count": solved_count, "correct_count": correct_count, "expired_count": expired_count, "last_day": last_day, "played_seconds": played_seconds}
+	return {"residences": residences.duplicate(true), "layout_initialized": layout_initialized, "city_name": city_name, "difficulty": difficulty, "funds": funds, "reputation": reputation, "population": population, "indicators": indicators.duplicate(true), "projects": projects.duplicate(true), "buildings": buildings.duplicate(true), "history": history.duplicate(true), "ledger": ledger.duplicate(true), "completed_months": completed_months, "homes_built_this_month": homes_built_this_month, "crisis_months": crisis_months, "term": term, "outcome": outcome, "solved_count": solved_count, "correct_count": correct_count, "expired_count": expired_count, "last_day": last_day, "played_seconds": played_seconds}
 
 func load_save_data(data: Dictionary) -> void:
 	start(String(data.get("city_name", "Vila Esperança")), String(data.get("difficulty", "medium")))
-	for key in ["funds", "reputation", "population", "completed_months", "crisis_months", "term", "outcome", "solved_count", "correct_count", "expired_count", "last_day", "played_seconds"]:
+	for key in ["funds", "reputation", "population", "completed_months", "homes_built_this_month", "crisis_months", "term", "outcome", "solved_count", "correct_count", "expired_count", "last_day", "played_seconds"]:
 		if data.has(key):
 			set(key, data[key])
 	if data.get("indicators") is Dictionary:
@@ -264,6 +276,26 @@ func housing_requests() -> int:
 	var extra := maxi(0, population - GameRules.INITIAL_POPULATION)
 	return maxi(0, int(extra / RESIDENTS_PER_HOME) - maxi(0, residences.size() - INITIAL_HOMES))
 
+func _service_mean_from_snapshot(snapshot: Dictionary) -> float:
+	var mean := 0.0
+	for area in GameRules.AREAS:
+		mean += float(snapshot.get(area, 0.0)) / float(GameRules.AREAS.size())
+	return mean
+
+func _spawn_growth_homes() -> void:
+	var requested_homes := housing_requests()
+	if requested_homes <= 0:
+		return
+	var available_lots: Array[Dictionary] = []
+	for lot in grass_lots:
+		if can_build(lot):
+			available_lots.append(lot)
+	available_lots.shuffle()
+	var homes_to_build := mini(requested_homes, available_lots.size())
+	for index in range(homes_to_build):
+		residences.append({"lot": available_lots[index].duplicate(), "variant": randi_range(0, 3)})
+	homes_built_this_month += homes_to_build
+
 func can_build(lot: Dictionary) -> bool:
 	if not grass_lots.has(lot) or lot == town_hall:
 		return false
@@ -279,5 +311,6 @@ func place_home(lot: Dictionary) -> String:
 	if not can_build(lot):
 		return "Escolha um lote livre na grama."
 	residences.append({"lot": lot.duplicate(), "variant": randi_range(0, 3)})
+	homes_built_this_month += 1
 	changed.emit()
 	return ""

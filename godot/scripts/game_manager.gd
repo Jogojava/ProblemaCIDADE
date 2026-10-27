@@ -170,14 +170,18 @@ func open_problem(event_id: String) -> void:
 	hud.close_panels()
 	_current_problem_id = event_id
 	_current_problem_runtime_event = runtime_event
-	if String(runtime_event.get("category", "")) == EventManager.CATEGORY_URGENT:
+	var is_urgent := String(runtime_event.get("category", "")) == EventManager.CATEGORY_URGENT
+	if is_urgent:
 		if float(runtime_event.get("deadline_remaining_seconds", URGENT_DEADLINE_SECONDS)) <= 0.0:
 			event_manager.expire_event_immediately(event_id)
 			return
 		runtime_event["deadline_phase"] = "solving"
 		runtime_event["deadline_remaining_seconds"] = float(runtime_event.get("deadline_remaining_seconds", URGENT_DEADLINE_SECONDS))
+		time_manager.set_speed(TimeManager.Speed.NORMAL)
 
-	time_manager.set_challenge_active(true)
+	# Urgent deadlines keep running while the popup is open. Other problems
+	# retain the existing paused challenge mode.
+	time_manager.set_challenge_active(not is_urgent)
 	hud.set_problem_mode(true)
 	var popup := PROBLEM_SCENE.instantiate() as ProblemTemplate
 	popup.theme = hud.theme
@@ -297,6 +301,7 @@ func _on_event_expired(runtime_event: Dictionary) -> void:
 	if String(runtime_event.get("category", "")) == EventManager.CATEGORY_URGENT:
 		_activate_next_urgent_deadline()
 	if String(runtime_event.get("event_id", "")) == _current_problem_id:
+		_save_current_problem_draft()
 		_close_current_problem()
 	_refresh_problem_tabs()
 
@@ -344,11 +349,16 @@ func _close_current_problem() -> void:
 func _on_problem_close_requested() -> void:
 	if _current_problem_popup == null:
 		return
-	_current_problem_runtime_event["draft_strokes"] = _current_problem_popup.export_draft()
-	_current_problem_runtime_event["draft_answer"] = _current_problem_popup.answer_input.text
+	_save_current_problem_draft()
 	if String(_current_problem_runtime_event.get("deadline_phase", "")) == "solving":
 		_current_problem_runtime_event["deadline_phase"] = "opening"
 	_close_current_problem()
+
+func _save_current_problem_draft() -> void:
+	if _current_problem_popup == null or not is_instance_valid(_current_problem_popup):
+		return
+	_current_problem_runtime_event["draft_strokes"] = _current_problem_popup.export_draft()
+	_current_problem_runtime_event["draft_answer"] = _current_problem_popup.answer_input.text
 
 func _on_menu_requested() -> void:
 	if not _placement_area.is_empty():

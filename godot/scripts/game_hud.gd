@@ -272,8 +272,7 @@ func set_problem_mode(active: bool) -> void:
 		normal_button.set_pressed_no_signal(true)
 		fast_button.set_pressed_no_signal(false)
 		very_fast_button.set_pressed_no_signal(false)
-	if not active:
-		_update_urgent_alert(_find_urgent_event())
+	_update_urgent_alert(_find_urgent_event())
 
 func _style_problem_button(button: Button, category: String) -> void:
 	button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -536,10 +535,10 @@ func refresh_city() -> void:
 	if _city == null:
 		return
 	set_city_indicators(_city.funds, _city.reputation)
-	_housing_button.text = tr("População: %d · Moradias: +%d") % [_city.population, _city.housing_requests()]
+	_housing_button.text = tr("Pop. %d · Moradias %d (+%d/mês)") % [_city.population, _city.residences.size(), _city.homes_built_this_month]
 	_housing_button.add_theme_color_override("font_disabled_color", Color("dce4dc"))
 	_housing_button.disabled = _city.housing_requests() <= 0 or _city.outcome != "playing"
-	_housing_button.tooltip_text = tr("A cada 150 novos habitantes, escolha onde construir uma moradia. Crescimento de 50 habitantes/mês quando a média dos serviços é de pelo menos 45 pontos. Sem custo adicional.")
+	_housing_button.tooltip_text = tr("Moradias novas neste mês: %d. Demanda pendente: %d. A população cresce pelo menos 50 habitantes/mês com média de serviços a partir de 45, e cresce mais quando os serviços melhoram. Nessa situação, novas casas ocupam lotes livres conforme a demanda. Clique para posicionar uma moradia pendente.") % [_city.homes_built_this_month, _city.housing_requests()]
 	_city_label.text = "%s · %s %d/2 · %s" % [_city.city_name, tr("Mandato"), _city.term, tr(GameRules.DIFFICULTIES[_city.difficulty].name)]
 	$InvestmentPanel/Content/AmountLabel.text = (tr("Valor: R$ %.0f") % $InvestmentPanel/Content/AmountSlider.value) if _investment_mode.selected == 0 else tr("Obra: R$ 35.000 · prazo de 20 dias")
 	$InvestmentPanel/Content/EmptyBalance.text = tr("Escolha o serviço. Para construir, selecione depois um lote no mapa. Obras: %d/3.") % _city.projects.size()
