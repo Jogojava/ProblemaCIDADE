@@ -61,7 +61,7 @@ func register_event(event_id: String, data: Dictionary) -> void:
 func register_default_problems() -> void:
 	var problems := {
 		"aura_travessia": {
-			"title": "Ajude AURA na travessia",
+			"title": "Ajude AURA na travessia VENIDA",
 			"image": "res://assets/problems/aura.png",
 			"description": "Uma senhora precisa atravessar uma rua de 8 metros. Ela anda a 1 metro por segundo e descansa por 3 segundos a cada 4 metros. O sinal fica aberto por 15 segundos; ela leva 2 segundos para interpretar a luz e mais 1 para começar a andar. Ela consegue atravessar?",
 			"category": CATEGORY_OPTIONAL,
@@ -85,7 +85,7 @@ func register_default_problems() -> void:
 			"explanation": "25% de 80 são 20 refeições extras. Então, 500 + 12 × (80 + 20) = R$ 1.700."
 		},
 		"transporte_proporcional": {
-			"title": "Abastecimento e proporcionalidade",
+			"title": "ABUStecimento & ProporcionaCIDADE",
 			"image": "res://assets/problems/onibus.png",
 			"description": "Uma verba de R$ 300 mil será distribuída proporcionalmente entre bairros com 50, 30 e 70 famílias. Quanto cada bairro deve receber, respectivamente?",
 			"category": CATEGORY_COMMON,

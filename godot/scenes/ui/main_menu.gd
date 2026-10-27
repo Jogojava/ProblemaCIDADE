@@ -1,6 +1,11 @@
 extends Control
 
+const SAVES_SCENE := preload("res://scenes/ui/carregar.tscn")
+const OPTIONS_SCENE := preload("res://scenes/ui/opcoes.tscn")
+const CREDITS_SCENE := preload("res://scenes/ui/creditos.tscn")
+
 @onready var quit_confirmation: ConfirmationDialog = $QuitConfirmation
+var _active_popup: Control
 
 func _ready() -> void:
 	theme = SettingsService.game_theme
@@ -19,6 +24,12 @@ func _ready() -> void:
 	$Menu/VBoxContainer/continuar.tooltip_text = "Abrir slots de salvamento."
 	SettingsService.changed.connect(_apply_design)
 	_apply_design()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if _active_popup != null and is_instance_valid(_active_popup):
+		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+			_close_active_popup()
+			get_viewport().set_input_as_handled()
 
 func _on_exit_pressed() -> void:
 	quit_confirmation.popup_centered()
@@ -51,13 +62,33 @@ func _on_btjogar_pressed() -> void:
 	city_name.grab_focus()
 
 func _on_btcontinuar_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/ui/carregar.tscn")
+	_open_popup(SAVES_SCENE)
 	
 func _on_btopcoes_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/ui/opcoes.tscn")
+	_open_popup(OPTIONS_SCENE)
 	
 func _on_btcreditos_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/ui/creditos.tscn")
+	_open_popup(CREDITS_SCENE)
+
+func _open_popup(scene: PackedScene) -> void:
+	if _active_popup != null and is_instance_valid(_active_popup):
+		return
+	var popup := scene.instantiate() as Control
+	popup.set("popup_mode", true)
+	popup.theme = theme
+	popup.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	popup.z_index = 100
+	popup.connect("close_requested", _close_active_popup)
+	_active_popup = popup
+	add_child(popup)
+
+func _close_active_popup() -> void:
+	if _active_popup == null or not is_instance_valid(_active_popup):
+		_active_popup = null
+		return
+	_active_popup.hide()
+	_active_popup.queue_free()
+	_active_popup = null
 
 func _on_sound_pressed() -> void:
 	SettingsService.update("muted", not bool(SettingsService.values.muted))

@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://oa87qvchjlvh" path="res://scenes/ui/main_menu.gd" id="1_sl1te"]
 [ext_resource type="Texture2D" uid="uid://urj72jqu74f2" path="res://assets/ui/pixilart-drawing.png" id="2_fe2o3"]
 [ext_resource type="AudioStream" uid="uid://htt18cmjx7my" path="res://assets/soundtrack/src_aud_lobby-classic-game.mp3" id="3_m1kxf"]
-[ext_resource type="Script" uid="uid://bdt4niw76wyj0" path="res://scripts/kkkkkkkk.gd" id="4_x2yvf"]
 
 [node name="TittleScreen" type="Control" unique_id=1596576623]
 layout_mode = 3
@@ -147,4 +146,3 @@ dialog_text = "Deseja mesmo sair do jogo?"
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=684694698]
 stream = ExtResource("3_m1kxf")
 autoplay = true
-script = ExtResource("4_x2yvf")
