@@ -111,7 +111,11 @@ function montarCarrossel() {
     for (const [i, ponto] of [...pontos.children].entries()) {
       ponto.setAttribute("aria-pressed", String(i === atual));
     }
-    if (direcao) animar(imagem, direcao);
+    if (direcao) {
+      animar(imagem, direcao);
+      animar(legenda, direcao);
+      animar(contador, direcao);
+    }
     if (ampliar.open) {
       imagemAmpliada.src = tela.img;
       imagemAmpliada.alt = tela.legenda;

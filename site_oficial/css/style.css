@@ -322,6 +322,7 @@ kbd, code {
   width: min(100%, 980px); margin: 0 auto; padding: clamp(16px, 3vw, 28px);
   color: var(--areia); background: var(--terra-2); border: 4px solid #000; border-radius: 12px;
   box-shadow: inset 0 -5px 0 rgba(0,0,0,.2), 0 8px 0 rgba(0,0,0,.35);
+  animation: surgir .4s cubic-bezier(.2,.7,.2,1);
 }
 .previa-topo { display: flex; justify-content: space-between; align-items: center; gap: 22px; margin-bottom: 18px; }
 .previa-topo h2 { margin: 0 0 8px; color: #fff; font: 14px/1.8 var(--pixel); letter-spacing: 0; }
@@ -330,9 +331,13 @@ kbd, code {
 .previa-controles { display: flex; align-items: center; gap: 10px; flex: none; }
 .previa-controles button { width: 46px; height: 46px; border: 3px solid #000; border-radius: 6px; color: #fff; background: var(--azul); box-shadow: inset 0 -4px 0 var(--azul-esc); font: 800 28px/1 var(--texto); transition: transform .15s, filter .15s; }
 .previa-controles button:hover { transform: translateY(-2px); filter: brightness(1.12); }
+.previa-controles button:active { transform: translateY(2px); box-shadow: inset 0 -1px 0 var(--azul-esc); }
 .previa-controles span { min-width: 56px; text-align: center; color: #fff; font: 9px/1.8 var(--pixel); }
 .previa-imagem { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; padding: 0; border: 3px solid #000; border-radius: 8px; background: #e9dccb; cursor: zoom-in; }
-.previa-imagem img { width: 100%; height: 100%; object-fit: contain; }
+.previa-imagem img { width: 100%; height: 100%; object-fit: contain; transition: transform .28s steps(4, end), filter .28s; }
+@media (hover: hover) {
+  .previa-imagem:hover img { transform: scale(1.018); filter: brightness(1.06); }
+}
 .previa-imagem > span { position: absolute; right: 12px; bottom: 12px; padding: 7px 10px; color: #fff; background: rgba(36,19,9,.92); border: 2px solid #000; border-radius: 4px; font: 700 14px/1.3 var(--texto); opacity: 0; transform: translateY(4px); transition: opacity .18s, transform .18s; }
 .previa-imagem:hover > span, .previa-imagem:focus-visible > span { opacity: 1; transform: none; }
 .previa-rodape { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding-top: 16px; }
@@ -340,7 +345,8 @@ kbd, code {
 .previa-pontos { display: flex; align-items: center; gap: 9px; }
 .previa-ponto { width: 15px; height: 15px; padding: 0; border: 2px solid #000; border-radius: 2px; background: transparent; cursor: pointer; transition: transform .15s, background .15s; }
 .previa-ponto:hover { transform: scale(1.2); }
-.previa-ponto[aria-pressed="true"] { background: var(--ciano); box-shadow: inset 0 0 0 2px var(--terra-2); }
+.previa-ponto[aria-pressed="true"] { background: var(--ciano); box-shadow: inset 0 0 0 2px var(--terra-2); animation: ponto-selecionado .32s steps(3, end); }
+@keyframes ponto-selecionado { 0% { transform: scale(.72); } 65% { transform: scale(1.25); } 100% { transform: scale(1); } }
 #previa-img { transition: opacity .2s; }
 .ampliar {
   border: 4px solid #000; border-radius: 14px; padding: 0; background: var(--creme);
