@@ -33,7 +33,6 @@
   <nav id="abas" class="abas" role="tablist" aria-label="Seções do site">
     <a href="#inicio" role="tab" data-aba="inicio">Início</a>
     <a href="#jogo" role="tab" data-aba="jogo">O jogo</a>
-    <a href="#telas" role="tab" data-aba="telas">Telas</a>
     <a href="#download" role="tab" data-aba="download">Download</a>
     <a href="#equipe" role="tab" data-aba="equipe">Equipe</a>
   </nav>
@@ -58,7 +57,7 @@
       <div class="botoes-pixel">
         <a class="pixel-btn azul" href="#download" data-aba="download">Baixar o jogo</a>
         <a class="pixel-btn cinza" href="#jogo" data-aba="jogo">Como funciona</a>
-        <a class="pixel-btn cinza" href="#telas" data-aba="telas">Ver telas</a>
+        <a class="pixel-btn cinza" href="#previa-jogo">Ver prévia</a>
         <a class="pixel-btn amarelo" href="#equipe" data-aba="equipe">Créditos</a>
       </div>
       <ul class="plataformas" aria-label="Plataformas">
@@ -67,6 +66,28 @@
         <li>GitHub</li>
       </ul>
     </div>
+    <section class="previa-jogo" id="previa-jogo" aria-labelledby="previa-titulo">
+      <div class="previa-topo">
+        <div>
+          <p class="previa-etiqueta">Prévia do jogo</p>
+          <h2 id="previa-titulo">Um passeio por ProblemaCIDADE</h2>
+          <p>Veja um pouco da cidade antes de começar seu mandato.</p>
+        </div>
+        <div class="previa-controles" role="group" aria-label="Controles da prévia">
+          <button type="button" id="previa-anterior" aria-label="Mostrar captura anterior">‹</button>
+          <span id="previa-contador" aria-live="polite">1 / 6</span>
+          <button type="button" id="previa-proxima" aria-label="Mostrar próxima captura">›</button>
+        </div>
+      </div>
+      <button type="button" class="previa-imagem" id="previa-ampliar" aria-label="Ampliar captura: Menu principal">
+        <img id="previa-img" src="img/telas/01-menu.jpg" alt="Menu principal" width="1280" height="720">
+        <span>Ampliar imagem</span>
+      </button>
+      <div class="previa-rodape">
+        <strong id="previa-legenda">Menu principal</strong>
+        <div class="previa-pontos" id="previa-pontos" role="group" aria-label="Escolher captura"></div>
+      </div>
+    </section>
   </section>
 
   <!-- O JOGO -->
@@ -209,15 +230,6 @@
         <a class="pixel-btn verde" href="#download" data-aba="download">Baixar o jogo</a>
         <small>Windows 10/11 (64-bit) e Linux Debian · mínimo de 4 GB de RAM</small>
       </div>
-    </div>
-  </section>
-
-  <!-- TELAS -->
-  <section id="telas" class="painel" role="tabpanel" data-painel="telas" hidden>
-    <div class="caixa">
-      <h2 class="pixel-titulo">Telas</h2>
-      <p class="lead">Capturas da versão atual do jogo. Clique para ampliar.</p>
-      <div class="galeria" id="galeria"></div>
     </div>
   </section>
 

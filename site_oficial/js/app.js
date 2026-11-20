@@ -15,7 +15,7 @@ function criar(tag, atributos = {}, filhos = []) {
 }
 
 /* ---------- Abas ---------- */
-const ABAS = ["inicio", "jogo", "telas", "download", "equipe"];
+const ABAS = ["inicio", "jogo", "download", "equipe"];
 let equipeCarregada = false, downloadCarregado = false;
 
 function mostrarAba(nome, { rolar = true } = {}) {
@@ -82,34 +82,65 @@ $(".dificuldade").addEventListener("click", (evento) => {
   if (botao) escolherDificuldade(botao.dataset.dif);
 });
 
-/* ---------- Galeria ---------- */
+/* ---------- Prévia em carrossel ---------- */
 const ampliar = $("#ampliar");
-function montarGaleria() {
-  const galeria = $("#galeria");
-  TELAS.forEach((tela, i) => {
-    const botao = criar("button", { type: "button", classe: "miniatura", "data-i": String(i) }, [
-      criar("img", { src: tela.img, alt: tela.legenda, loading: "lazy", width: "1280", height: "720" }),
-      criar("span", { texto: tela.legenda })
-    ]);
-    galeria.append(botao);
-  });
+function montarCarrossel() {
+  const imagem = $("#previa-img");
+  const legenda = $("#previa-legenda");
+  const contador = $("#previa-contador");
+  const pontos = $("#previa-pontos");
+  const botaoImagem = $("#previa-ampliar");
+  const imagemAmpliada = $("img", ampliar);
+  const legendaAmpliada = $("p", ampliar);
   let atual = 0;
-  const mostrarTela = (i, direcao = 0) => {
-    atual = (i + TELAS.length) % TELAS.length;
-    const tela = TELAS[atual], img = $("img", ampliar);
-    img.src = tela.img;
-    img.alt = tela.legenda;
-    $("p", ampliar).textContent = `${tela.legenda} · ${atual + 1} de ${TELAS.length}`;
-    if (direcao) {
-      img.classList.remove("deslizar-esq", "deslizar-dir");
-      void img.offsetWidth;
-      img.classList.add(direcao > 0 ? "deslizar-esq" : "deslizar-dir");
+
+  function animar(el, direcao) {
+    el.classList.remove("deslizar-esq", "deslizar-dir");
+    void el.offsetWidth;
+    el.classList.add(direcao > 0 ? "deslizar-esq" : "deslizar-dir");
+  }
+
+  function mostrarTela(indice, direcao = 0) {
+    atual = (indice + TELAS.length) % TELAS.length;
+    const tela = TELAS[atual];
+    imagem.src = tela.img;
+    imagem.alt = tela.legenda;
+    legenda.textContent = tela.legenda;
+    contador.textContent = `${atual + 1} / ${TELAS.length}`;
+    botaoImagem.setAttribute("aria-label", `Ampliar captura: ${tela.legenda}`);
+    for (const [i, ponto] of [...pontos.children].entries()) {
+      ponto.setAttribute("aria-pressed", String(i === atual));
     }
-  };
-  galeria.addEventListener("click", (evento) => {
-    const botao = evento.target.closest(".miniatura");
-    if (!botao) return;
-    mostrarTela(Number(botao.dataset.i));
+    if (direcao) animar(imagem, direcao);
+    if (ampliar.open) {
+      imagemAmpliada.src = tela.img;
+      imagemAmpliada.alt = tela.legenda;
+      legendaAmpliada.textContent = `${tela.legenda} · ${atual + 1} de ${TELAS.length}`;
+      if (direcao) animar(imagemAmpliada, direcao);
+    }
+  }
+
+  TELAS.forEach((tela, i) => {
+    pontos.append(criar("button", {
+      type: "button", classe: "previa-ponto", "aria-label": `Mostrar: ${tela.legenda}`,
+      "aria-pressed": String(i === 0), "data-indice": String(i)
+    }));
+  });
+  pontos.addEventListener("click", (evento) => {
+    const ponto = evento.target.closest("[data-indice]");
+    const indice = ponto ? Number(ponto.dataset.indice) : atual;
+    if (ponto && indice !== atual) mostrarTela(indice, indice > atual ? 1 : -1);
+  });
+  $("#previa-jogo").addEventListener("keydown", (evento) => {
+    if (evento.key === "ArrowLeft") { evento.preventDefault(); mostrarTela(atual - 1, -1); }
+    if (evento.key === "ArrowRight") { evento.preventDefault(); mostrarTela(atual + 1, 1); }
+  });
+  $("#previa-anterior").addEventListener("click", () => mostrarTela(atual - 1, -1));
+  $("#previa-proxima").addEventListener("click", () => mostrarTela(atual + 1, 1));
+  botaoImagem.addEventListener("click", () => {
+    imagemAmpliada.src = TELAS[atual].img;
+    imagemAmpliada.alt = TELAS[atual].legenda;
+    legendaAmpliada.textContent = `${TELAS[atual].legenda} · ${atual + 1} de ${TELAS.length}`;
     ampliar.showModal();
   });
   $(".anterior", ampliar).addEventListener("click", () => mostrarTela(atual - 1, -1));
@@ -120,8 +151,8 @@ function montarGaleria() {
   });
   $(".fechar", ampliar).addEventListener("click", () => ampliar.close());
   ampliar.addEventListener("click", (evento) => { if (evento.target === ampliar) ampliar.close(); });
+  mostrarTela(0);
 }
-
 /* ---------- Equipe e GitHub ---------- */
 function montarEquipe() {
   const grade = $("#grade-equipe");
@@ -275,7 +306,7 @@ function prepararRevelar() {
       observador.unobserve(el);
     }
   }, { threshold: 0.12 });
-  for (const el of $$(".cartao, .servicos li, .membro, .miniatura, .numeros div, .objetivo, .baixar, .sobre > div")) {
+  for (const el of $$(".cartao, .servicos li, .membro, .numeros div, .objetivo, .baixar, .sobre > div")) {
     el.dataset.i = [...el.parentElement.children].indexOf(el) % 6;
     el.classList.add("revelar");
     observador.observe(el);
@@ -284,7 +315,7 @@ function prepararRevelar() {
 
 /* ---------- Início ---------- */
 montarEquipe();
-montarGaleria();
+montarCarrossel();
 prepararRevelar();
 escolherDificuldade("medio");
 mostrarAba(location.hash.slice(1), { rolar: false });

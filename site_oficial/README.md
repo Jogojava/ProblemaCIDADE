@@ -28,12 +28,12 @@ Todos os caminhos do site são relativos, então ele funciona no endereço `/Pro
 
 ```
 site_oficial/
-  index.html      estrutura das abas (Início, O jogo, Telas, Download, Equipe)
+  index.html      estrutura das abas (Início, O jogo, Download, Equipe) e prévia de telas na capa
   css/style.css   visual, estados de hover e regras de responsividade
   css/efeitos.css capa animada, dia e noite, transições, simulador, gráfico e download
   js/dados.js     dados fixos tirados do jogo (equipe, dificuldades, telas)
   js/github.js    acesso à API do GitHub, com cache
-  js/app.js       abas, menu móvel, galeria, download e montagem da equipe no DOM
+  js/app.js       abas, menu móvel, carrossel da capa, download e montagem da equipe no DOM
   js/efeitos.js   carregamento, transição entre abas, parallax, sons, dia e noite,
                   cidade que cresce, simulador, gráfico de commits e o pato
   img/            arte do jogo, fotos da equipe, ícones e capturas (img/telas/)
@@ -43,9 +43,8 @@ site_oficial/
 
 | Aba | O que mostra | Interação |
 |---|---|---|
-| Início | Capa com o fundo do menu do jogo, nuvens e carros passando, e botões no estilo do jogo | O fundo se move com o mouse (parallax); botões levam às outras abas |
+| Início | Capa com o fundo do menu, nuvens, carros, botões e prévia em carrossel das telas do jogo | O fundo se move com o mouse (parallax); controles trocam as capturas e permitem ampliá-las |
 | O jogo | Objetivo, regras, categorias de ocorrências, seis serviços e como rodar | Escolher a dificuldade muda a reputação inicial (65%, 55% ou 45%); o simulador soma ou tira reputação a cada escolha e diz se haveria reeleição ou impeachment (valores ilustrativos, não os do jogo) |
-| Telas | Capturas da versão atual do jogo | Clique abre a imagem ampliada (`<dialog>`); setas na tela ou ← → do teclado trocam a captura; fecha no ×, no fundo ou com Esc |
 | Download | Botão para o `.zip` do último release, com versão, data, tamanho e número de downloads | Dados lidos do Releases do GitHub; instruções para Windows e Linux |
 | Equipe | Integrantes com foto e link para o GitHub, dados do repositório e gráfico de commits por semana | Passar o mouse num cartão o vira e mostra os commits da pessoa; carrega a API na primeira vez que a aba abre |
 

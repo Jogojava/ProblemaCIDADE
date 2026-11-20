@@ -87,7 +87,7 @@ const SOM = (() => {
   document.addEventListener("click", (e) => {
     if (e.target.closest("#som")) return;
     if (e.target.closest("[data-aba]")) tocar([[660, 0.06], [880, 0.08]]);
-    else if (e.target.closest("button, .pixel-btn, .membro, .miniatura")) tocar([[440, 0.05]]);
+    else if (e.target.closest("button, .pixel-btn, .membro")) tocar([[440, 0.05]]);
   });
   document.addEventListener("pointerover", (e) => {
     const alvo = e.target.closest(".pixel-btn");
