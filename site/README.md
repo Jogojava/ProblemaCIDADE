@@ -4,8 +4,8 @@ Site de apresentação do jogo, feito com HTML, CSS e JavaScript puros, sem bibl
 
 ## Como abrir
 
-- **Direto:** abra `site/index.html` no navegador.
-- **Com servidor local** (recomendado, igual a um site publicado):
+- **Direto:** abra `site/index.html` no navegador. Não precisa de servidor.
+- **Com servidor local** (opcional):
 
   ```bash
   cd site
@@ -14,7 +14,15 @@ Site de apresentação do jogo, feito com HTML, CSS e JavaScript puros, sem bibl
 
   Depois acesse `http://localhost:8000`.
 
-- **GitHub Pages:** em *Settings → Pages* do repositório, publique a pasta `site/` (ou copie o conteúdo para a branch usada pelo Pages). Todos os caminhos são relativos, então funciona em qualquer subpasta.
+- **Publicado:** <https://jogojava.github.io/ProblemaCIDADE/>
+
+## Publicação no GitHub Pages
+
+O workflow `.github/workflows/pages.yml` publica a pasta `site/` sempre que algo nela muda na `main` (também dá para rodar à mão na aba *Actions*). Não há etapa de build: a pasta é enviada como está.
+
+Configuração, feita uma vez por alguém com acesso de admin: *Settings → Pages → Build and deployment → Source:* **GitHub Actions**.
+
+Todos os caminhos do site são relativos, então ele funciona no endereço `/ProblemaCIDADE/` do Pages.
 
 ## Estrutura
 
