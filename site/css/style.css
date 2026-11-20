@@ -413,3 +413,101 @@ kbd, code {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Animações e feedback ---------- */
+:root { --suave-ease: cubic-bezier(.2, .7, .2, 1); }
+
+/* Elementos que surgem ao entrar na tela (classe posta pelo app.js) */
+.revelar { opacity: 0; transform: translateY(16px); transition: opacity .55s var(--suave-ease), transform .55s var(--suave-ease); transition-delay: calc(var(--i, 0) * 70ms); }
+.revelar.visivel { opacity: 1; transform: none; }
+.revelar.visivel:hover { transition-delay: 0s; }
+
+/* Capa: entrada em sequência */
+.heroi-conteudo > * { animation: subir .7s var(--suave-ease) both; }
+.heroi-conteudo > :nth-child(2) { animation-delay: .08s; }
+.heroi-conteudo > :nth-child(3) { animation-delay: .16s; }
+.heroi-conteudo > :nth-child(4) { animation-delay: .24s; }
+.heroi-conteudo > :nth-child(5) { animation-delay: .32s; }
+.heroi-conteudo > :nth-child(6) { animation-delay: .40s; }
+@keyframes subir { from { opacity: 0; transform: translateY(22px); } }
+.titulo .ciano { display: inline-block; animation: flutuar 4s ease-in-out infinite; }
+@keyframes flutuar { 50% { transform: translateY(-6px); } }
+
+/* Botões pixel: brilho que atravessa no hover */
+.pixel-btn { position: relative; overflow: hidden; }
+.pixel-btn::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+  transform: translateX(-120%); transition: transform .6s var(--suave-ease);
+}
+.pixel-btn:hover::after { transform: translateX(120%); }
+
+/* Abas: sublinhado que cresce */
+.abas a { position: relative; }
+.abas a::after {
+  content: ""; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 3px;
+  background: var(--ciano); transform: scaleX(0); transition: transform .25s var(--suave-ease);
+}
+.abas a:hover:not(.ativa)::after { transform: scaleX(1); }
+
+/* Menu móvel desliza */
+@media (max-width: 820px) {
+  .abas.aberto { animation: descer .25s var(--suave-ease); }
+  .abas.aberto a { animation: subir .3s var(--suave-ease) both; }
+  .abas.aberto a:nth-child(2) { animation-delay: .04s; }
+  .abas.aberto a:nth-child(3) { animation-delay: .08s; }
+  .abas.aberto a:nth-child(4) { animation-delay: .12s; }
+  .abas.aberto a:nth-child(5) { animation-delay: .16s; }
+}
+@keyframes descer { from { opacity: 0; transform: translateY(-10px); } }
+.menu-btn span { transition: transform .25s var(--suave-ease), opacity .2s; }
+.menu-btn[aria-expanded="true"] span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+.menu-btn[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.menu-btn[aria-expanded="true"] span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+/* Cartões, serviços, números: elevação com sombra */
+.cartao, .servicos li, .numeros div, .objetivo { transition: transform .2s var(--suave-ease), box-shadow .2s var(--suave-ease), opacity .55s var(--suave-ease); }
+.cartao:hover, .numeros div:hover, .objetivo:hover { transform: translateY(-4px); box-shadow: inset 0 -5px 0 var(--areia), 0 6px 0 rgba(0,0,0,.18); }
+.servicos li { cursor: default; }
+.servicos li:hover { transform: translateY(-4px); box-shadow: 0 6px 0 rgba(0,0,0,.18); background: var(--creme); }
+.servicos li img { transition: transform .35s var(--suave-ease); }
+.servicos li:hover img { transform: scale(1.18) rotate(-8deg); }
+
+/* Problemas: entrada em cascata ao filtrar */
+.problema { animation: subir .4s var(--suave-ease) both; animation-delay: calc(var(--i, 0) * 50ms); transition: transform .2s var(--suave-ease), box-shadow .2s; }
+.problema:hover { transform: translateY(-3px); box-shadow: 0 6px 0 rgba(0,0,0,.15); }
+.problema img { transition: transform .3s var(--suave-ease); }
+.problema:hover img { transform: scale(1.12); }
+.filtro:active, .dificuldade button:active { transform: scale(.95); }
+.filtro img { transition: transform .3s var(--suave-ease); }
+.filtro:hover img { transform: rotate(-10deg) scale(1.1); }
+
+/* Dificuldade: número da reputação pulsa ao trocar */
+.pulsar { animation: pulsar .4s var(--suave-ease); }
+@keyframes pulsar { 40% { transform: scale(1.25); color: var(--azul-esc); } }
+.reputacao-linha strong { display: inline-block; }
+
+/* Galeria e lightbox */
+.miniatura img { transition: transform .4s var(--suave-ease); }
+.miniatura:hover img { transform: scale(1.05); }
+.ampliar[open] { animation: abrir .3s var(--suave-ease); }
+.ampliar[open]::backdrop { animation: escurecer .3s ease; }
+@keyframes abrir { from { opacity: 0; transform: scale(.94); } }
+@keyframes escurecer { from { opacity: 0; } }
+.fechar { transition: transform .2s var(--suave-ease); }
+.fechar:hover { transform: rotate(90deg); }
+
+/* Equipe */
+.membro img { transition: transform .35s var(--suave-ease); }
+.membro:hover img { transform: scale(1.06) rotate(-3deg); }
+.logo { transition: transform .4s var(--suave-ease); }
+.logo:hover { transform: rotate(-8deg) scale(1.06); }
+.ling-barra span { transition: width .9s var(--suave-ease); }
+.commits li { animation: subir .4s var(--suave-ease) both; animation-delay: calc(var(--i, 0) * 50ms); transition: transform .2s var(--suave-ease); }
+.commits li:hover { transform: translateX(4px); }
+.membro, .miniatura, .baixar, .sobre > div { transition: opacity .55s var(--suave-ease), transform .3s var(--suave-ease), box-shadow .2s var(--suave-ease); }
+
+/* 10 cartões: 2 por linha no desktop e tablet, 1 no celular (nenhum fica sozinho) */
+.grade-cartoes { grid-template-columns: 1fr; }
+@media (min-width: 600px) { .grade-cartoes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+

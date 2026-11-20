@@ -62,7 +62,11 @@ function escolherDificuldade(chave) {
   for (const botao of $$(".dificuldade button")) {
     botao.setAttribute("aria-checked", String(botao.dataset.dif === chave));
   }
-  $("#rep-valor").textContent = dados.rep + "%";
+  const valor = $("#rep-valor");
+  valor.textContent = dados.rep + "%";
+  valor.classList.remove("pulsar");
+  void valor.offsetWidth; // reinicia a animação
+  valor.classList.add("pulsar");
   const barra = $("#rep-barra");
   barra.style.width = dados.rep + "%";
   barra.classList.toggle("abaixo", dados.rep < 50);
@@ -80,7 +84,7 @@ function mostrarProblemas(categoria) {
   const filtrados = PROBLEMAS.filter((p) => categoria === "todos" || p.cat === categoria);
   for (const p of filtrados) {
     const cat = CATEGORIAS[p.cat];
-    lista.append(criar("li", { classe: "problema cat-" + p.cat }, [
+    lista.append(criar("li", { classe: "problema cat-" + p.cat, style: "--i:" + lista.children.length }, [
       criar("img", { src: cat.icone, alt: "", width: "40", height: "40" }),
       criar("div", {}, [
         criar("span", { classe: "selo", texto: cat.nome }),
@@ -147,7 +151,18 @@ function montarEquipe() {
 }
 
 const formatarData = (iso) => new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-const numero = (chave, valor) => { $(`[data-num="${chave}"]`).textContent = valor; };
+// Números inteiros sobem contando até o valor; datas entram direto.
+const numero = (chave, valor) => {
+  const el = $(`[data-num="${chave}"]`);
+  if (typeof valor !== "number" || matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = valor; return; }
+  const inicio = performance.now(), duracao = 900;
+  const passo = (agora) => {
+    const t = Math.min((agora - inicio) / duracao, 1);
+    el.textContent = Math.round(valor * (1 - Math.pow(1 - t, 3)));
+    if (t < 1) requestAnimationFrame(passo);
+  };
+  requestAnimationFrame(passo);
+};
 
 async function carregarGitHub() {
   const status = $("#api-status");
@@ -209,7 +224,7 @@ function mostrarCommits(lista) {
   for (const c of lista) {
     const mensagem = c.commit.message.split("\n")[0];
     const autor = c.author ? c.author.login : c.commit.author.name;
-    ul.append(criar("li", {}, [
+    ul.append(criar("li", { style: "--i:" + ul.children.length }, [
       criar("a", { href: c.html_url, target: "_blank", rel: "noopener", classe: "sha", texto: c.sha.slice(0, 7) }),
       criar("span", { classe: "msg", texto: mensagem }),
       criar("span", { classe: "meta", texto: autor + " · " + formatarData(c.commit.author.date) })
@@ -217,9 +232,31 @@ function mostrarCommits(lista) {
   }
 }
 
+/* ---------- Revelar ao rolar ---------- */
+// Cada bloco surge ao entrar na tela, em cascata com os irmãos.
+function prepararRevelar() {
+  if (!("IntersectionObserver" in window)) return;
+  const observador = new IntersectionObserver((entradas) => {
+    for (const e of entradas) {
+      if (!e.isIntersecting) continue;
+      const el = e.target;
+      el.style.transitionDelay = (el.dataset.i * 70) + "ms";
+      el.classList.add("visivel");
+      setTimeout(() => { el.style.transitionDelay = ""; }, 1200);
+      observador.unobserve(el);
+    }
+  }, { threshold: 0.12 });
+  for (const el of $$(".cartao, .servicos li, .membro, .miniatura, .numeros div, .objetivo, .baixar, .sobre > div")) {
+    el.dataset.i = [...el.parentElement.children].indexOf(el) % 6;
+    el.classList.add("revelar");
+    observador.observe(el);
+  }
+}
+
 /* ---------- Início ---------- */
 montarEquipe();
 montarGaleria();
+prepararRevelar();
 mostrarProblemas("todos");
 escolherDificuldade("medio");
 mostrarAba(location.hash.slice(1), { rolar: false });
