@@ -225,12 +225,17 @@ kbd, code {
 .cartao h3 { font: 11px/1.4 var(--pixel); margin: 0 0 10px; color: var(--azul-esc); }
 .cartao p { margin: 0; }
 .cartao.perigo h3 { color: var(--vermelho); }
+.categorias-container {
+  margin-top: 36px; padding: 20px;
+  background: var(--areia); border: 3px solid var(--azul); border-radius: 14px;
+}
+.categorias-container .sub { margin-top: 0; }
 .categorias-problemas {
   list-style: none; padding: 0; margin: 0;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 12px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 14px;
 }
 .categorias-problemas li {
-  display: flex; align-items: center; gap: 12px; min-width: 0;
+  display: flex; align-items: center; gap: 14px; min-width: 0; min-height: 108px;
   background: #fff; border: 3px solid #000; border-left-width: 9px; border-radius: 10px; padding: 14px;
 }
 .categorias-problemas img { width: 42px; height: 42px; flex: none; object-fit: contain; image-rendering: pixelated; }
@@ -369,6 +374,9 @@ kbd, code {
   .numeros strong { font-size: 12px; }
   .commits li { grid-template-columns: auto 1fr; }
   .commits .meta { grid-column: 2; white-space: normal; }
+}
+@media (max-width: 600px) {
+  .categorias-problemas { grid-template-columns: 1fr; grid-auto-rows: auto; }
 }
 @media (max-width: 480px) {
   body { font-size: 16px; }
