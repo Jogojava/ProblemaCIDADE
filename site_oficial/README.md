@@ -4,11 +4,11 @@ Site de apresentação do jogo, feito com HTML, CSS e JavaScript puros, sem bibl
 
 ## Como abrir
 
-- **Direto:** abra `site/index.html` no navegador. Não precisa de servidor.
+- **Direto:** abra `site_oficial/index.html` no navegador. Não precisa de servidor.
 - **Com servidor local** (opcional):
 
   ```bash
-  cd site
+  cd site_oficial
   python -m http.server 8000
   ```
 
@@ -18,7 +18,7 @@ Site de apresentação do jogo, feito com HTML, CSS e JavaScript puros, sem bibl
 
 ## Publicação no GitHub Pages
 
-O workflow `.github/workflows/pages.yml` publica a pasta `site/` sempre que algo nela muda no branch `site` (também dá para rodar à mão na aba *Actions*). Não há etapa de build: a pasta é enviada como está.
+O workflow `../.github/workflows/pages.yml` publica a pasta `site_oficial/` sempre que algo nela muda no branch `site` (também dá para rodar à mão na aba *Actions*). Não há etapa de build: a pasta é enviada como está.
 
 Configuração, feita uma vez por alguém com acesso de admin: *Settings → Pages → Build and deployment → Source:* **GitHub Actions**.
 
@@ -27,7 +27,7 @@ Todos os caminhos do site são relativos, então ele funciona no endereço `/Pro
 ## Estrutura
 
 ```
-site/
+site_oficial/
   index.html      estrutura das abas (Início, O jogo, Problemas, Telas, Download, Equipe)
   css/style.css   visual, estados de hover e regras de responsividade
   css/efeitos.css capa animada, dia e noite, transições, simulador, gráfico e download
@@ -106,3 +106,4 @@ Som e modo noite ficam salvos no `localStorage` do navegador.
 ## Créditos das imagens
 
 Fundo, botões e ícones de categoria: Débora Luiza de Paula Ferreira. Fotos e logo: tela de créditos do jogo. Ícones dos serviços: HUD do jogo. Capturas: tiradas da versão atual do jogo.
+
