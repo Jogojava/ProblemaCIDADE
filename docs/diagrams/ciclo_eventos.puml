@@ -1,0 +1,62 @@
+@startuml ciclo_eventos
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequence {
+  ParticipantBackgroundColor #E7F1F2
+  ParticipantBorderColor #17687B
+  ActorBackgroundColor #F3F7F5
+  ActorBorderColor #17687B
+  ArrowColor #17687B
+  LifeLineBorderColor #51B7CF
+}
+
+title ProblemaCIDADE - Ciclo de Vida de um Problema / Evento
+
+actor Jogador
+participant TimeManager
+participant EventManager
+participant EventDatabase
+participant GameManager
+participant GameHUD
+participant ProblemTemplate
+participant CityState
+
+== Início do Mês ==
+TimeManager -> EventManager : month_passed(mês, ano)
+EventManager -> EventDatabase : ensure_month_content(mês, ano)
+EventManager -> EventDatabase : get_random_event_id_by_category(cat)
+EventDatabase --> EventManager : event_id
+EventManager -> EventManager : Agenda dias únicos\n(Opcional, Comum, Importante, 1 Urgente)
+
+== Dia do Disparo ==
+TimeManager -> EventManager : day_passed(dia, mês, ano)
+EventManager -> EventDatabase : build_runtime_event(event_id, data)
+EventDatabase --> EventManager : runtime_event (com expires_on)
+EventManager -> GameManager : event_triggered(runtime_event)
+alt Categoria == Urgente
+  GameManager -> TimeManager : set_speed(NORMAL)
+  GameManager -> GameManager : Inicia timer 180s\n(ou coloca na fila)
+end
+GameManager -> GameHUD : update_problem_tabs(active_events)
+
+== Resolução pelo Jogador ==
+Jogador -> GameHUD : Clica no problema / alerta urgente
+GameHUD -> GameManager : problem_open_requested(event_id)
+GameManager -> TimeManager : set_challenge_active(not is_urgent)
+GameManager -> ProblemTemplate : configure(...) + restore_draft(...)
+Jogador -> ProblemTemplate : Usa rascunho/calculadora e envia resposta
+ProblemTemplate -> GameManager : answer_selected(answer)
+GameManager -> GameManager : _is_answer_correct(data, answer)
+GameManager -> EventManager : resolve_event(event_id)
+EventManager -> GameManager : event_resolved(runtime_event)
+GameManager -> CityState : apply_problem(def, correct, false, answer)
+CityState --> GameManager : last_result (verba, reputação, efeitos)
+GameManager -> GameManager : Exibe Feedback + Som (660Hz / 220Hz)
+
+== Alternativa: Expiração ==
+alt Prazo em dias atingido ou Timer Urgente == 0
+  EventManager -> GameManager : event_expired(runtime_event)
+  GameManager -> CityState : apply_problem(def, false, true)
+  GameManager -> GameHUD : show_notice("Prazo encerrado...")
+end
+@enduml

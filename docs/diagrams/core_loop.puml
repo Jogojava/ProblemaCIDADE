@@ -1,0 +1,64 @@
+@startuml core_loop
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor #E7F1F2
+  BorderColor #17687B
+  FontColor #20383F
+  DiamondBackgroundColor #F3F7F5
+  DiamondBorderColor #17687B
+}
+skinparam ArrowColor #17687B
+
+title ProblemaCIDADE - Core Loop e Ciclo de Campanha
+
+start
+:Configurar Nova Gestão\n(Nome da Cidade + Dificuldade);
+:Exibir Briefing Inicial\n(Tempo pausado);
+
+repeat
+  :Avanço do Tempo\n(Normal / Rápido / Muito Rápido\nou Pular até Ocorrência);
+
+  fork
+    :Acompanhar Indicadores\n(Saldo, Reputação, População,\n6 Áreas de Serviço);
+  fork again
+    :Investir em Serviços\n(R$ 5.000+) ou Iniciar Obra\n(R$ 35.000 / 20 dias no mapa);
+  fork again
+    if (Evento/Problema disparado?) then (Sim)
+      :Abrir Problema na Barra Lateral\nou Alerta Urgente (180s);
+      :Usar Rascunho / Calculadora\ne Enviar Resposta;
+      if (Acertou?) then (Sim)
+        :Ganho de Verba, Reputação\ne Indicador da Área\n(Opcional: -5 dias em obras);
+      else (Não ou Expirou)
+        :Perda de Verba, Reputação\ne Indicador\n(Opcional expirado não penaliza);
+      endif
+    endif
+  end fork
+
+  if (Virou o Mês?) then (Sim)
+    :Fechamento Mensal:\n+ Receita (Pop. × 12 × Fator)\n- Manutenção (Base + Prédios)\n- Decaimento de Serviços (-0,5)\nAtualizar Desemprego, Fome e Reputação;
+    if (Média de serviços >= 45?) then (Sim)
+      :Crescimento Populacional\n(+50 hab. + bônus de melhoria)\ne Novas Moradias;
+    endif
+    :Registrar Snapshot Mensal\n(Habilita Projeção após 12 meses);
+  endif
+
+  if (Reputação <= 0% ou\n< 10% por 3 meses seguidos?) then (Sim)
+    :Fim de Jogo:\nIMPEACHMENT; <<#F8D7DA>>
+    stop
+  endif
+
+  if (Mês == 48?) then (Sim)
+    if (Reputação >= 50%?) then (Sim)
+      :REELEITO!\nInício do 2º Mandato; <<#D4EDDA>>
+    else (Não)
+      :Fim de Jogo:\nNÃO REELEITO; <<#F8D7DA>>
+      stop
+    endif
+  endif
+
+repeat while (Mês < 96?) is (Sim)
+
+:VITÓRIA!\nDois Mandatos Concluídos (96 meses); <<#D4EDDA>>
+stop
+@enduml

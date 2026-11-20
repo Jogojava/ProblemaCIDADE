@@ -1,0 +1,70 @@
+@startuml fluxo_telas
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam state {
+  BackgroundColor #E7F1F2
+  BorderColor #17687B
+  FontColor #20383F
+}
+skinparam ArrowColor #17687B
+
+title ProblemaCIDADE - Fluxo de Telas e Overlays
+
+[*] --> MenuPrincipal
+
+state MenuPrincipal {
+  [*] --> IdleMenu
+  IdleMenu --> DialogoNovaGestao : Botão "Jogar"
+  DialogoNovaGestao --> IdleMenu : Cancelar
+  IdleMenu --> PopupPartidasSalvas : Botão "Continuar"
+  PopupPartidasSalvas --> IdleMenu : Voltar / Esc
+  IdleMenu --> PopupOpcoes : Botão "Opções"
+  PopupOpcoes --> IdleMenu : Voltar / Esc
+  IdleMenu --> PopupCreditos : Botão "Créditos"
+  PopupCreditos --> IdleMenu : Voltar / Esc
+  IdleMenu --> DialogoSair : Botão Sair
+  DialogoSair --> IdleMenu : Continuar jogando
+}
+
+DialogoSair --> [*] : Confirmar Saída
+DialogoNovaGestao --> Gameplay : Começar Nova Gestão
+PopupPartidasSalvas --> Gameplay : Carregar Slot (1..3)
+
+state Gameplay {
+  [*] --> BriefingInicial : Nova Partida
+  [*] --> MapaAtivo : Partida Carregada
+  BriefingInicial --> MapaAtivo : Iniciar Mandato
+
+  MapaAtivo --> PainelInvestimentos : Botão Saldo (pausa tempo)
+  PainelInvestimentos --> MapaAtivo : Fechar / Esc
+  PainelInvestimentos --> ModoPosicionamento : Construir Instalação
+
+  MapaAtivo --> ModoPosicionamento : Botão Moradias (demanda > 0)
+  ModoPosicionamento --> MapaAtivo : Lote Confirmado / Botão Direito / Esc
+
+  MapaAtivo --> PainelEstatisticas : Botão Reputação (pausa tempo)
+  PainelEstatisticas --> MapaAtivo : Fechar / Esc
+
+  MapaAtivo --> PopupProblema : Abrir Ocorrência / Urgente
+  PopupProblema --> QuadroRascunho : Abrir Lousa
+  QuadroRascunho --> PopupProblema : Fechar / Esc
+  PopupProblema --> Calculadora : Abrir Calculadora
+  Calculadora --> PopupProblema : Fechar / Esc
+  PopupProblema --> MapaAtivo : Fechar (salva rascunho)
+  PopupProblema --> FeedbackResposta : Enviar Resposta
+  FeedbackResposta --> MapaAtivo : Continuar Gestão
+
+  MapaAtivo --> MenuPausa : Botão Menu / Esc (pausa tempo)
+  MenuPausa --> MapaAtivo : Retomar / Esc
+  MenuPausa --> SlotsSalvamento : Salvar Partida
+  SlotsSalvamento --> MenuPausa : Voltar
+  MenuPausa --> ConfirmarSaidaMenu : Voltar ao Menu
+
+  MapaAtivo --> EventoCampanha : Mês 48 / Mês 96 / Impeachment
+  EventoCampanha --> MapaAtivo : Reeleito (inicia 2º mandato)
+  EventoCampanha --> SlotsSalvamento : Salvar Resultado
+}
+
+ConfirmarSaidaMenu --> MenuPrincipal : Confirmar
+EventoCampanha --> MenuPrincipal : Voltar ao Menu
+@enduml

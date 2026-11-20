@@ -1,0 +1,163 @@
+@startuml arquitetura
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam class {
+  BackgroundColor #F3F7F5
+  BorderColor #17687B
+  FontColor #20383F
+  HeaderBackgroundColor #CFEAF0
+}
+skinparam package {
+  BackgroundColor #FAFAFA
+  BorderColor #51B7CF
+}
+skinparam ArrowColor #17687B
+
+title ProblemaCIDADE - Arquitetura de Software (Godot 4.7)
+
+package "Autoloads (Singletons)" {
+  class SettingsService {
+    +values: Dictionary
+    +game_theme: Theme
+    +update(key, value)
+    +apply_settings()
+    +play_feedback(correct: bool)
+  }
+
+  class SaveManager {
+    +SLOT_COUNT = 3
+    +SCHEMA_VERSION = 2
+    +save_game(time, events, slot, db, city)
+    +load_slot(slot: int): bool
+    +read_slot(slot: int): Dictionary
+    +delete_slot(slot: int)
+  }
+}
+
+package "Domínio e Simulação (godot/game)" {
+  class GameRules <<constantes>> {
+    +TERM_MONTHS = 48
+    +FINAL_MONTH = 96
+    +REELECTION_APPROVAL = 50.0
+    +IMPEACHMENT_APPROVAL = 10.0
+    +DIFFICULTIES: Dictionary
+    +AREAS: Array
+  }
+
+  class CityState {
+    +city_name: String
+    +difficulty: String
+    +funds: float
+    +reputation: float
+    +population: int
+    +indicators: Dictionary
+    +projects: Array
+    +buildings: Array
+    +residences: Array
+    +history: Array
+    +invest(area, amount): String
+    +construct(area, day, lot): String
+    +advance_day(day_index)
+    +advance_month()
+    +apply_problem(def, correct, expired, answer)
+    +projection(key: String): Dictionary
+  }
+
+  class CityVisuals {
+    +MAP_RADIUS = 12
+    +placing: bool
+    +bind(city: CityState)
+    +begin_placement(area: String)
+    +point(lot): Vector2
+    +lot_at(world): Dictionary
+  }
+
+  class ProjectionChart {
+    +series: Dictionary
+    +_draw()
+  }
+}
+
+package "Orquestração e Sistemas (godot/scripts)" {
+  class GameManager {
+    +city: CityState
+    +visuals: CityVisuals
+    +open_problem(event_id)
+    +_invest(area, amount)
+    +_place_building(lot)
+    +_skip_to_next()
+  }
+
+  class TimeManager {
+    +current_day: int
+    +current_month: int
+    +current_year: int
+    +current_speed: Speed
+    +paused: bool
+    +hold(reason: String)
+    +release(reason: String)
+    +skip_until_next_event(checker)
+  }
+
+  class EventManager {
+    +scheduled_events: Array
+    +active_events: Array
+    +resolved_events: Array
+    +expired_events: Array
+    +start_system(month, year)
+    +resolve_event(event_id): bool
+    +expire_event_immediately(event_id): bool
+  }
+
+  class EventDatabase {
+    +events: Dictionary
+    +register_default_problems()
+    +ensure_month_content(month, year)
+    +build_runtime_event(...)
+  }
+}
+
+package "Interface (godot/scenes/ui & godot/ui)" {
+  class GameHUD {
+    +bind_city(city)
+    +bind_time_manager(manager)
+    +update_problem_tabs(events)
+    +refresh_city()
+  }
+
+  class ProblemTemplate {
+    +configure(...)
+    +show_route_graph(distances)
+    +export_draft(): Array
+    +restore_draft(strokes, answer)
+  }
+
+  class ProblemBoard {
+    +strokes: Array
+    +export_strokes(): Array
+    +import_strokes(data)
+  }
+
+  class RouteGraph {
+    +distances: Dictionary
+  }
+}
+
+GameManager --> CityState : gerencia
+GameManager --> CityVisuals : instancia e conecta
+GameManager --> TimeManager : controla
+GameManager --> EventManager : coordena
+GameManager --> EventDatabase : consulta
+GameManager --> GameHUD : atualiza
+GameManager ..> ProblemTemplate : instancia
+GameManager ..> SaveManager : persiste via
+GameManager ..> SettingsService : áudio e tema
+
+CityState ..> GameRules : usa regras
+CityVisuals --> CityState : renderiza
+EventManager --> TimeManager : escuta dias/meses
+EventManager --> EventDatabase : solicita eventos
+GameHUD --> ProjectionChart : exibe tendências
+ProblemTemplate *-- ProblemBoard : quadro de rascunho
+ProblemTemplate ..> RouteGraph : grafo opcional
+@enduml
