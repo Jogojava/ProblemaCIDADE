@@ -240,8 +240,6 @@ a, button, .miniatura, .membro, [role="tab"] {
 .noite .sim-acoes button { background: #2b1e16; color: var(--tinta); }
 .noite .sim-acoes button:hover:not(:disabled) { background: #46342a; }
 .noite .servicos li:hover { background: #46342a; }
-.noite .categorias-problemas li { background: #3a2a1f; }
-.noite .categorias-container { background: #2b1e16; }
 .noite .servicos img { filter: invert(1) brightness(1.4); }
 .noite kbd, .noite code { color: var(--tinta); border-color: #6d5848; }
 .noite .caixa { box-shadow: 0 8px 0 rgba(0,0,0,.6), 0 0 0 1px #000; }

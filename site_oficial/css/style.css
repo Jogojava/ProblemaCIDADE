@@ -225,10 +225,7 @@ kbd, code {
 .cartao h3 { font: 11px/1.4 var(--pixel); margin: 0 0 10px; color: var(--azul-esc); }
 .cartao p { margin: 0; }
 .cartao.perigo h3 { color: var(--vermelho); }
-.categorias-container {
-  margin-top: 36px; padding: 20px;
-  background: var(--areia); border: 3px solid var(--azul); border-radius: 14px;
-}
+.categorias-container { margin-top: 36px; }
 .categorias-container .sub { margin-top: 0; }
 .categorias-problemas {
   list-style: none; padding: 0; margin: 0;
@@ -236,16 +233,16 @@ kbd, code {
 }
 .categorias-problemas li {
   display: flex; align-items: center; gap: 14px; min-width: 0; min-height: 108px;
-  background: #fff; border: 3px solid #000; border-left-width: 9px; border-radius: 10px; padding: 14px;
+  border-left-width: 9px;
 }
 .categorias-problemas img { width: 42px; height: 42px; flex: none; object-fit: contain; image-rendering: pixelated; }
 .categorias-problemas li > div { display: grid; gap: 3px; }
 .categorias-problemas strong { font: 10px/1.5 var(--pixel); }
 .categorias-problemas span { color: var(--suave); font-size: 14px; line-height: 1.4; }
-.categorias-problemas .cat-optional { border-left-color: var(--verde); }
-.categorias-problemas .cat-optional strong { color: var(--verde-esc); }
-.categorias-problemas .cat-common { border-left-color: var(--azul); }
-.categorias-problemas .cat-common strong { color: var(--azul-esc); }
+.categorias-problemas .cat-optional { border-left-color: var(--azul); }
+.categorias-problemas .cat-optional strong { color: var(--azul-esc); }
+.categorias-problemas .cat-common { border-left-color: var(--verde); }
+.categorias-problemas .cat-common strong { color: var(--verde-esc); }
 .categorias-problemas .cat-important { border-left-color: var(--amarelo); }
 .categorias-problemas .cat-important strong { color: var(--amarelo-esc); }
 .categorias-problemas .cat-urgent { border-left-color: var(--vermelho); }
