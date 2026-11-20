@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="godot/assets/ui/credits/pato_jogos_logo.jpg" width="136" alt="Logo de Pato Jogos: um pato pixel art amarelo" />
+  <img src="godot/assets/ui/credits/pato_jogos_logo.jpg" width="136" alt="Logo Duck Games: rosto estilizado de um pato amarelo" />
   <h1>ProblemaCIDADE</h1>
   <p><strong>Administre a cidade. Resolva problemas. Conquiste a reeleição.</strong></p>
   <p>Um jogo educacional de gestão municipal feito por Pato Jogos (Duck Games).</p>
