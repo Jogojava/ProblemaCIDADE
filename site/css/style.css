@@ -212,7 +212,7 @@ kbd, code {
 .nota.erro { color: var(--vermelho); font-weight: 700; }
 
 /* O jogo */
-.grade-cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.grade-cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 16px; }
 .cartao {
   background: #fff;
   border: 3px solid #000;
@@ -248,13 +248,13 @@ kbd, code {
 .barra-cheia.abaixo { background: var(--amarelo); }
 .barra-meta { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: #000; }
 
-.servicos { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.servicos { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .servicos li {
   display: flex; align-items: center; gap: 10px;
   background: #fff; border: 3px solid #000; border-radius: 10px;
-  padding: 10px 14px; font-weight: 800;
+  padding: 12px 14px; font-weight: 800; min-width: 0; overflow-wrap: break-word;
 }
-.servicos img { width: 30px; height: 30px; }
+.servicos img { width: 30px; height: 30px; flex: none; }
 .passos { padding-left: 22px; margin: 0; }
 .passos li { margin-bottom: 8px; }
 
@@ -276,14 +276,15 @@ kbd, code {
 .filtro:hover { transform: translateY(-2px); }
 .filtro.ativo { background: var(--tinta); color: #fff; }
 .contagem { font-weight: 800; color: var(--suave); margin: 0 0 14px; }
-.lista-problemas { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.lista-problemas { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 14px; }
 .problema {
   display: flex; gap: 14px; align-items: flex-start;
   background: #fff; border: 3px solid #000; border-left-width: 10px; border-radius: 12px;
   padding: 16px; animation: surgir .2s ease-out;
 }
 .problema img { flex: none; image-rendering: pixelated; }
-.problema h3 { margin: 4px 0 6px; font-size: 18px; line-height: 1.25; }
+.problema > div { min-width: 0; }
+.problema h3 { overflow-wrap: anywhere; margin: 4px 0 6px; font-size: 18px; line-height: 1.25; }
 .problema p { margin: 0; color: var(--suave); font-size: 15px; }
 .selo { font: 9px/1 var(--pixel); text-transform: uppercase; }
 .cat-optional { border-left-color: var(--verde); } .cat-optional .selo { color: var(--verde-esc); }
@@ -292,7 +293,7 @@ kbd, code {
 .cat-urgent { border-left-color: var(--vermelho); } .cat-urgent .selo { color: var(--vermelho); }
 
 /* Telas */
-.galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 18px; }
 .miniatura {
   padding: 0; background: #fff; border: 3px solid #000; border-radius: 12px; overflow: hidden;
   cursor: zoom-in; text-align: left; font: inherit; color: inherit;
@@ -319,7 +320,7 @@ kbd, code {
 .equipe-topo { display: flex; gap: 20px; align-items: center; margin-bottom: 24px; }
 .equipe-topo .lead { margin: 0; }
 .logo { width: 96px; height: 96px; border: 3px solid #000; border-radius: 14px; object-fit: cover; flex: none; }
-.grade-equipe { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+.grade-equipe { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
 .membro {
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px;
   background: #fff; border: 3px solid #000; border-radius: 14px; padding: 18px 12px;
@@ -329,8 +330,9 @@ kbd, code {
 }
 .membro:hover { transform: translateY(-4px); box-shadow: inset 0 -5px 0 var(--areia), 0 6px 0 rgba(0,0,0,.25); }
 .membro img { width: 104px; height: 104px; object-fit: cover; border-radius: 50%; border: 3px solid #000; margin-bottom: 8px; }
-.membro strong { line-height: 1.25; }
-.membro .login { color: var(--azul-esc); font-weight: 800; font-size: 15px; }
+.membro { min-width: 0; flex: 0 1 180px; }
+.membro strong { line-height: 1.25; overflow-wrap: anywhere; }
+.membro .login { overflow-wrap: anywhere; color: var(--azul-esc); font-weight: 800; font-size: 15px; }
 .membro .papel { font-size: 14px; color: var(--suave); }
 .membro .contrib { font: 9px/1.6 var(--pixel); color: var(--suave); min-height: 1.6em; }
 
@@ -339,7 +341,7 @@ kbd, code {
 .repo-cabeca { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; margin-bottom: 18px; }
 .repo-cabeca h3 { margin: 0; }
 .numeros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-.numeros div { background: #fff; border: 3px solid #000; border-radius: 10px; padding: 14px; text-align: center; }
+.numeros div { min-width: 0; background: #fff; border: 3px solid #000; border-radius: 10px; padding: 14px; text-align: center; }
 .numeros strong { display: block; font: 15px/1.4 var(--pixel); }
 .numeros span { color: var(--suave); font-size: 14px; font-weight: 700; }
 .linguagens { margin-bottom: 28px; }
@@ -377,6 +379,8 @@ kbd, code {
   .abas a:hover { transform: none; }
   .numeros { grid-template-columns: repeat(2, 1fr); }
   .sobre { grid-template-columns: 1fr; }
+  .servicos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .numeros strong { font-size: 12px; }
   .commits li { grid-template-columns: auto 1fr; }
   .commits .meta { grid-column: 2; white-space: normal; }
 }
@@ -388,9 +392,23 @@ kbd, code {
   .pixel-titulo { font-size: 17px; }
   .pixel-btn { font-size: 13px; }
   .lista-problemas, .galeria { grid-template-columns: 1fr; }
-  .grade-equipe { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .grade-equipe { gap: 10px; }
+  .membro { flex-basis: calc(50% - 5px); }
+  .membro { padding: 14px 8px; }
+  .servicos { gap: 8px; }
+  .servicos li { flex-direction: column; justify-content: center; text-align: center; gap: 6px; padding: 12px 6px; font-size: 15px; }
+  .membro .contrib { font-size: 8px; }
+  .numeros { gap: 8px; }
+  .numeros div { padding: 10px 6px; }
+  .numeros strong { font-size: 10px; }
   .membro img { width: 76px; height: 76px; }
   .equipe-topo { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 360px) {
+  .numeros strong { font-size: 9px; }
+  .numeros div { padding: 10px 4px; }
+  .problema { padding: 12px; gap: 10px; }
+  .membro .login { font-size: 13px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
