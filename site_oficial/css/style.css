@@ -50,6 +50,12 @@ kbd, code {
 }
 :focus-visible { outline: 3px solid var(--ciano); outline-offset: 3px; }
 
+/* Contador de visitas flutuante sob o cabeçalho */
+.visitas-site { position: fixed; z-index: 15; top: 76px; right: 18px; display: flex; align-items: center; gap: 9px; min-height: 48px; padding: 6px 11px; color: var(--areia); background: rgba(58,36,22,.96); border: 3px solid #000; border-radius: 8px; box-shadow: inset 0 -4px 0 rgba(0,0,0,.24), 0 3px 0 rgba(0,0,0,.28); }
+.visitas-site svg { display: block; width: 36px; height: 26px; flex: none; }
+.visitas-info { display: grid; gap: 2px; line-height: 1.1; }
+.visitas-info span { color: var(--areia); font: 7px/1.4 var(--pixel); text-transform: uppercase; }
+.visitas-info strong { color: #fff; font: 800 14px/1 var(--texto); font-variant-numeric: tabular-nums; }
 /* ---------- Topo ---------- */
 .topo {
   position: sticky;
@@ -433,6 +439,10 @@ kbd, code {
   .previa-rodape { align-items: flex-start; flex-direction: column; }
 }
 @media (max-width: 480px) {
+  .visitas-site { top: 70px; right: 8px; min-height: 40px; gap: 6px; padding: 4px 8px; }
+  .visitas-site svg { width: 29px; height: 22px; }
+  .visitas-info span { font-size: 6px; }
+  .visitas-info strong { font-size: 12px; }
   body { font-size: 16px; }
   .marca { font-size: 11px; }
   .painel:not(.heroi) { padding: 20px 10px 40px; }
