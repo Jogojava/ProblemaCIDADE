@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProblemaCIDADE</title>
+<meta name="description" content="ProblemaCIDADE: jogo de gestão de cidade em que cada decisão passa por um problema de matemática. Feito pela Pato Jogos.">
+<link rel="icon" href="img/pato_jogos_logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topo">
+  <a class="marca" href="#inicio" data-aba="inicio">Problema<b>CIDADE</b></a>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-controls="abas" aria-label="Abrir menu">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="abas" class="abas" role="tablist" aria-label="Seções do site">
+    <a href="#inicio" role="tab" data-aba="inicio">Início</a>
+    <a href="#jogo" role="tab" data-aba="jogo">O jogo</a>
+    <a href="#problemas" role="tab" data-aba="problemas">Problemas</a>
+    <a href="#telas" role="tab" data-aba="telas">Telas</a>
+    <a href="#equipe" role="tab" data-aba="equipe">Equipe</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- INÍCIO -->
+  <section id="inicio" class="painel heroi" role="tabpanel" data-painel="inicio">
+    <div class="heroi-conteudo">
+      <h1 class="titulo"><span>Problema</span> <span class="ciano">CIDADE</span></h1>
+      <p class="chamada">Governe uma cidade por quatro anos. Cada decisão é um problema de matemática.</p>
+      <div class="botoes-pixel">
+        <a class="pixel-btn azul" href="#jogo" data-aba="jogo">Jogar</a>
+        <a class="pixel-btn cinza" href="#telas" data-aba="telas">Ver telas</a>
+        <a class="pixel-btn verde" href="#problemas" data-aba="problemas">Problemas</a>
+        <a class="pixel-btn amarelo" href="#equipe" data-aba="equipe">Créditos</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- O JOGO -->
+  <section id="jogo" class="painel" role="tabpanel" data-painel="jogo" hidden>
+    <div class="caixa">
+      <h2 class="pixel-titulo">O jogo</h2>
+      <p class="lead">Você é quem administra a cidade. Problemas aparecem, o dinheiro é curto e a eleição chega em quatro anos.</p>
+
+      <div class="grade-cartoes">
+        <article class="cartao">
+          <h3>Objetivo</h3>
+          <p>Chegar à eleição com pelo menos <strong>50% de reputação</strong> e depois concluir o segundo mandato.</p>
+        </article>
+        <article class="cartao">
+          <h3>Problemas</h3>
+          <p>Cada ocorrência tem enunciado, imagem e resposta. Use o <strong>rascunho</strong> e a <strong>calculadora</strong> do jogo.</p>
+        </article>
+        <article class="cartao">
+          <h3>Investimentos</h3>
+          <p>Invista em serviços ou em obras. Uma obra custa <strong>R$ 35.000</strong> e leva <strong>20 dias</strong>.</p>
+        </article>
+        <article class="cartao">
+          <h3>Projeções</h3>
+          <p>Gráficos do histórico com estimativa para os próximos <strong>6 meses</strong>.</p>
+        </article>
+        <article class="cartao perigo">
+          <h3>Impeachment</h3>
+          <p>Reputação abaixo de 10% por três meses seguidos, ou chegando a zero, encerra a gestão.</p>
+        </article>
+        <article class="cartao">
+          <h3>Tempo</h3>
+          <p>Velocidades, pausa no <kbd>Espaço</kbd>, menu no <kbd>Esc</kbd>. Problemas e painéis pausam o calendário.</p>
+        </article>
+      </div>
+
+      <h3 class="sub">Escolha a dificuldade</h3>
+      <div class="dificuldade" role="radiogroup" aria-label="Dificuldade">
+        <button type="button" role="radio" data-dif="facil" aria-checked="false">Fácil</button>
+        <button type="button" role="radio" data-dif="medio" aria-checked="true">Médio</button>
+        <button type="button" role="radio" data-dif="dificil" aria-checked="false">Difícil</button>
+      </div>
+      <div class="reputacao" aria-live="polite">
+        <div class="reputacao-linha">
+          <span>Reputação inicial</span>
+          <strong id="rep-valor">55%</strong>
+        </div>
+        <div class="barra"><div class="barra-cheia" id="rep-barra" style="width:55%"></div><div class="barra-meta" title="Meta da eleição: 50%"></div></div>
+        <p class="nota" id="rep-nota"></p>
+      </div>
+
+      <h3 class="sub">Seis serviços</h3>
+      <ul class="servicos">
+        <li><img src="img/education.svg" alt="">Educação</li>
+        <li><img src="img/health.svg" alt="">Saúde</li>
+        <li><img src="img/water.svg" alt="">Saneamento</li>
+        <li><img src="img/security.svg" alt="">Segurança</li>
+        <li><img src="img/culture.svg" alt="">Cultura</li>
+        <li><img src="img/social.svg" alt="">Assistência</li>
+      </ul>
+
+      <h3 class="sub">Como rodar</h3>
+      <ol class="passos">
+        <li>Instale o <a href="https://godotengine.org/download" target="_blank" rel="noopener">Godot 4.7</a>.</li>
+        <li>Baixe o projeto no <a href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">GitHub</a>.</li>
+        <li>Abra <code>godot/project.godot</code> e aperte <kbd>F5</kbd>.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- PROBLEMAS -->
+  <section id="problemas" class="painel" role="tabpanel" data-painel="problemas" hidden>
+    <div class="caixa">
+      <h2 class="pixel-titulo">Problemas</h2>
+      <p class="lead">Os problemas do jogo vêm em quatro categorias. Filtre para ver quais são.</p>
+      <div class="filtros" role="group" aria-label="Filtrar por categoria">
+        <button type="button" class="filtro ativo" data-cat="todos" aria-pressed="true">Todos</button>
+        <button type="button" class="filtro" data-cat="optional" aria-pressed="false"><img src="img/optional.png" alt="">Opcional</button>
+        <button type="button" class="filtro" data-cat="common" aria-pressed="false"><img src="img/common.png" alt="">Comum</button>
+        <button type="button" class="filtro" data-cat="important" aria-pressed="false"><img src="img/important.png" alt="">Importante</button>
+        <button type="button" class="filtro" data-cat="urgent" aria-pressed="false"><img src="img/urgent.png" alt="">Urgente</button>
+      </div>
+      <p class="contagem" id="contagem" aria-live="polite"></p>
+      <ul class="lista-problemas" id="lista-problemas"></ul>
+    </div>
+  </section>
+
+  <!-- TELAS -->
+  <section id="telas" class="painel" role="tabpanel" data-painel="telas" hidden>
+    <div class="caixa">
+      <h2 class="pixel-titulo">Telas</h2>
+      <p class="lead">Capturas da versão atual do jogo. Clique para ampliar.</p>
+      <div class="galeria" id="galeria"></div>
+    </div>
+  </section>
+
+  <!-- EQUIPE -->
+  <section id="equipe" class="painel" role="tabpanel" data-painel="equipe" hidden>
+    <div class="caixa">
+      <div class="equipe-topo">
+        <img src="img/pato_jogos_logo.jpg" alt="Logo da Pato Jogos" class="logo">
+        <div>
+          <h2 class="pixel-titulo">Equipe</h2>
+          <p class="lead">Pato Jogos. Clique num nome para abrir o perfil no GitHub.</p>
+        </div>
+      </div>
+      <div class="grade-equipe" id="grade-equipe"></div>
+
+      <div class="repo">
+        <div class="repo-cabeca">
+          <h3>Repositório no GitHub</h3>
+          <a class="pixel-btn azul pequeno" href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">Abrir no GitHub</a>
+        </div>
+        <div class="numeros" id="numeros">
+          <div><strong data-num="commits">…</strong><span>commits</span></div>
+          <div><strong data-num="contribuidores">…</strong><span>contribuidores</span></div>
+          <div><strong data-num="criado">…</strong><span>início</span></div>
+          <div><strong data-num="atualizado">…</strong><span>última atualização</span></div>
+        </div>
+        <div class="linguagens" id="linguagens"></div>
+        <h3>Commits recentes</h3>
+        <ul class="commits" id="commits"><li class="carregando">Carregando do GitHub…</li></ul>
+        <p class="nota" id="api-status"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p>ProblemaCIDADE · Pato Jogos · <a href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">GitHub</a></p>
+</footer>
+
+<dialog class="ampliar" id="ampliar" aria-label="Captura ampliada">
+  <button type="button" class="fechar" aria-label="Fechar">×</button>
+  <img alt="">
+  <p></p>
+</dialog>
+
+<script src="js/dados.js"></script>
+<script src="js/github.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
