@@ -9,36 +9,6 @@ const EQUIPE = [
   { nome: "Henrique Daisuke Akiyama", login: "AkiyamaDaisuke", foto: "img/henrique.jpg" }
 ];
 
-const CATEGORIAS = {
-  optional: { nome: "Opcional", icone: "img/optional.png" },
-  common: { nome: "Comum", icone: "img/common.png" },
-  important: { nome: "Importante", icone: "img/important.png" },
-  urgent: { nome: "Urgente", icone: "img/urgent.png" }
-};
-
-const PROBLEMAS = [
-  { titulo: "Ajude AURA na travessia VENIDA", cat: "optional",
-    texto: "Uma senhora precisa atravessar uma rua de 8 metros antes de o sinal fechar. Ela consegue?" },
-  { titulo: "Comer comer para poder crescer", cat: "common",
-    texto: "Transporte fixo, R$ 12 por refeição, 80 alunos e margem de 25%. Qual verba é necessária?" },
-  { titulo: "ABUStecimento & ProporcionaCIDADE", cat: "common",
-    texto: "R$ 300 mil divididos proporcionalmente entre bairros com 50, 30 e 70 famílias." },
-  { titulo: "Juros pelo meu milhão", cat: "common",
-    texto: "Juros simples de 25% ao ano ou compostos de 20% ao ano: qual banco custa menos em dois anos?" },
-  { titulo: "Obra-primarial", cat: "common",
-    texto: "Cinco obras prioritárias, duas por vez. Quantas combinações diferentes existem?" },
-  { titulo: "MedicaMOVImentos", cat: "important",
-    texto: "Duas rotas para levar remédios: compare tempo e custo e escolha uma." },
-  { titulo: "Verba IMSS", cat: "important",
-    texto: "População, orçamento e lógica proposicional decidem se a verba aumenta." },
-  { titulo: "Tsente: moradias após a enchente", cat: "urgent",
-    texto: "120 sobreviventes sem moradia. Qual modelo de casa atende a todos pelo menor custo?" },
-  { titulo: "Intriga do Carroeios", cat: "urgent",
-    texto: "Levar presos ao presídio em 30 minutos sem passar de R$ 6 de pedágio. Dá tempo?" },
-  { titulo: "Pesquisa satisfatória", cat: "optional",
-    texto: "1.200 entrevistados: qual o percentual de aprovação e de desaprovação?" }
-];
-
 const DIFICULDADES = {
   facil: { rep: 65, nota: "Começa com folga sobre a meta da eleição (50%)." },
   medio: { rep: 55, nota: "Começa pouco acima da meta da eleição (50%)." },

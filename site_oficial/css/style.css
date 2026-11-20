@@ -225,6 +225,26 @@ kbd, code {
 .cartao h3 { font: 11px/1.4 var(--pixel); margin: 0 0 10px; color: var(--azul-esc); }
 .cartao p { margin: 0; }
 .cartao.perigo h3 { color: var(--vermelho); }
+.categorias-problemas {
+  list-style: none; padding: 0; margin: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr)); gap: 12px;
+}
+.categorias-problemas li {
+  display: flex; align-items: center; gap: 12px; min-width: 0;
+  background: #fff; border: 3px solid #000; border-left-width: 9px; border-radius: 10px; padding: 14px;
+}
+.categorias-problemas img { width: 42px; height: 42px; flex: none; object-fit: contain; image-rendering: pixelated; }
+.categorias-problemas li > div { display: grid; gap: 3px; }
+.categorias-problemas strong { font: 10px/1.5 var(--pixel); }
+.categorias-problemas span { color: var(--suave); font-size: 14px; line-height: 1.4; }
+.categorias-problemas .cat-optional { border-left-color: var(--verde); }
+.categorias-problemas .cat-optional strong { color: var(--verde-esc); }
+.categorias-problemas .cat-common { border-left-color: var(--azul); }
+.categorias-problemas .cat-common strong { color: var(--azul-esc); }
+.categorias-problemas .cat-important { border-left-color: var(--amarelo); }
+.categorias-problemas .cat-important strong { color: var(--amarelo-esc); }
+.categorias-problemas .cat-urgent { border-left-color: var(--vermelho); }
+.categorias-problemas .cat-urgent strong { color: var(--vermelho); }
 
 .dificuldade { display: flex; gap: 10px; flex-wrap: wrap; }
 .dificuldade button {
@@ -257,40 +277,6 @@ kbd, code {
 .servicos img { width: 30px; height: 30px; flex: none; }
 .passos { padding-left: 22px; margin: 0; }
 .passos li { margin-bottom: 8px; }
-
-/* Problemas */
-.filtros { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
-.filtro {
-  display: inline-flex; align-items: center; gap: 8px;
-  font: 800 16px/1 var(--texto);
-  padding: 8px 16px;
-  min-height: 48px;
-  background: #fff;
-  color: var(--tinta);
-  border: 3px solid #000;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: transform .12s, background .12s;
-}
-.filtro img { width: 28px; height: 28px; image-rendering: pixelated; }
-.filtro:hover { transform: translateY(-2px); }
-.filtro.ativo { background: var(--tinta); color: #fff; }
-.contagem { font-weight: 800; color: var(--suave); margin: 0 0 14px; }
-.lista-problemas { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 14px; }
-.problema {
-  display: flex; gap: 14px; align-items: flex-start;
-  background: #fff; border: 3px solid #000; border-left-width: 10px; border-radius: 12px;
-  padding: 16px; animation: surgir .2s ease-out;
-}
-.problema img { flex: none; image-rendering: pixelated; }
-.problema > div { min-width: 0; }
-.problema h3 { overflow-wrap: anywhere; margin: 4px 0 6px; font-size: 18px; line-height: 1.25; }
-.problema p { margin: 0; color: var(--suave); font-size: 15px; }
-.selo { font: 9px/1 var(--pixel); text-transform: uppercase; }
-.cat-optional { border-left-color: var(--verde); } .cat-optional .selo { color: var(--verde-esc); }
-.cat-common { border-left-color: var(--azul); } .cat-common .selo { color: var(--azul-esc); }
-.cat-important { border-left-color: var(--amarelo); } .cat-important .selo { color: var(--amarelo-esc); }
-.cat-urgent { border-left-color: var(--vermelho); } .cat-urgent .selo { color: var(--vermelho); }
 
 /* Telas */
 .galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 18px; }
@@ -391,7 +377,7 @@ kbd, code {
   .caixa { border-radius: 14px; }
   .pixel-titulo { font-size: 17px; }
   .pixel-btn { font-size: 13px; }
-  .lista-problemas, .galeria { grid-template-columns: 1fr; }
+  .galeria { grid-template-columns: 1fr; }
   .grade-equipe { gap: 10px; }
   .membro { flex-basis: calc(50% - 5px); }
   .membro { padding: 14px 8px; }
@@ -407,7 +393,6 @@ kbd, code {
 @media (max-width: 360px) {
   .numeros strong { font-size: 9px; }
   .numeros div { padding: 10px 4px; }
-  .problema { padding: 12px; gap: 10px; }
   .membro .login { font-size: 13px; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -473,14 +458,7 @@ kbd, code {
 .servicos li img { transition: transform .35s var(--suave-ease); }
 .servicos li:hover img { transform: scale(1.18) rotate(-8deg); }
 
-/* Problemas: entrada em cascata ao filtrar */
-.problema { animation: subir .4s var(--suave-ease) both; animation-delay: calc(var(--i, 0) * 50ms); transition: transform .2s var(--suave-ease), box-shadow .2s; }
-.problema:hover { transform: translateY(-3px); box-shadow: 0 6px 0 rgba(0,0,0,.15); }
-.problema img { transition: transform .3s var(--suave-ease); }
-.problema:hover img { transform: scale(1.12); }
-.filtro:active, .dificuldade button:active { transform: scale(.95); }
-.filtro img { transition: transform .3s var(--suave-ease); }
-.filtro:hover img { transform: rotate(-10deg) scale(1.1); }
+.dificuldade button:active { transform: scale(.95); }
 
 /* Dificuldade: número da reputação pulsa ao trocar */
 .pulsar { animation: pulsar .4s var(--suave-ease); }

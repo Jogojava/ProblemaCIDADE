@@ -33,7 +33,6 @@
   <nav id="abas" class="abas" role="tablist" aria-label="Seções do site">
     <a href="#inicio" role="tab" data-aba="inicio">Início</a>
     <a href="#jogo" role="tab" data-aba="jogo">O jogo</a>
-    <a href="#problemas" role="tab" data-aba="problemas">Problemas</a>
     <a href="#telas" role="tab" data-aba="telas">Telas</a>
     <a href="#download" role="tab" data-aba="download">Download</a>
     <a href="#equipe" role="tab" data-aba="equipe">Equipe</a>
@@ -60,7 +59,6 @@
         <a class="pixel-btn azul" href="#download" data-aba="download">Baixar o jogo</a>
         <a class="pixel-btn cinza" href="#jogo" data-aba="jogo">Como funciona</a>
         <a class="pixel-btn cinza" href="#telas" data-aba="telas">Ver telas</a>
-        <a class="pixel-btn verde" href="#problemas" data-aba="problemas">Problemas</a>
         <a class="pixel-btn amarelo" href="#equipe" data-aba="equipe">Créditos</a>
       </div>
       <ul class="plataformas" aria-label="Plataformas">
@@ -105,6 +103,12 @@
       </div>
 
       <h3 class="sub">Como o jogo funciona</h3>
+      <ul class="categorias-problemas" aria-label="Categorias de ocorrências do jogo">
+        <li class="cat-optional"><img src="img/optional.png" alt=""><div><strong>Opcional</strong><span>Desafio extra que pode ser resolvido ou deixado para depois.</span></div></li>
+        <li class="cat-common"><img src="img/common.png" alt=""><div><strong>Comum</strong><span>Ocorrência frequente ligada à rotina da cidade.</span></div></li>
+        <li class="cat-important"><img src="img/important.png" alt=""><div><strong>Importante</strong><span>Demanda que merece atenção e pode afetar a gestão.</span></div></li>
+        <li class="cat-urgent"><img src="img/urgent.png" alt=""><div><strong>Urgente</strong><span>Situação prioritária que pede uma resposta rápida.</span></div></li>
+      </ul>
       <div class="grade-cartoes">
         <article class="cartao">
           <h3>Objetivo</h3>
@@ -201,23 +205,6 @@
         <a class="pixel-btn verde" href="#download" data-aba="download">Baixar o jogo</a>
         <small>Windows 10/11 (64-bit) e Linux Debian · mínimo de 4 GB de RAM</small>
       </div>
-    </div>
-  </section>
-
-  <!-- PROBLEMAS -->
-  <section id="problemas" class="painel" role="tabpanel" data-painel="problemas" hidden>
-    <div class="caixa">
-      <h2 class="pixel-titulo">Problemas</h2>
-      <p class="lead">Os problemas do jogo vêm em quatro categorias. Filtre para ver quais são.</p>
-      <div class="filtros" role="group" aria-label="Filtrar por categoria">
-        <button type="button" class="filtro ativo" data-cat="todos" aria-pressed="true">Todos</button>
-        <button type="button" class="filtro" data-cat="optional" aria-pressed="false"><img src="img/optional.png" alt="">Opcional</button>
-        <button type="button" class="filtro" data-cat="common" aria-pressed="false"><img src="img/common.png" alt="">Comum</button>
-        <button type="button" class="filtro" data-cat="important" aria-pressed="false"><img src="img/important.png" alt="">Importante</button>
-        <button type="button" class="filtro" data-cat="urgent" aria-pressed="false"><img src="img/urgent.png" alt="">Urgente</button>
-      </div>
-      <p class="contagem" id="contagem" aria-live="polite"></p>
-      <ul class="lista-problemas" id="lista-problemas"></ul>
     </div>
   </section>
 

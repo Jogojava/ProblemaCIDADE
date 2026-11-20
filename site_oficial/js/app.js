@@ -1,4 +1,4 @@
-// Interface do site: abas, menu móvel, dificuldade, filtros, galeria e equipe.
+// Interface do site: abas, menu móvel, dificuldade, galeria e equipe.
 
 const $ = (seletor, raiz = document) => raiz.querySelector(seletor);
 const $$ = (seletor, raiz = document) => [...raiz.querySelectorAll(seletor)];
@@ -15,7 +15,7 @@ function criar(tag, atributos = {}, filhos = []) {
 }
 
 /* ---------- Abas ---------- */
-const ABAS = ["inicio", "jogo", "problemas", "telas", "download", "equipe"];
+const ABAS = ["inicio", "jogo", "telas", "download", "equipe"];
 let equipeCarregada = false, downloadCarregado = false;
 
 function mostrarAba(nome, { rolar = true } = {}) {
@@ -80,35 +80,6 @@ function escolherDificuldade(chave) {
 $(".dificuldade").addEventListener("click", (evento) => {
   const botao = evento.target.closest("button[data-dif]");
   if (botao) escolherDificuldade(botao.dataset.dif);
-});
-
-/* ---------- Problemas ---------- */
-function mostrarProblemas(categoria) {
-  const lista = $("#lista-problemas");
-  lista.replaceChildren();
-  const filtrados = PROBLEMAS.filter((p) => categoria === "todos" || p.cat === categoria);
-  for (const p of filtrados) {
-    const cat = CATEGORIAS[p.cat];
-    lista.append(criar("li", { classe: "problema cat-" + p.cat, style: "--i:" + lista.children.length }, [
-      criar("img", { src: cat.icone, alt: "", width: "40", height: "40" }),
-      criar("div", {}, [
-        criar("span", { classe: "selo", texto: cat.nome }),
-        criar("h3", { texto: p.titulo }),
-        criar("p", { texto: p.texto })
-      ])
-    ]));
-  }
-  const n = filtrados.length;
-  $("#contagem").textContent = n + (n === 1 ? " problema" : " problemas");
-  for (const botao of $$(".filtro")) {
-    const ativo = botao.dataset.cat === categoria;
-    botao.classList.toggle("ativo", ativo);
-    botao.setAttribute("aria-pressed", String(ativo));
-  }
-}
-$(".filtros").addEventListener("click", (evento) => {
-  const botao = evento.target.closest(".filtro");
-  if (botao) mostrarProblemas(botao.dataset.cat);
 });
 
 /* ---------- Galeria ---------- */
@@ -315,6 +286,5 @@ function prepararRevelar() {
 montarEquipe();
 montarGaleria();
 prepararRevelar();
-mostrarProblemas("todos");
 escolherDificuldade("medio");
 mostrarAba(location.hash.slice(1), { rolar: false });
