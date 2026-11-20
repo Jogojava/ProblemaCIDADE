@@ -41,7 +41,8 @@
 <main>
 
   <!-- INÍCIO -->
-  <section id="inicio" class="painel heroi" role="tabpanel" data-painel="inicio">
+  <div id="inicio" class="inicio-painel" role="tabpanel" data-painel="inicio">
+  <section class="painel heroi">
     <div class="ceu" aria-hidden="true">
       <span class="nuvem n1"></span><span class="nuvem n2"></span><span class="nuvem n3"></span>
       <span class="estrelas"></span>
@@ -57,7 +58,7 @@
       <div class="botoes-pixel">
         <a class="pixel-btn azul" href="#download" data-aba="download">Baixar o jogo</a>
         <a class="pixel-btn cinza" href="#jogo" data-aba="jogo">Como funciona</a>
-        <a class="pixel-btn cinza" href="#previa-jogo">Ver prévia</a>
+        <a class="pixel-btn verde" href="#previa-jogo">Ver prévia</a>
         <a class="pixel-btn amarelo" href="#equipe" data-aba="equipe">Créditos</a>
       </div>
       <ul class="plataformas" aria-label="Plataformas">
@@ -66,12 +67,19 @@
         <li>GitHub</li>
       </ul>
     </div>
-    <section class="previa-jogo" id="previa-jogo" aria-labelledby="previa-titulo">
+  </section>
+  <section class="previa-faixa" aria-label="Prévia visual do jogo">
+    <div class="previa-ornamentos" aria-hidden="true">
+      <span class="parque-arbusto um"></span><span class="parque-arbusto dois"></span>
+      <span class="parque-arvore um"></span><span class="parque-arvore dois"></span>
+      <span class="parque-poste um"></span><span class="parque-poste dois"></span>
+    </div>
+    <div class="previa-jogo" id="previa-jogo" aria-labelledby="previa-titulo">
       <div class="previa-topo">
         <div>
           <p class="previa-etiqueta">Prévia do jogo</p>
           <h2 id="previa-titulo">Um passeio por ProblemaCIDADE</h2>
-          <p>Veja um pouco da cidade antes de começar seu mandato.</p>
+          <p>Use as setas para navegar; clique na captura para ampliá-la.</p>
         </div>
         <div class="previa-controles" role="group" aria-label="Controles da prévia">
           <button type="button" id="previa-anterior" aria-label="Mostrar captura anterior">‹</button>
@@ -87,8 +95,17 @@
         <strong id="previa-legenda">Menu principal</strong>
         <div class="previa-pontos" id="previa-pontos" role="group" aria-label="Escolher captura"></div>
       </div>
-    </section>
+    </div>
+    <div class="paisagem-transicao" aria-hidden="true">
+      <span class="arbusto arbusto-1"></span>
+      <span class="arbusto arbusto-2"></span>
+      <span class="arvore-pixel"></span>
+      <span class="arbusto arbusto-3"></span>
+      <span class="arbusto arbusto-4"></span>
+      <div class="estrada-pixel"></div>
+    </div>
   </section>
+</div>
 
   <!-- O JOGO -->
   <section id="jogo" class="painel" role="tabpanel" data-painel="jogo" hidden>

@@ -28,7 +28,7 @@ Todos os caminhos do site são relativos, então ele funciona no endereço `/Pro
 
 ```
 site_oficial/
-  index.html      estrutura das abas (Início, O jogo, Download, Equipe) e prévia de telas na capa
+  index.html      estrutura das abas (Início, O jogo, Download, Equipe) e prévia de telas na página inicial
   css/style.css   visual, estados de hover e regras de responsividade
   css/efeitos.css capa animada, dia e noite, transições, simulador, gráfico e download
   js/dados.js     dados fixos tirados do jogo (equipe, dificuldades, telas)
@@ -43,7 +43,7 @@ site_oficial/
 
 | Aba | O que mostra | Interação |
 |---|---|---|
-| Início | Capa com o fundo do menu, nuvens, carros, botões e prévia em carrossel das telas do jogo | O fundo se move com o mouse (parallax); controles trocam as capturas e permitem ampliá-las |
+| Início | Capa com o fundo do menu, nuvens, carros e botões; carrossel de prévia logo abaixo | O fundo se move com o mouse (parallax); controles trocam as capturas e permitem ampliá-las |
 | O jogo | Objetivo, regras, categorias de ocorrências, seis serviços e como rodar | Escolher a dificuldade muda a reputação inicial (65%, 55% ou 45%); o simulador soma ou tira reputação a cada escolha e diz se haveria reeleição ou impeachment (valores ilustrativos, não os do jogo) |
 | Download | Botão para o `.zip` do último release, com versão, data, tamanho e número de downloads | Dados lidos do Releases do GitHub; instruções para Windows e Linux |
 | Equipe | Integrantes com foto e link para o GitHub, dados do repositório e gráfico de commits por semana | Passar o mouse num cartão o vira e mostra os commits da pessoa; carrega a API na primeira vez que a aba abre |

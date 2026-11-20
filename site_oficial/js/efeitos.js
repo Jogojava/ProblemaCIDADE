@@ -120,23 +120,31 @@ const SOM = (() => {
 (() => {
   const faixa = document.querySelector(".cidade-cresce");
   const cores = ["#6d5848", "#1e9bd7", "#3e4452", "#55d23e", "#e9c40c", "#a58c7a", "#10b8b0", "#e5533d"];
-  let semente = 7;
-  const aleatorio = () => (semente = (semente * 9301 + 49297) % 233280) / 233280; // fixo: sempre a mesma cidade
-  for (let i = 0; i < 26; i++) {
-    const p = document.createElement("span");
-    p.style.setProperty("--h", Math.round(40 + aleatorio() * 110) + "px");
-    p.style.setProperty("--w", Math.round(22 + aleatorio() * 26) + "px");
-    p.style.setProperty("--c", cores[Math.floor(aleatorio() * cores.length)]);
-    p.style.setProperty("--d", (i % 8) * 40 + "ms");
-    faixa.append(p);
+  let semente = 7, quantidadePredios = 0;
+  const aleatorio = () => (semente = (semente * 9301 + 49297) % 233280) / 233280; // cidade fixa e reproduzível
+  function montarCidade() {
+    const desejados = Math.ceil(faixa.clientWidth / 34);
+    if (desejados === quantidadePredios) return;
+    quantidadePredios = desejados;
+    semente = 7;
+    faixa.replaceChildren();
+    for (let i = 0; i < desejados; i++) {
+      const p = document.createElement("span");
+      p.style.setProperty("--h", Math.round(40 + aleatorio() * 110) + "px");
+      p.style.setProperty("--w", Math.round(22 + aleatorio() * 26) + "px");
+      p.style.setProperty("--c", cores[Math.floor(aleatorio() * cores.length)]);
+      p.style.setProperty("--d", (i % 8) * 40 + "ms");
+      faixa.append(p);
+    }
   }
+  montarCidade();
   const atualizar = () => {
     const max = document.documentElement.scrollHeight - innerHeight;
     const p = max > 0 ? Math.min(scrollY / max, 1) : 1;
     faixa.style.setProperty("--p", p.toFixed(3));
   };
   addEventListener("scroll", atualizar, { passive: true });
-  addEventListener("resize", atualizar);
+  addEventListener("resize", () => { montarCidade(); atualizar(); });
   document.addEventListener("click", () => setTimeout(atualizar, 400));
   atualizar();
 })();
