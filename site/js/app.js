@@ -15,8 +15,8 @@ function criar(tag, atributos = {}, filhos = []) {
 }
 
 /* ---------- Abas ---------- */
-const ABAS = ["inicio", "jogo", "problemas", "telas", "equipe"];
-let equipeCarregada = false;
+const ABAS = ["inicio", "jogo", "problemas", "telas", "download", "equipe"];
+let equipeCarregada = false, downloadCarregado = false;
 
 function mostrarAba(nome, { rolar = true } = {}) {
   if (!ABAS.includes(nome)) nome = "inicio";
@@ -29,6 +29,10 @@ function mostrarAba(nome, { rolar = true } = {}) {
   document.body.classList.toggle("na-capa", nome === "inicio");
   fecharMenu();
   if (rolar) window.scrollTo({ top: 0, behavior: "smooth" });
+  if (nome === "download" && !downloadCarregado) {
+    downloadCarregado = true;
+    carregarDownload();
+  }
   if (nome === "equipe" && !equipeCarregada) {
     equipeCarregada = true;
     carregarGitHub();
@@ -41,6 +45,7 @@ document.addEventListener("click", (evento) => {
   evento.preventDefault();
   const nome = link.dataset.aba;
   if (location.hash !== "#" + nome) history.pushState(null, "", "#" + nome);
+  if (window.transicaoPixel) window.transicaoPixel(); // efeito do efeitos.js
   mostrarAba(nome);
 });
 window.addEventListener("popstate", () => mostrarAba(location.hash.slice(1), { rolar: false }));
@@ -117,14 +122,30 @@ function montarGaleria() {
     ]);
     galeria.append(botao);
   });
+  let atual = 0;
+  const mostrarTela = (i, direcao = 0) => {
+    atual = (i + TELAS.length) % TELAS.length;
+    const tela = TELAS[atual], img = $("img", ampliar);
+    img.src = tela.img;
+    img.alt = tela.legenda;
+    $("p", ampliar).textContent = `${tela.legenda} · ${atual + 1} de ${TELAS.length}`;
+    if (direcao) {
+      img.classList.remove("deslizar-esq", "deslizar-dir");
+      void img.offsetWidth;
+      img.classList.add(direcao > 0 ? "deslizar-esq" : "deslizar-dir");
+    }
+  };
   galeria.addEventListener("click", (evento) => {
     const botao = evento.target.closest(".miniatura");
     if (!botao) return;
-    const tela = TELAS[Number(botao.dataset.i)];
-    $("img", ampliar).src = tela.img;
-    $("img", ampliar).alt = tela.legenda;
-    $("p", ampliar).textContent = tela.legenda;
+    mostrarTela(Number(botao.dataset.i));
     ampliar.showModal();
+  });
+  $(".anterior", ampliar).addEventListener("click", () => mostrarTela(atual - 1, -1));
+  $(".proxima", ampliar).addEventListener("click", () => mostrarTela(atual + 1, 1));
+  ampliar.addEventListener("keydown", (evento) => {
+    if (evento.key === "ArrowLeft") mostrarTela(atual - 1, -1);
+    if (evento.key === "ArrowRight") mostrarTela(atual + 1, 1);
   });
   $(".fechar", ampliar).addEventListener("click", () => ampliar.close());
   ampliar.addEventListener("click", (evento) => { if (evento.target === ampliar) ampliar.close(); });
@@ -141,11 +162,20 @@ function montarEquipe() {
       rel: "noopener",
       "data-login": pessoa.login.toLowerCase()
     }, [
-      criar("img", { src: pessoa.foto, alt: "Foto de " + pessoa.nome, loading: "lazy" }),
-      criar("strong", { texto: pessoa.nome }),
-      criar("span", { classe: "login", texto: "@" + pessoa.login }),
-      criar("span", { classe: "papel", texto: "Desenvolvimento" }),
-      criar("span", { classe: "contrib", texto: "" })
+      criar("div", { classe: "membro-giro" }, [
+        criar("div", { classe: "membro-frente" }, [
+          criar("img", { src: pessoa.foto, alt: "Foto de " + pessoa.nome, loading: "lazy" }),
+          criar("strong", { texto: pessoa.nome }),
+          criar("span", { classe: "login", texto: "@" + pessoa.login }),
+          criar("span", { classe: "papel", texto: "Desenvolvimento" }),
+          criar("span", { classe: "contrib", texto: "" })
+        ]),
+        criar("div", { classe: "membro-verso", "aria-hidden": "true" }, [
+          criar("span", { classe: "verso-num", texto: "…" }),
+          criar("span", { classe: "verso-rotulo", texto: "commits no projeto" }),
+          criar("span", { classe: "verso-link", texto: "Abrir GitHub →" })
+        ])
+      ])
     ]));
   }
 }
@@ -179,6 +209,8 @@ async function carregarGitHub() {
       for (const c of lista) {
         const card = $(`.membro[data-login="${c.login.toLowerCase()}"] .contrib`);
         if (card) card.textContent = c.contributions + (c.contributions === 1 ? " commit" : " commits");
+        const verso = $(`.membro[data-login="${c.login.toLowerCase()}"] .verso-num`);
+        if (verso) verso.textContent = c.contributions;
       }
     }),
     GITHUB.linguagens().then(mostrarLinguagens),
@@ -229,6 +261,32 @@ function mostrarCommits(lista) {
       criar("span", { classe: "msg", texto: mensagem }),
       criar("span", { classe: "meta", texto: autor + " · " + formatarData(c.commit.author.date) })
     ]));
+  }
+}
+
+/* ---------- Download (último release do GitHub) ---------- */
+const RELEASES = "https://github.com/" + GITHUB.REPO + "/releases";
+const tamanho = (bytes) => (bytes / 1048576).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " MB";
+
+async function carregarDownload() {
+  const caixa = $("#versao");
+  try {
+    const rel = await GITHUB.ultimaVersao();
+    const zip = rel.assets.find((a) => a.name.endsWith(".zip")) || rel.assets[0];
+    const baixados = rel.assets.reduce((soma, a) => soma + a.download_count, 0);
+    const botao = $("#baixar-jogo");
+    botao.href = zip ? zip.browser_download_url : rel.html_url;
+    botao.removeAttribute("aria-disabled");
+    caixa.replaceChildren(
+      criar("div", {}, [criar("strong", { texto: rel.tag_name }), criar("span", { texto: "versão" })]),
+      criar("div", {}, [criar("strong", { texto: new Date(rel.published_at).toLocaleDateString("pt-BR") }), criar("span", { texto: "publicada em" })]),
+      criar("div", {}, [criar("strong", { texto: zip ? tamanho(zip.size) : "–" }), criar("span", { texto: "tamanho do .zip" })]),
+      criar("div", {}, [criar("strong", { texto: String(baixados) }), criar("span", { texto: baixados === 1 ? "download" : "downloads" })])
+    );
+    if (zip) $("#nome-zip").textContent = zip.name;
+  } catch (erro) {
+    caixa.replaceChildren(criar("p", { classe: "nota erro", texto: "Não deu para consultar o GitHub agora. Os arquivos estão na página de Releases." }));
+    $("#baixar-jogo").href = RELEASES;
   }
 }
 

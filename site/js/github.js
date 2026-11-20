@@ -49,6 +49,7 @@ const GITHUB = (() => {
     contribuidores: () => pedir("/contributors?per_page=100"),
     commits: (n = 8) => pedir("/commits?per_page=" + n),
     linguagens: () => pedir("/languages"),
+    ultimaVersao: () => pedir("/releases/latest"),
     totalCommits
   };
 })();

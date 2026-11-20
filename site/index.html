@@ -10,11 +10,23 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/efeitos.css">
 </head>
-<body>
+<body class="carregando-site">
+
+<div class="tela-carregar" aria-hidden="true">
+  <p>Problema<b>CIDADE</b></p>
+  <div class="carregar-barra"><span></span></div>
+  <small>Carregando a prefeitura…</small>
+</div>
+<div class="transicao" aria-hidden="true"></div>
 
 <header class="topo">
   <a class="marca" href="#inicio" data-aba="inicio">Problema<b>CIDADE</b></a>
+  <div class="controles">
+    <button type="button" class="controle" id="som" aria-pressed="false" aria-label="Ligar sons" title="Sons 8-bit"><span aria-hidden="true">♪</span></button>
+    <button type="button" class="controle" id="noite" aria-pressed="false" aria-label="Modo noite" title="Dia e noite"><span aria-hidden="true">☾</span></button>
+  </div>
   <button class="menu-btn" type="button" aria-expanded="false" aria-controls="abas" aria-label="Abrir menu">
     <span></span><span></span><span></span>
   </button>
@@ -23,6 +35,7 @@
     <a href="#jogo" role="tab" data-aba="jogo">O jogo</a>
     <a href="#problemas" role="tab" data-aba="problemas">Problemas</a>
     <a href="#telas" role="tab" data-aba="telas">Telas</a>
+    <a href="#download" role="tab" data-aba="download">Download</a>
     <a href="#equipe" role="tab" data-aba="equipe">Equipe</a>
   </nav>
 </header>
@@ -31,13 +44,21 @@
 
   <!-- INÍCIO -->
   <section id="inicio" class="painel heroi" role="tabpanel" data-painel="inicio">
+    <div class="ceu" aria-hidden="true">
+      <span class="nuvem n1"></span><span class="nuvem n2"></span><span class="nuvem n3"></span>
+      <span class="estrelas"></span>
+    </div>
+    <div class="rua" aria-hidden="true">
+      <span class="carro c1"></span><span class="carro c2"></span><span class="carro c3"></span>
+    </div>
     <div class="heroi-conteudo">
       <span class="etiqueta">Projeto escolar · IFSP</span>
       <h1 class="titulo"><span>Problema</span> <span class="ciano">CIDADE</span></h1>
       <p class="chamada">Administre a cidade. Resolva problemas. Seja reeleito.</p>
       <p class="chamada-sub">Você é o prefeito: tome decisões durante um mandato de 4 anos, enfrente desafios matemáticos e conduza a cidade ao desenvolvimento — ou ao impeachment.</p>
       <div class="botoes-pixel">
-        <a class="pixel-btn azul" href="#jogo" data-aba="jogo">Jogar</a>
+        <a class="pixel-btn azul" href="#download" data-aba="download">Baixar o jogo</a>
+        <a class="pixel-btn cinza" href="#jogo" data-aba="jogo">Como funciona</a>
         <a class="pixel-btn cinza" href="#telas" data-aba="telas">Ver telas</a>
         <a class="pixel-btn verde" href="#problemas" data-aba="problemas">Problemas</a>
         <a class="pixel-btn amarelo" href="#equipe" data-aba="equipe">Créditos</a>
@@ -142,6 +163,21 @@
         <p class="nota" id="rep-nota"></p>
       </div>
 
+      <h3 class="sub">Simule um mandato</h3>
+      <div class="simulador">
+        <p class="nota">Simulação ilustrativa (os valores não são os do jogo). Começa com a reputação da dificuldade escolhida.</p>
+        <div class="sim-acoes">
+          <button type="button" data-efeito="8" data-texto="Investiu em saúde">Investir em saúde <b>+8</b></button>
+          <button type="button" data-efeito="12" data-texto="Resolveu um problema urgente">Resolver urgente <b>+12</b></button>
+          <button type="button" data-efeito="-10" data-texto="Aumentou impostos">Aumentar impostos <b>−10</b></button>
+          <button type="button" data-efeito="-15" data-texto="Ignorou uma enchente">Ignorar enchente <b>−15</b></button>
+        </div>
+        <div class="reputacao-linha"><span>Reputação simulada</span><strong id="sim-valor">55%</strong></div>
+        <div class="barra"><div class="barra-cheia" id="sim-barra" style="width:55%"></div><div class="barra-meta"></div></div>
+        <p class="sim-status" id="sim-status" aria-live="polite">Faça uma escolha.</p>
+        <button type="button" class="sim-reiniciar" id="sim-reiniciar">Recomeçar</button>
+      </div>
+
       <h3 class="sub">Seis serviços</h3>
       <ul class="servicos">
         <li><img src="img/education.svg" alt="">Educação</li>
@@ -162,7 +198,7 @@
       <div class="baixar">
         <h3>Pronto para governar?</h3>
         <p>O ProblemaCIDADE é gratuito. Comece seu mandato.</p>
-        <a class="pixel-btn verde" href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">Ver no GitHub</a>
+        <a class="pixel-btn verde" href="#download" data-aba="download">Baixar o jogo</a>
         <small>Windows 10/11 (64-bit) e Linux Debian · mínimo de 4 GB de RAM</small>
       </div>
     </div>
@@ -194,6 +230,45 @@
     </div>
   </section>
 
+  <!-- DOWNLOAD -->
+  <section id="download" class="painel" role="tabpanel" data-painel="download" hidden>
+    <div class="caixa">
+      <h2 class="pixel-titulo">Download</h2>
+      <p class="lead">Um só arquivo para Windows e Linux. Baixe, extraia e abra o executável do seu sistema.</p>
+
+      <div class="download-cartao">
+        <a class="pixel-btn verde grande" id="baixar-jogo" href="https://github.com/Jogojava/ProblemaCIDADE/releases" aria-disabled="true">Baixar ProblemaCIDADE</a>
+        <p class="nota">Arquivo: <code id="nome-zip">ProblemaCIDADE.zip</code> · direto do <a href="https://github.com/Jogojava/ProblemaCIDADE/releases" target="_blank" rel="noopener">Releases do GitHub</a></p>
+        <div class="numeros" id="versao">
+          <div><strong>…</strong><span>versão</span></div>
+          <div><strong>…</strong><span>publicada em</span></div>
+          <div><strong>…</strong><span>tamanho do .zip</span></div>
+          <div><strong>…</strong><span>downloads</span></div>
+        </div>
+      </div>
+
+      <div class="sistemas">
+        <article class="cartao">
+          <h3>Windows 10/11</h3>
+          <ol class="passos">
+            <li>Extraia o .zip.</li>
+            <li>Abra a pasta <code>Windows</code> e dê dois cliques em <code>ProblemaCIDADE.exe</code>.</li>
+            <li>Se o Windows avisar que o app é desconhecido, clique em <strong>Mais informações → Executar assim mesmo</strong>.</li>
+          </ol>
+        </article>
+        <article class="cartao">
+          <h3>Linux (Debian)</h3>
+          <ol class="passos">
+            <li>Extraia o .zip.</li>
+            <li>No terminal, dentro da pasta <code>Linux</code>: <code>chmod +x ProblemaCIDADE.x86_64</code></li>
+            <li>Rode <code>./ProblemaCIDADE.x86_64</code>.</li>
+          </ol>
+        </article>
+      </div>
+      <p class="nota">Requisitos mínimos: 64 bits, 4 GB de RAM e placa de vídeo integrada. Não precisa instalar o Godot.</p>
+    </div>
+  </section>
+
   <!-- EQUIPE -->
   <section id="equipe" class="painel" role="tabpanel" data-painel="equipe" hidden>
     <div class="caixa">
@@ -218,13 +293,18 @@
           <div><strong data-num="atualizado">…</strong><span>última atualização</span></div>
         </div>
         <div class="linguagens" id="linguagens"></div>
+        <h3>Commits por semana</h3>
+        <div class="grafico" id="grafico"><p class="nota">Carregando do GitHub…</p></div>
         <h3>Commits recentes</h3>
         <ul class="commits" id="commits"><li class="carregando">Carregando do GitHub…</li></ul>
         <p class="nota" id="api-status"></p>
       </div>
     </div>
   </section>
+
+  <div class="cidade-cresce" aria-hidden="true"></div>
 </main>
+<div class="pato" aria-hidden="true"></div>
 
 <footer class="rodape">
   <p>ProblemaCIDADE · jogo educativo de administração pública · projeto escolar do IFSP Campus São Paulo</p>
@@ -234,6 +314,8 @@
 
 <dialog class="ampliar" id="ampliar" aria-label="Captura ampliada">
   <button type="button" class="fechar" aria-label="Fechar">×</button>
+  <button type="button" class="seta anterior" aria-label="Captura anterior">‹</button>
+  <button type="button" class="seta proxima" aria-label="Próxima captura">›</button>
   <img alt="">
   <p></p>
 </dialog>
@@ -241,5 +323,6 @@
 <script src="js/dados.js"></script>
 <script src="js/github.js"></script>
 <script src="js/app.js"></script>
+<script src="js/efeitos.js"></script>
 </body>
 </html>

@@ -28,11 +28,14 @@ Todos os caminhos do site são relativos, então ele funciona no endereço `/Pro
 
 ```
 site/
-  index.html      estrutura das abas (Início, O jogo, Problemas, Telas, Equipe)
+  index.html      estrutura das abas (Início, O jogo, Problemas, Telas, Download, Equipe)
   css/style.css   visual, estados de hover e regras de responsividade
+  css/efeitos.css capa animada, dia e noite, transições, simulador, gráfico e download
   js/dados.js     dados fixos tirados do jogo (equipe, problemas, dificuldades, telas)
   js/github.js    acesso à API do GitHub, com cache
-  js/app.js       abas, menu móvel, filtros, galeria e montagem da equipe no DOM
+  js/app.js       abas, menu móvel, filtros, galeria, download e montagem da equipe no DOM
+  js/efeitos.js   carregamento, transição entre abas, parallax, sons, dia e noite,
+                  cidade que cresce, simulador, gráfico de commits e o pato
   img/            arte do jogo, fotos da equipe, ícones e capturas (img/telas/)
 ```
 
@@ -40,11 +43,12 @@ site/
 
 | Aba | O que mostra | Interação |
 |---|---|---|
-| Início | Capa com o fundo do menu do jogo e botões no estilo dos botões do jogo | Botões levam às outras abas |
-| O jogo | Objetivo, regras, seis serviços e como rodar | Escolher a dificuldade muda a reputação inicial na barra (65%, 55% ou 45%) |
+| Início | Capa com o fundo do menu do jogo, nuvens e carros passando, e botões no estilo do jogo | O fundo se move com o mouse (parallax); botões levam às outras abas |
+| O jogo | Objetivo, regras, seis serviços e como rodar | Escolher a dificuldade muda a reputação inicial (65%, 55% ou 45%); o simulador soma ou tira reputação a cada escolha e diz se haveria reeleição ou impeachment (valores ilustrativos, não os do jogo) |
 | Problemas | Os 10 problemas do banco de eventos do jogo | Filtro por categoria (opcional, comum, importante, urgente) com contagem |
-| Telas | Capturas da versão atual do jogo | Clique abre a imagem ampliada (`<dialog>`), fecha no ×, no fundo ou com Esc |
-| Equipe | Integrantes com foto e link para o GitHub, e dados do repositório | Carrega a API do GitHub na primeira vez que a aba abre |
+| Telas | Capturas da versão atual do jogo | Clique abre a imagem ampliada (`<dialog>`); setas na tela ou ← → do teclado trocam a captura; fecha no ×, no fundo ou com Esc |
+| Download | Botão para o `.zip` do último release, com versão, data, tamanho e número de downloads | Dados lidos do Releases do GitHub; instruções para Windows e Linux |
+| Equipe | Integrantes com foto e link para o GitHub, dados do repositório e gráfico de commits por semana | Passar o mouse num cartão o vira e mostra os commits da pessoa; carrega a API na primeira vez que a aba abre |
 
 As abas usam o endereço (`#jogo`, `#equipe`…), então dá para mandar o link de uma aba e os botões voltar e avançar do navegador funcionam.
 
@@ -65,11 +69,25 @@ As abas usam o endereço (`#jogo`, `#equipe`…), então dá para mandar o link 
 | `GET /repos/.../contributors` | Número de contribuidores e commits de cada integrante no cartão dele |
 | `GET /repos/.../languages` | Barra de linguagens do repositório |
 | `GET /repos/.../commits?per_page=8` | Lista dos commits recentes com link para cada um |
+| `GET /repos/.../stats/participation` | Gráfico de commits das últimas 26 semanas (se o GitHub responder 202, o site tenta de novo) |
+| `GET /repos/.../releases/latest` | Aba Download: link do `.zip`, versão, data, tamanho e downloads |
 
-- **Limite:** sem login, o GitHub aceita 60 pedidos por hora por IP. Cada abertura da aba usa 5. Por isso as respostas ficam em `sessionStorage` por 10 minutos.
+- **Limite:** sem login, o GitHub aceita 60 pedidos por hora por IP. Cada abertura da aba usa 6. Por isso as respostas ficam em `sessionStorage` por 10 minutos.
 - **Erros:** se a API falhar ou o limite acabar, a aba continua funcionando (fotos, nomes e links são fixos) e mostra um aviso em vermelho explicando o motivo.
 
 Para trocar o repositório, altere `REPO` em `js/github.js`. Para mudar integrantes ou problemas, edite `js/dados.js`.
+
+## Efeitos e preferências
+
+- **Tela de carregamento** pixelada na primeira visita da sessão.
+- **Transição** em quadradinhos ao trocar de aba.
+- **Sons 8-bit** (botão ♪ no topo), feitos com Web Audio. Começam desligados.
+- **Dia e noite** (botão ☾/☀): a capa ganha céu escuro, estrelas e faróis acesos, e as caixas ficam escuras.
+- **Cidade que cresce**: prédios em pixel acima do rodapé que sobem conforme a página é rolada.
+- **Cursor** em pixel art.
+- **Pato:** ↑↑↓↓←→←→ B A, ou cinco cliques no logo da equipe.
+
+Som e modo noite ficam salvos no `localStorage` do navegador.
 
 ## Responsividade
 
