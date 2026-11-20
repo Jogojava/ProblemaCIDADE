@@ -18,7 +18,7 @@ Site de apresentação do jogo, feito com HTML, CSS e JavaScript puros, sem bibl
 
 ## Publicação no GitHub Pages
 
-O workflow `.github/workflows/pages.yml` publica a pasta `site/` sempre que algo nela muda na `main` (também dá para rodar à mão na aba *Actions*). Não há etapa de build: a pasta é enviada como está.
+O workflow `.github/workflows/pages.yml` publica a pasta `site/` sempre que algo nela muda no branch `site` (também dá para rodar à mão na aba *Actions*). Não há etapa de build: a pasta é enviada como está.
 
 Configuração, feita uma vez por alguém com acesso de admin: *Settings → Pages → Build and deployment → Source:* **GitHub Actions**.
 
