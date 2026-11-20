@@ -149,6 +149,48 @@ kbd, code {
   text-shadow: 0 2px 6px rgba(0,0,0,.8);
 }
 .botoes-pixel { display: grid; gap: 14px; max-width: 420px; margin: 0 auto; }
+.etiqueta {
+  display: inline-block; margin-bottom: 16px;
+  font: 10px/1 var(--pixel); color: #fff;
+  background: var(--ciano); border: 3px solid #000; border-radius: 8px;
+  padding: 9px 12px 11px; box-shadow: inset 0 -4px 0 #0a7f79;
+}
+.chamada-sub {
+  margin: -18px auto 30px; max-width: 600px;
+  color: #fff; font-weight: 700; text-shadow: 0 2px 6px rgba(0,0,0,.9);
+}
+.plataformas { list-style: none; padding: 0; margin: 26px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.plataformas li {
+  font-weight: 800; font-size: 15px; color: #fff;
+  background: rgba(36,19,9,.75); border: 2px solid #000; border-radius: 999px; padding: 4px 14px;
+}
+
+/* Sobre (O jogo) */
+.sobre { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; align-items: start; }
+.sobre p { margin: 0; }
+.sub.primeiro { margin-top: 0; }
+.objetivo {
+  position: relative; background: #fff; border: 3px solid #000; border-radius: 14px;
+  padding: 30px 22px 20px; box-shadow: inset 0 -5px 0 var(--areia);
+}
+.objetivo .fita {
+  position: absolute; top: -14px; left: 18px;
+  font: 9px/1 var(--pixel); color: #fff; background: var(--azul);
+  border: 3px solid #000; border-radius: 6px; padding: 7px 10px 8px;
+}
+.objetivo h3 { font: 12px/1.4 var(--pixel); margin: 0 0 10px; }
+.objetivo ul { margin: 14px 0 0; padding-left: 20px; }
+.objetivo li { margin-bottom: 4px; }
+.pos { color: var(--verde-esc); }
+.neg { color: var(--vermelho); }
+.numeros-jogo { margin: 28px 0 0; }
+.baixar {
+  margin-top: 40px; padding: 28px 20px; text-align: center;
+  background: var(--terra-2); color: #fff; border: 4px solid #000; border-radius: 14px;
+}
+.baixar h3 { font: 15px/1.4 var(--pixel); margin: 0 0 8px; }
+.baixar p { margin: 0 0 20px; }
+.baixar small { display: block; margin-top: 18px; color: var(--areia); }
 
 /* ---------- Painéis ---------- */
 .painel:not(.heroi) { padding: 40px 16px 64px; }
@@ -289,6 +331,7 @@ kbd, code {
 .membro img { width: 104px; height: 104px; object-fit: cover; border-radius: 50%; border: 3px solid #000; margin-bottom: 8px; }
 .membro strong { line-height: 1.25; }
 .membro .login { color: var(--azul-esc); font-weight: 800; font-size: 15px; }
+.membro .papel { font-size: 14px; color: var(--suave); }
 .membro .contrib { font: 9px/1.6 var(--pixel); color: var(--suave); min-height: 1.6em; }
 
 .repo { margin-top: 40px; border-top: 4px dashed #cdb9a3; padding-top: 28px; }
@@ -314,6 +357,7 @@ kbd, code {
 .commits .carregando, .commits .vazio { display: block; color: var(--suave); }
 
 /* Rodapé */
+.rodape p { margin: 4px 0; font-size: 15px; }
 .rodape { text-align: center; color: var(--areia); padding: 18px 16px; border-top: 4px solid #000; background: var(--terra); }
 .rodape a { color: var(--ciano); }
 .na-capa .rodape { display: none; }
@@ -332,6 +376,7 @@ kbd, code {
   .abas a { padding: 18px 20px; border-radius: 0; font-size: 12px; }
   .abas a:hover { transform: none; }
   .numeros { grid-template-columns: repeat(2, 1fr); }
+  .sobre { grid-template-columns: 1fr; }
   .commits li { grid-template-columns: auto 1fr; }
   .commits .meta { grid-column: 2; white-space: normal; }
 }

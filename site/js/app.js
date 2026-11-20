@@ -140,6 +140,7 @@ function montarEquipe() {
       criar("img", { src: pessoa.foto, alt: "Foto de " + pessoa.nome, loading: "lazy" }),
       criar("strong", { texto: pessoa.nome }),
       criar("span", { classe: "login", texto: "@" + pessoa.login }),
+      criar("span", { classe: "papel", texto: "Desenvolvimento" }),
       criar("span", { classe: "contrib", texto: "" })
     ]));
   }

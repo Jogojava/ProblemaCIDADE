@@ -32,14 +32,21 @@
   <!-- INÍCIO -->
   <section id="inicio" class="painel heroi" role="tabpanel" data-painel="inicio">
     <div class="heroi-conteudo">
+      <span class="etiqueta">Projeto escolar · IFSP</span>
       <h1 class="titulo"><span>Problema</span> <span class="ciano">CIDADE</span></h1>
-      <p class="chamada">Governe uma cidade por quatro anos. Cada decisão é um problema de matemática.</p>
+      <p class="chamada">Administre a cidade. Resolva problemas. Seja reeleito.</p>
+      <p class="chamada-sub">Você é o prefeito: tome decisões durante um mandato de 4 anos, enfrente desafios matemáticos e conduza a cidade ao desenvolvimento — ou ao impeachment.</p>
       <div class="botoes-pixel">
         <a class="pixel-btn azul" href="#jogo" data-aba="jogo">Jogar</a>
         <a class="pixel-btn cinza" href="#telas" data-aba="telas">Ver telas</a>
         <a class="pixel-btn verde" href="#problemas" data-aba="problemas">Problemas</a>
         <a class="pixel-btn amarelo" href="#equipe" data-aba="equipe">Créditos</a>
       </div>
+      <ul class="plataformas" aria-label="Plataformas">
+        <li>Windows 10/11</li>
+        <li>Linux Debian</li>
+        <li>GitHub</li>
+      </ul>
     </div>
   </section>
 
@@ -47,8 +54,36 @@
   <section id="jogo" class="painel" role="tabpanel" data-painel="jogo" hidden>
     <div class="caixa">
       <h2 class="pixel-titulo">O jogo</h2>
-      <p class="lead">Você é quem administra a cidade. Problemas aparecem, o dinheiro é curto e a eleição chega em quatro anos.</p>
+      <p class="lead">Um jogo educativo de administração pública que une entretenimento e aprendizado. Cada escolha tem consequências na economia, na população e na sua reputação como prefeito.</p>
 
+      <div class="sobre">
+        <div>
+          <h3 class="sub primeiro">Gestão com consequências</h3>
+          <p>Você lida com infraestrutura, serviços públicos, investimentos e prioridades de governo. Orçamento limitado, gestão de tempo e a repercussão das escolhas definem o rumo da cidade.</p>
+          <h3 class="sub">Matemática na prática</h3>
+          <p>Grafos, funções de 1º e 2º grau, estatística, matemática financeira e operadores lógicos aparecem dentro da jogabilidade: você resolve problemas reais enquanto governa.</p>
+        </div>
+        <aside class="objetivo">
+          <span class="fita">Objetivo do jogador</span>
+          <h3>Chegar à reeleição</h3>
+          <p>As decisões levam à <b class="pos">reeleição</b>, à <b class="neg">não reeleição</b> ou até ao <b class="neg">impeachment</b>.</p>
+          <ul>
+            <li>Reputação, orçamento e indicadores sociais</li>
+            <li>Desafios matemáticos contextualizados</li>
+            <li>Passagem de tempo em 3 velocidades</li>
+            <li>Até 3 salvamentos simultâneos</li>
+          </ul>
+        </aside>
+      </div>
+
+      <div class="numeros numeros-jogo">
+        <div><strong>4</strong><span>anos de mandato</span></div>
+        <div><strong>12</strong><span>requisitos funcionais</span></div>
+        <div><strong>3</strong><span>níveis de dificuldade</span></div>
+        <div><strong>2</strong><span>idiomas (PT-BR / EN)</span></div>
+      </div>
+
+      <h3 class="sub">Como o jogo funciona</h3>
       <div class="grade-cartoes">
         <article class="cartao">
           <h3>Objetivo</h3>
@@ -72,7 +107,23 @@
         </article>
         <article class="cartao">
           <h3>Tempo</h3>
-          <p>Velocidades, pausa no <kbd>Espaço</kbd>, menu no <kbd>Esc</kbd>. Problemas e painéis pausam o calendário.</p>
+          <p>Três velocidades: normal (3 min/mês), rápido (1,5 min/mês) e muito rápido (30 s/mês). Pausa no <kbd>Espaço</kbd>, menu no <kbd>Esc</kbd>.</p>
+        </article>
+        <article class="cartao">
+          <h3>Construções</h3>
+          <p>Obras resolvem problemas urgentes ou melhoram o governo. Um engenheiro precisa de ajuda com cálculos? Resolva e adiante a obra.</p>
+        </article>
+        <article class="cartao">
+          <h3>Salvamentos</h3>
+          <p>Até <strong>três</strong> slots de save independentes.</p>
+        </article>
+        <article class="cartao">
+          <h3>Câmera livre</h3>
+          <p>Movimente a câmera pela cidade e ajuste o zoom para ver cada região.</p>
+        </article>
+        <article class="cartao">
+          <h3>Pausa segura</h3>
+          <p>Pause sem consequências, inclusive durante ocorrências e pop-ups.</p>
         </article>
       </div>
 
@@ -107,6 +158,13 @@
         <li>Baixe o projeto no <a href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">GitHub</a>.</li>
         <li>Abra <code>godot/project.godot</code> e aperte <kbd>F5</kbd>.</li>
       </ol>
+
+      <div class="baixar">
+        <h3>Pronto para governar?</h3>
+        <p>O ProblemaCIDADE é gratuito. Comece seu mandato.</p>
+        <a class="pixel-btn verde" href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">Ver no GitHub</a>
+        <small>Windows 10/11 (64-bit) e Linux Debian · mínimo de 4 GB de RAM</small>
+      </div>
     </div>
   </section>
 
@@ -143,7 +201,7 @@
         <img src="img/pato_jogos_logo.jpg" alt="Logo da Pato Jogos" class="logo">
         <div>
           <h2 class="pixel-titulo">Equipe</h2>
-          <p class="lead">Pato Jogos. Clique num nome para abrir o perfil no GitHub.</p>
+          <p class="lead">Pato Jogos: alunos do 3º ano de Desenvolvimento de Sistemas, IFSP Campus São Paulo (2026). Clique num nome para abrir o perfil no GitHub.</p>
         </div>
       </div>
       <div class="grade-equipe" id="grade-equipe"></div>
@@ -169,7 +227,9 @@
 </main>
 
 <footer class="rodape">
-  <p>ProblemaCIDADE · Pato Jogos · <a href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">GitHub</a></p>
+  <p>ProblemaCIDADE · jogo educativo de administração pública · projeto escolar do IFSP Campus São Paulo</p>
+  <p><a href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">GitHub</a> · <a href="mailto:akiyama.daisuke@aluno.ifsp.edu.br">akiyama.daisuke@aluno.ifsp.edu.br</a></p>
+  <p>© 2026 Pato Jogos (Duck Games)</p>
 </footer>
 
 <dialog class="ampliar" id="ampliar" aria-label="Captura ampliada">
