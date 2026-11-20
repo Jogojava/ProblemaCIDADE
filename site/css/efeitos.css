@@ -267,3 +267,4 @@ a, button, .miniatura, .membro, [role="tab"], .filtro {
 @media (max-width: 700px) { .sistemas { grid-template-columns: 1fr; } }
 @media (max-width: 480px) { .pixel-btn.grande { font-size: 11px; padding: 16px 12px 20px; } }
 @media (max-width: 400px) { .download-cartao { padding: 20px 8px 12px; } .download-cartao .numeros { gap: 6px; } .download-cartao .numeros strong { font-size: 8px; } .pixel-btn.grande { font-size: 11px; padding: 16px 12px 20px; max-width: 100%; } }
+.pixel-btn.grande { font-size: clamp(11px, 2.9vw, 17px); white-space: nowrap; }
