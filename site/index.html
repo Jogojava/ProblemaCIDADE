@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProblemaCidade — Jogo de Administração Pública</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <nav class="navbar">
+            <a href="#home" class="logo">
+                <span class="logo-mark">🏙️</span>
+                <span class="logo-text">Problema<span>CIDADE</span></span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">Início</a></li>
+                <li><a href="#sobre">Sobre</a></li>
+                <li><a href="#mecanicas">Mecânicas</a></li>
+                <li><a href="#requisitos">Requisitos</a></li>
+                <li><a href="#equipe">Equipe</a></li>
+                <li><a href="#download" class="btn-nav">Baixar Jogo</a></li>
+            </ul>
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+                <span></span><span></span><span></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="home">
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <span class="hero-badge">🎓 Projeto Escolar · IFSP</span>
+            <h1 class="hero-title">
+                Administre a cidade.<br>
+                <span class="highlight">Resolva problemas.</span><br>
+                Seja reeleito.
+            </h1>
+            <p class="hero-subtitle">
+                Em <strong>ProblemaCidade</strong> você é o prefeito. Tome decisões estratégicas
+                durante um mandato de 4 anos, enfrente desafios matemáticos contextualizados
+                e conduza a cidade ao desenvolvimento — ou ao impeachment.
+            </p>
+            <div class="hero-buttons">
+                <a href="#download" class="btn btn-primary">Download Gratuito</a>
+                <a href="#sobre" class="btn btn-ghost">Conhecer o Jogo</a>
+            </div>
+            <div class="hero-platforms">
+                <span>Disponível para</span>
+                <div class="platforms">
+                    <span class="platform">🪟 Windows 10/11</span>
+                    <span class="platform">🐧 Linux Debian</span>
+                    <span class="platform">📦 GitHub</span>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-hint">
+            <span></span>
+        </div>
+    </section>
+
+    <!-- ===== SOBRE ===== -->
+    <section class="section about" id="sobre">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-tag">Sobre o projeto</span>
+                <h2 class="section-title">Uma cidade na sua mão</h2>
+                <p class="section-desc">
+                    ProblemaCidade é um jogo educativo de administração pública que une
+                    entretenimento e aprendizado. Cada escolha gera consequências reais:
+                    na economia, na população e na sua reputação como prefeito.
+                </p>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-text">
+                    <h3>Gestão com consequências</h3>
+                    <p>
+                        Você assume o papel de prefeito e precisa lidar com desafios de
+                        infraestrutura, serviços públicos, investimentos e prioridades
+                        governamentais. Limitações orçamentárias, gestão de tempo e
+                        repercussões das suas escolhas definem o rumo da cidade.
+                    </p>
+                    <h3>Matemática na prática</h3>
+                    <p>
+                        Conceitos como <strong>grafos, funções de 1º e 2º grau, estatística,
+                        matemática financeira e operadores lógicos</strong> aparecem integrados
+                        à jogabilidade — você resolve problemas reais enquanto governa.
+                    </p>
+                    <div class="stats">
+                        <div class="stat">
+                            <span class="stat-num">4</span>
+                            <span class="stat-label">anos de mandato</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-num">12</span>
+                            <span class="stat-label">requisitos funcionais</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-num">3</span>
+                            <span class="stat-label">níveis de dificuldade</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-num">2</span>
+                            <span class="stat-label">idiomas (PT-BR / EN)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="about-card">
+                    <div class="card-ribbon">Objetivo do jogador</div>
+                    <h4>Chegar à reeleição</h4>
+                    <p>
+                        Administre a cidade de forma eficiente durante o mandato.
+                        Suas decisões podem levar à <span class="pos">reeleição</span>,
+                        à <span class="neg">não reeleição</span> ou até ao
+                        <span class="neg">impeachment</span>.
+                    </p>
+                    <ul class="about-list">
+                        <li>📊 Reputação, orçamento e indicadores sociais</li>
+                        <li>🧠 Desafios matemáticos contextualizados</li>
+                        <li>⏱️ Passagem de tempo em 3 velocidades</li>
+                        <li>💾 Até 3 salvamentos simultâneos</li>
+                    </ul>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MECÂNICAS ===== -->
+    <section class="section features" id="mecanicas">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-tag">Mecânicas</span>
+                <h2 class="section-title">Como o jogo funciona</h2>
+                <p class="section-desc">
+                    Sistemas pensados para unir gestão pública, matemática computacional
+                    e tomada de decisão.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <article class="feature-card">
+                    <div class="feature-icon">🏗️</div>
+                    <h3>Construções</h3>
+                    <p>Construa estruturas para resolver problemas urgentes ou melhorar o governo. Cada obra leva dias no jogo para ser concluída.</p>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">🧮</div>
+                    <h3>Desafios matemáticos</h3>
+                    <p>Um engenheiro precisa de ajuda com cálculos? Resolva equações para adiantar obras e evitar atrasos.</p>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Investimentos</h3>
+                    <p>Aplique verbas e construa instalações em diferentes áreas da cidade — ações independentes das missões.</p>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Projeções do governo</h3>
+                    <p>Gráficos estimam popularidade, dinheiro, educação, desemprego e fome para os próximos 6 meses, com base nos 12 meses anteriores.</p>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <h3>Passagem de tempo</h3>
+                    <p>Três velocidades: normal (3 min/mês), rápido (1,5 min/mês) e muito rápido (30 s/mês). Pule períodos até surgir uma ocorrência.</p>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">🎮</div>
+                    <h3>Dificuldade ajustável</h3>
+                    <p>Modos Fácil, Médio e Difícil alteram reputação inicial, frequência de problemas e ganho de reputação.</p>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3>Até 3 salvamentos</h3>
+                    <p>Crie, armazene e acesse até três slots de save independentes.</p>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">🎥</div>
+                    <h3>Câmera livre</h3>
+                    <p>Movimente a câmera ao redor da cidade e ajuste o zoom para visualizar melhor cada região.</p>
+                </article>
+                <article class="feature-card">
+                    <div class="feature-icon">⏸️</div>
+                    <h3>Pausa segura</h3>
+                    <p>Pause o jogo sem consequências, inclusive durante ocorrências e pop-ups.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== REQUISITOS ===== -->
+    <!--<section class="section requirements" id="requisitos">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-tag">Documentação técnica</span>
+                <h2 class="section-title">Requisitos do sistema</h2>
+                <p class="section-desc">
+                    Transparência sobre o que foi planejado: funcionais e não funcionais.
+                </p>
+            </div>
+
+            <div class="req-tabs">
+                <button class="req-tab active" data-tab="rf">Funcionais (RF)</button>
+                <button class="req-tab" data-tab="rnf">Não funcionais (RNF)</button>
+            </div>
+
+            <div class="req-panel active" id="rf">
+                <div class="req-list">
+                    <div class="req-item"><span class="req-code">RF01</span><div><h4>Criar salvamentos</h4><p>Até três slots de save independentes.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF02</span><div><h4>Selecionar dificuldade</h4><p>Fácil, Médio e Difícil alteram reputação inicial e progressão.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF03</span><div><h4>Configurar áudio</h4><p>Volume, silenciar, efeitos e música de fundo.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF04</span><div><h4>Configurar vídeo</h4><p>Qualidade gráfica, resolução e modo de exibição.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF05</span><div><h4>Configurações gerais</h4><p>Idioma, preferências e pausa automática em inatividade.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF06</span><div><h4>Adicionar construções</h4><p>Obras com tempo de conclusão em dias do jogo.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF07</span><div><h4>Resolver problemas</h4><p>Desafios matemáticos contextualizados, como equações de 2º grau.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF08</span><div><h4>Fazer investimento</h4><p>Aplicação de verbas em áreas diversas da cidade.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF09</span><div><h4>Projeções do governo</h4><p>Gráficos de indicadores dos próximos 6 meses.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF10</span><div><h4>Movimentar visão</h4><p>Câmera livre com zoom ao redor da cidade.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF11</span><div><h4>Passar o tempo</h4><p>Três velocidades e função pular até ocorrência.</p></div></div>
+                    <div class="req-item"><span class="req-code">RF12</span><div><h4>Pausar jogabilidade</h4><p>Pausa segura sem consequências.</p></div></div>
+                </div>
+            </div>
+
+            <div class="req-panel" id="rnf">
+                <div class="req-list">
+                    <div class="req-item"><span class="req-code">RNF01</span><div><h4>Tempo de resposta</h4><p>Ações respondidas em menos de 600 ms.</p></div></div>
+                    <div class="req-item"><span class="req-code">RNF02</span><div><h4>Usabilidade</h4><p>Descrição contextual ao passar o cursor por 500 ms sobre elemento interativo.</p></div></div>
+                    <div class="req-item"><span class="req-code">RNF03</span><div><h4>Requisitos mínimos</h4><p>30–60 FPS · CPU Intel Pentium · GPU integrada · 4 GB RAM.</p></div></div>
+                    <div class="req-item"><span class="req-code">RNF04</span><div><h4>Requisitos recomendados</h4><p>60+ FPS · Intel i3 3ª geração · GTX 550 · 8 GB RAM.</p></div></div>
+                    <div class="req-item"><span class="req-code">RNF05</span><div><h4>Compatibilidade</h4><p>Windows 10/11 (64-bit) e Linux Debian.</p></div></div>
+                    <div class="req-item"><span class="req-code">RNF06</span><div><h4>Distribuição</h4><p>GitHub · organização Pato Jogos (Duck Games).</p></div></div>
+                    <div class="req-item"><span class="req-code">RNF07</span><div><h4>Consistência visual</h4><p>Padrão uniforme de menus, avisos e notificações.</p></div></div>
+                    <div class="req-item"><span class="req-code">RNF08</span><div><h4>Idiomas</h4><p>Português (Brasil) e Inglês Internacional.</p></div></div>
+                </div>
+            </div>
+        </div>
+    </section>-->
+
+    <!-- ===== EQUIPE ===== -->
+    <section class="section team" id="equipe">
+        <div class="container">
+            <div class="section-head">
+                <span class="section-tag">Quem faz</span>
+                <h2 class="section-title">Equipe Pato Jogos</h2>
+                <p class="section-desc">
+                    Projeto desenvolvido por alunos do 3º ano de Desenvolvimento de Sistemas — IFSP Campus São Paulo (2026).
+                </p>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-card"><div class="avatar">BF</div><h4>Beatriz Leonardo Fernandes da Silva</h4><span>Desenvolvimento</span></div>
+                <div class="team-card"><div class="avatar">CO</div><h4>Camilo Handal Batista Oliveira</h4><span>Desenvolvimento</span></div>
+                <div class="team-card"><div class="avatar">DF</div><h4>Débora Luiza de Paula Ferreira</h4><span>Desenvolvimento</span></div>
+                <div class="team-card"><div class="avatar">GB</div><h4>Guilherme Nascimento Bilibio</h4><span>Desenvolvimento</span></div>
+                <div class="team-card"><div class="avatar">HA</div><h4>Henrique Daisuke Akiyama</h4><span>Desenvolvimento</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DOWNLOAD / CTA ===== -->
+    <section class="section download" id="download">
+        <div class="container download-inner">
+            <h2>Pronto para governar?</h2>
+            <p>Baixe o ProblemaCidade gratuitamente e comece seu mandato.</p>
+            <div class="download-buttons">
+                <a href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener" class="btn btn-primary btn-lg">📦 Ver no GitHub</a>
+                <a href="#" class="btn btn-ghost btn-lg">📖 Documentação</a>
+            </div>
+            <small class="download-note">
+                Roda em Windows 10/11 (64-bit) e Linux Debian · Requer 4 GB RAM (mínimo)
+            </small>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <span class="logo-text">Problema<span>CIDADE</span></span>
+                    <p>Jogo educativo de administração pública. Um projeto escolar do IFSP.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Navegação</h4>
+                    <ul>
+                        <li><a href="#home">Início</a></li>
+                        <li><a href="#sobre">Sobre</a></li>
+                        <li><a href="#mecanicas">Mecânicas</a></li>
+                        <li><a href="#requisitos">Requisitos</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Projeto</h4>
+                    <ul>
+                        <li><a href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="#equipe">Equipe</a></li>
+                        <li><a href="#download">Download</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contato</h4>
+                    <ul>
+                        <li><a href="mailto:akiyama.daisuke@aluno.ifsp.edu.br">akiyama.daisuke@aluno.ifsp.edu.br</a></li>
+                        <li>IFSP · Campus São Paulo</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Pato Jogos (Duck Games) · ProblemaCidade. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Menu mobile
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+        });
+
+        // Fecha menu ao clicar em link
+        navLinks.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                menuToggle.classList.remove('active');
+            });
+        });
+
+        // Tabs de requisitos
+        document.querySelectorAll('.req-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.req-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.req-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Header com scroll
+        window.addEventListener('scroll', () => {
+            document.querySelector('.header').classList.toggle('scrolled', window.scrollY > 40);
+        });
+    </script>
+</body>
+</html>
