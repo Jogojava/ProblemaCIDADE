@@ -23,6 +23,7 @@ var layout_initialized := false
 var grass_lots: Array[Dictionary] = []
 var _grass_lot_keys: Dictionary = {}
 var _occupied_lots: Dictionary = {}
+var _blocked_nature_lots: Dictionary = {}
 
 var city_name := "Vila Esperança"
 var difficulty := "medium"
@@ -55,6 +56,7 @@ func start(name_value: String, difficulty_value: String) -> void:
 	grass_lots.clear()
 	_grass_lot_keys.clear()
 	_occupied_lots.clear()
+	_blocked_nature_lots.clear()
 	projects.clear()
 	buildings.clear()
 	history.clear()
@@ -495,7 +497,7 @@ func town_hall_coords() -> Array[Vector2i]:
 	var anchor := hall_key as Vector2i
 	var coords: Array[Vector2i] = []
 	for dx in range(-2, 1):
-		for dy in range(-1, 1):
+		for dy in range(-2, 1):
 			coords.append(Vector2i(anchor.x + dx, anchor.y + dy))
 	return coords
 
@@ -518,8 +520,16 @@ func _rebuild_occupied_lots() -> void:
 			if raw_lot is Dictionary:
 				_occupy_footprint(raw_lot)
 
+func set_nature_obstacles(coords: Array[Vector2i]) -> void:
+	_blocked_nature_lots.clear()
+	for coord in coords:
+		if _grass_lot_keys.has(coord) and not _occupied_lots.has(coord):
+			_blocked_nature_lots[coord] = true
+
 func can_build_coord(coord: Vector2i) -> bool:
 	if not _grass_lot_keys.has(coord):
+		return false
+	if _blocked_nature_lots.has(coord):
 		return false
 	var hall_key: Variant = _lot_key(town_hall)
 	if hall_key != null and coord == hall_key:

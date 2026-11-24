@@ -76,6 +76,7 @@ func _ready() -> void:
 	visuals.name = "CityVisuals"
 	visuals.origin = $Camera2D.position
 	visuals.z_index = 4
+	visuals.time_manager = time_manager
 	add_child(visuals)
 	visuals.bind(city)
 	$Camera2D.set_map_radius(visuals.map_radius)

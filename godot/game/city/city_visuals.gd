@@ -54,7 +54,12 @@ static var _used_rect_cache: Dictionary = {}
 var _textures: Dictionary = {}
 var _construction_anim_time := 0.0
 var _construction_frame := 0
+var _lake_anchors: Array[Vector2i] = []
+var _lake_tiles: Dictionary = {}
+var _tree_coords: Array[Vector2i] = []
+var _tree_tiles: Dictionary = {}
 var state: CityState
+var time_manager: TimeManager
 var origin := Vector2(1056, 1780)
 var map_radius := INITIAL_MAP_RADIUS
 var _next_population_expansion := 0
@@ -68,6 +73,8 @@ func _init() -> void:
 
 func _process(delta: float) -> void:
 	if state == null or state.projects.is_empty():
+		return
+	if time_manager != null and time_manager.paused:
 		return
 	_construction_anim_time += delta
 	var next_frame := int(floor(_construction_anim_time * 4.5)) % 4
@@ -148,9 +155,14 @@ func _should_flip_building(lot: Dictionary, area: String, sprite_path: String = 
 
 func bind(city: CityState) -> void:
 	state = city
+	_lake_anchors.clear()
+	_lake_tiles.clear()
+	_tree_coords.clear()
+	_tree_tiles.clear()
 	map_radius = _required_radius_for_city(city)
 	_generate_lots()
 	city.configure_lots(lots)
+	_rebuild_nature_layout()
 	_next_population_expansion = city.population + POPULATION_GROWTH_PER_EXPANSION
 	city.changed.connect(_on_city_changed)
 	queue_redraw()
@@ -185,9 +197,92 @@ func expand_map() -> bool:
 	_generate_lots()
 	if state != null:
 		state.configure_lots(lots)
+		_rebuild_nature_layout()
 	map_expanded.emit(map_radius)
 	queue_redraw()
 	return true
+
+func _rebuild_nature_layout() -> void:
+	if state == null:
+		return
+	# Preserve already-placed nature obstacles that remain free of buildings,
+	# then add a modest number of lakes (2x2) and trees (1x1) on empty lots
+	# and block them so no construction can be built there.
+	var has_lake_sprite := ResourceLoader.exists(LAKE_PATH)
+	var max_lakes := clampi(floori(float(map_radius) / 7.0), 2, 7) if has_lake_sprite else 0
+	var max_trees := clampi(floori(float(map_radius) * 1.15), 14, 55)
+
+	if has_lake_sprite and _lake_anchors.size() < max_lakes:
+		var fallback_lake := Vector2i(999, 999)
+		for x in range(-map_radius, map_radius):
+			if _lake_anchors.size() >= max_lakes:
+				break
+			for y in range(-map_radius, map_radius):
+				if _lake_anchors.size() >= max_lakes:
+					break
+				var coord := Vector2i(x, y)
+				if _lake_tiles.has(coord) or _tree_tiles.has(coord):
+					continue
+				if not state.can_build_footprint({"x": x, "y": y}):
+					continue
+				if state._blocks_town_hall_view(coord):
+					continue
+				var too_close := false
+				for existing in _lake_anchors:
+					if absi(x - existing.x) < 8 and absi(y - existing.y) < 8:
+						too_close = true
+						break
+				if too_close:
+					continue
+				if fallback_lake.x == 999 and absi(x) >= 3 and absi(y) >= 3:
+					fallback_lake = coord
+				if posmod(absi(x * 37 + y * 53), 41) != 0:
+					continue
+				_add_lake_anchor(coord)
+		if _lake_anchors.is_empty() and fallback_lake.x != 999:
+			_add_lake_anchor(fallback_lake)
+
+	if _tree_coords.size() < max_trees:
+		for stride_mod in [13, 7]:
+			if _tree_coords.size() >= max_trees:
+				break
+			for x in range(-map_radius, map_radius + 1):
+				if _tree_coords.size() >= max_trees:
+					break
+				for y in range(-map_radius, map_radius + 1):
+					if _tree_coords.size() >= max_trees:
+						break
+					if _road(x, y):
+						continue
+					var coord := Vector2i(x, y)
+					if _lake_tiles.has(coord) or _tree_tiles.has(coord):
+						continue
+					if not state.can_build_coord(coord) or state._blocks_town_hall_view(coord):
+						continue
+					if posmod(absi(x * 19 + y * 31), stride_mod) != 0:
+						continue
+					var near_tree := false
+					for existing in _tree_coords:
+						if absi(x - existing.x) <= 2 and absi(y - existing.y) <= 2:
+							near_tree = true
+							break
+					if near_tree:
+						continue
+					_tree_coords.append(coord)
+					_tree_tiles[coord] = true
+
+	var blocked: Array[Vector2i] = []
+	for tile in _lake_tiles.keys():
+		blocked.append(tile as Vector2i)
+	for tile in _tree_tiles.keys():
+		blocked.append(tile as Vector2i)
+	state.set_nature_obstacles(blocked)
+
+func _add_lake_anchor(anchor: Vector2i) -> void:
+	_lake_anchors.append(anchor)
+	for dx in range(2):
+		for dy in range(2):
+			_lake_tiles[Vector2i(anchor.x + dx, anchor.y + dy)] = true
 
 func _on_city_changed() -> void:
 	while state != null and state.population >= _next_population_expansion and map_radius < MAX_MAP_RADIUS:
@@ -256,38 +351,6 @@ func _draw() -> void:
 	var lake_sprite := _get_sprite_entry(LAKE_PATH) if ResourceLoader.exists(LAKE_PATH) else {}
 	var tile_size := HALF_TILE * 2.0 + Vector2(2.0, 1.5)
 	var tile_offset := HALF_TILE + Vector2(1.0, 0.75)
-	var lake_anchors: Array[Vector2i] = []
-	var lake_tiles: Dictionary = {}
-	if not lake_sprite.is_empty() and state != null:
-		var fallback_lake := Vector2i(999, 999)
-		var max_lakes := maxi(1, floori(float(map_radius) / 10.0))
-		for x in range(-map_radius, map_radius):
-			if lake_anchors.size() >= max_lakes:
-				break
-			for y in range(-map_radius, map_radius):
-				if lake_anchors.size() >= max_lakes:
-					break
-				if lake_tiles.has(Vector2i(x, y)) or not state.can_build_footprint({"x": x, "y": y}):
-					continue
-				if fallback_lake.x == 999 and absi(x) >= 3 and absi(y) >= 3:
-					fallback_lake = Vector2i(x, y)
-				if posmod(absi(x * 37 + y * 53), 47) != 0:
-					continue
-				var too_close := false
-				for existing in lake_anchors:
-					if absi(x - existing.x) < 10 and absi(y - existing.y) < 10:
-						too_close = true
-						break
-				if not too_close:
-					lake_anchors.append(Vector2i(x, y))
-					for dx in range(2):
-						for dy in range(2):
-							lake_tiles[Vector2i(x + dx, y + dy)] = true
-		if lake_anchors.is_empty() and fallback_lake.x != 999:
-			lake_anchors.append(fallback_lake)
-			for dx in range(2):
-				for dy in range(2):
-					lake_tiles[Vector2i(fallback_lake.x + dx, fallback_lake.y + dy)] = true
 	for depth in range(-map_radius * 2, map_radius * 2 + 1):
 		for x in range(-map_radius, map_radius + 1):
 			var y := depth - x
@@ -325,7 +388,7 @@ func _draw() -> void:
 						draw_line(base + Vector2(-16, -10), base + Vector2(16, 10), Color("bec9ad"), 2)
 	if not lake_sprite.is_empty():
 		var lake_src: Vector2 = lake_sprite["src_rect"].size
-		for anchor in lake_anchors:
+		for anchor in _lake_anchors:
 			var lbase := point({"x": anchor.x + 0.5, "y": anchor.y + 0.5})
 			var lw := 240.0
 			var lh := lw * (lake_src.y / maxf(1.0, lake_src.x))
@@ -343,12 +406,15 @@ func _draw() -> void:
 		var item := project.duplicate()
 		item["construction"] = true
 		objects.append(item)
-	if not placing:
-		for x in range(-map_radius, map_radius + 1):
-			for y in range(-map_radius, map_radius + 1):
-				if not _road(x, y) and not lake_tiles.has(Vector2i(x, y)) and state.can_build_coord(Vector2i(x, y)) and posmod(x * 19 + y * 31, 17) == 0:
-					objects.append({"lot": {"x": x, "y": y}, "area": "tree"})
-	objects.sort_custom(func(a: Dictionary, b: Dictionary): return _structure_sort_y(a) < _structure_sort_y(b))
+	for coord in _tree_coords:
+		objects.append({"lot": {"x": coord.x, "y": coord.y}, "area": "tree"})
+	objects.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var ba := _structure_base(a)
+		var bb := _structure_base(b)
+		if not is_equal_approx(ba.y, bb.y):
+			return ba.y < bb.y
+		return ba.x < bb.x
+	)
 	for item in objects:
 		var area := String(item.get("area", "home"))
 		var base := _structure_base(item)
@@ -380,19 +446,15 @@ func _structure_base(item: Dictionary) -> Vector2:
 	var area := String(item.get("area", "home"))
 	var lot: Dictionary = item.lot
 	if area == "hall":
-		return point({"x": int(lot.x) - 1.0, "y": int(lot.y) - 0.5})
+		return point({"x": int(lot.x) - 1.0, "y": int(lot.y) - 1.0})
 	if area != "home" and area != "tree":
 		return point({"x": int(lot.x) + 0.5, "y": int(lot.y) + 0.5})
 	return point(lot)
 
 func _structure_sort_y(item: Dictionary) -> float:
-	var area := String(item.get("area", "home"))
-	var base := _structure_base(item)
-	if area == "home" or area == "tree":
-		return base.y + HALF_TILE.y
-	if area == "hall":
-		return base.y + HALF_TILE.y * 2.5
-	return base.y + HALF_TILE.y * 2.0
+	# Exact isometric depth of the footprint center (origin.y + (cx + cy) * HALF_TILE.y).
+	# Ensures 2x2 buildings, 3x2 town hall, and construction sites never tie with 1x1 houses directly in front of them.
+	return _structure_base(item).y
 
 func _closed(polygon: PackedVector2Array) -> PackedVector2Array:
 	var result := polygon.duplicate()
@@ -420,18 +482,18 @@ func _draw_structure(base: Vector2, area: String, variant: int, construction: bo
 	if not sprite_entry.is_empty():
 		var src_size: Vector2 = sprite_entry["src_rect"].size
 		var is_park := sprite_path.ends_with("/culture_2.png")
-		var target_w := 116.0 if home else (258.0 if area == "hall" else (248.0 if is_park else (204.0 if area == "water" else (228.0 if area == "apartment" else 236.0))))
+		var target_w := 116.0 if home else (316.0 if area == "hall" else (248.0 if is_park else (204.0 if area == "water" else (228.0 if area == "apartment" else 236.0))))
 		var target_h := target_w * (src_size.y / maxf(1.0, src_size.x))
-		var anchor_bottom_y := base.y + (HALF_TILE.y * 0.92 if home else (HALF_TILE.y * 1.82 if area == "hall" else (HALF_TILE.y * 1.95 if is_park else (HALF_TILE.y * 1.72 if area == "water" else HALF_TILE.y * 1.85))))
-		var x_offset := 12.0 if area == "hall" else 0.0
-		var dest := Rect2(Vector2(base.x + x_offset - target_w * 0.5, anchor_bottom_y - target_h), Vector2(target_w, target_h))
+		var anchor_bottom_y := base.y + (HALF_TILE.y * 0.92 if home else (HALF_TILE.y * 2.50 if area == "hall" else (HALF_TILE.y * 1.95 if is_park else (HALF_TILE.y * 1.72 if area == "water" else HALF_TILE.y * 1.85))))
 		var flip_h := _should_flip_building(lot, area, sprite_path)
+		var x_offset := (-10.0 if not flip_h else 10.0) if sprite_path.ends_with("/apartment_5.png") else 0.0
+		var dest := Rect2(Vector2(base.x + x_offset - target_w * 0.5, anchor_bottom_y - target_h), Vector2(target_w, target_h))
 		if construction:
 			_draw_sprite_entry(sprite_entry, dest, flip_h, Color(1.0, 1.0, 1.0, 0.5))
 			return
 		_draw_sprite_entry(sprite_entry, dest, flip_h, Color.WHITE)
 		if area == "hall":
-			draw_string(ThemeDB.fallback_font, base + Vector2(-42, HALF_TILE.y * 2.55), tr("Prefeitura"), HORIZONTAL_ALIGNMENT_LEFT, 120, 17, Color("f5f1dc"))
+			draw_string(ThemeDB.fallback_font, base + Vector2(-42, HALF_TILE.y * 2.75), tr("Prefeitura"), HORIZONTAL_ALIGNMENT_LEFT, 120, 17, Color("f5f1dc"))
 		return
 	var colors := [Color("e2c29a"), Color("cbd4bf"), Color("a5c4ca"), Color("e4ceaa")]
 	var accent: Color = {"education": Color("e9bf59"), "health": Color("d37871"), "water": Color("63b3cc"), "security": Color("6e8bbb"), "culture": Color("ac86b8"), "social": Color("a2bd7c"), "hall": Color("5aa5a0"), "apartment": Color("9baec0")}.get(area, colors[variant % 4])
