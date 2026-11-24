@@ -35,7 +35,7 @@ func get_cases() -> Array[Dictionary]:
 		{"id": "T1-F05-4", "method": "_t1_f05_4", "description": "BoardButton and CalculatorButton WCAG contrast >= 4.5:1 across states"},
 		{"id": "T1-F05-5", "method": "_t1_f05_5", "description": "Option1..4 and calculator_keys maintain >= 4.5:1 WCAG contrast"},
 		{"id": "T1-F06-1", "method": "_t1_f06_1", "description": "CityState.can_build_coord matches can_build across all 625 grid coords"},
-		{"id": "T1-F06-2", "method": "_t1_f06_2", "description": "CityVisuals configures 484 grass lots; town_hall and 18 initial homes blocked"},
+		{"id": "T1-F06-2", "method": "_t1_f06_2", "description": "CityVisuals configures 484 grass lots; 100 homes and 1 apartment block fit at start"},
 		{"id": "T1-F06-3", "method": "_t1_f06_3", "description": "can_build_coord stays synchronized after construct, place_home, and growth"},
 		{"id": "T1-F06-4", "method": "_t1_f06_4", "description": "CityVisuals mouse motion within same tile triggers zero extra redraws"},
 		{"id": "T1-F06-5", "method": "_t1_f06_5", "description": "CityVisuals mouse motion to different tile updates hovered and redraws once"},
@@ -478,8 +478,12 @@ func _t1_f06_2(h: RefCounted, tree: SceneTree) -> void:
 	var vis := CityVisuals.new()
 	tree.root.add_child(vis)
 	vis.bind(city)
-	h.call("check_eq", vis.lots.size(), 484, "484 grass lots configured")
-	h.call("check_eq", city.residences.size(), 18, "18 initial homes placed")
+	h.call("check_eq", vis.lots.size(), 576, "576 grass lots configured on initial 14-radius grid")
+	h.call("check_eq", city.homes_count(), CityState.INITIAL_HOMES, "100 initial homes placed")
+	var apartments := city.residences.size() - city.homes_count()
+	h.call("check_true", apartments >= CityState.MIN_INITIAL_APARTMENTS and apartments <= CityState.MAX_INITIAL_APARTMENTS, "40-60 initial apartment blocks placed")
+	h.call("check_eq", city.housing_capacity(), city.population, "Initial housing capacity matches population")
+	h.call("check_gt", city.population, 1000, "Initial population exceeds one thousand")
 	h.call("check_false", city.can_build(city.town_hall), "town_hall blocked")
 	for home in city.residences:
 		h.call("check_false", city.can_build(home.lot), "Initial home lot blocked")
@@ -493,7 +497,7 @@ func _t1_f06_3(h: RefCounted, tree: SceneTree) -> void:
 	h.call("check_true", city.has_method("can_build_coord"), "can_build_coord exists")
 	var free_lot := {}
 	for lot in vis.lots:
-		if city.can_build(lot):
+		if city.can_build_footprint(lot):
 			free_lot = lot
 			break
 	h.call("check_eq", city.construct("health", 0, free_lot), "", "construct succeeds on free lot")

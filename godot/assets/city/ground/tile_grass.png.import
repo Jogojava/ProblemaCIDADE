@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://by6owio0gkh4p"
-path="res://.godot/imported/WhatsApp Image 2026-03-10 at 12.44.11.jpeg-c265635234349e550d1156260dd9ac2a.ctex"
+uid="uid://8bwbge2x71ut"
+path="res://.godot/imported/tile_grass.png-463a988ad61e409b1123943754c3580b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/WhatsApp Image 2026-03-10 at 12.44.11.jpeg"
-dest_files=["res://.godot/imported/WhatsApp Image 2026-03-10 at 12.44.11.jpeg-c265635234349e550d1156260dd9ac2a.ctex"]
+source_file="res://assets/city/ground/tile_grass.png"
+dest_files=["res://.godot/imported/tile_grass.png-463a988ad61e409b1123943754c3580b.ctex"]
 
 [params]
 

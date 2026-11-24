@@ -42,7 +42,7 @@ func _run() -> void:
 	game._construct("education")
 	check(game.city.projects.is_empty(), "Escolher serviço ainda não debita nem inicia obra.")
 	for lot in game.visuals.lots:
-		if game.city.can_build(lot):
+		if game.city.can_build_footprint(lot):
 			game._place_building(lot)
 			break
 	check(game.city.projects.size() == 1, "Obra iniciada.")
@@ -180,7 +180,7 @@ func _unit_rules() -> void:
 	time.set_date(30, 12, 1)
 	time._advance_one_day()
 	check(time.current_day == 1 and time.current_month == 1 and time.current_year == 2, "Virada de ano.")
-	for pair in [[TimeManager.Speed.NORMAL, 6.0], [TimeManager.Speed.FAST, 3.0], [TimeManager.Speed.VERY_FAST, 1.0]]:
+	for pair in [[TimeManager.Speed.NORMAL, 3.0], [TimeManager.Speed.FAST, 1.5], [TimeManager.Speed.VERY_FAST, 0.5]]:
 		time.set_speed(pair[0])
 		check(is_equal_approx(time._get_real_seconds_per_game_day(), pair[1]), "Velocidades previstas no RF11.")
 	time.free()

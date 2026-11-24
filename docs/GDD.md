@@ -150,7 +150,7 @@ A cada virada de mês (`advance_month`):
 
 7. **Projeção Linear de 6 Meses (`ProjectionChart`):**
    - Disponível no painel de Estatísticas após **12 snapshots mensais**.
-   - Calcula a regressão linear simples (mínimos quadrados) sobre as últimas 12 observações de qualquer um dos 10 indicadores (`Saldo`, `Reputação`, 6 serviços, `Desemprego`, `Fome`) e projeta a tendência tracejada para os próximos **6 meses**.
+   - Calcula a regressão linear simples (mínimos quadrados) sobre as últimas 6 a 12 observações de qualquer um dos 10 indicadores (`Saldo`, `Reputação`, 6 serviços, `Desemprego`, `Fome`) e projeta a tendência tracejada para os próximos **6 meses**.
 
 ---
 
@@ -162,9 +162,9 @@ Gerenciado por `TimeManager` (`godot/scripts/timemanager.gd`):
 - **Velocidades:**
   | Velocidade | Duração real de 1 mês | Multiplicador |
   | :--- | :---: | :---: |
-  | **Normal** | 180 s (3 min) | 1× |
-  | **Rápido** | 90 s (1 min 30 s) | 2× |
-  | **Muito Rápido** | 30 s | 6× |
+  | **Normal** | 90 s (1 min 30 s) | 1× |
+  | **Rápido** | 45 s | 2× |
+  | **Muito Rápido** | 15 s | 6× |
 - **Pausa Contextual por Motivos (`hold` / `release`):** o relógio é pausado automaticamente quando há menu de pausa (`menu`), painel aberto (`panel`), diálogo modal (`dialog`), modo de construção (`placement`), desafio não-urgente (`challenge`), janela sem foco (`inactive`, configurável) ou fim de campanha (`ended`).
 - **Atalho de Pausa Manual:** tecla `Espaço` (desabilitada durante problemas e painéis).
 - **Avançar até a Próxima Ocorrência (`SkipButton`):** simula dia a dia (com limite de 360 dias por clique) processando receitas, obras e eleições normalmente até surgir um evento ativo ou o fim da campanha, abrindo automaticamente o primeiro evento encontrado.
@@ -179,13 +179,13 @@ Gerenciado por `TimeManager` (`godot/scripts/timemanager.gd`):
 | Categoria | Peso | Frequência/Mês | Janela de Disparo | Prazo de Expiração | Recompensa (Acerto) | Penalidade (Erro/Expiração) |
 | :--- | :---: | :---: | :---: | :--- | :--- | :--- |
 | **Opcional** (`optional`) | 1× | 1 | Dias 2–28 | 30 dias (28 gerados) | +R\$ 4.000 · +1,5 rep. | -R\$ 2.000 · -1,5 rep. *(expirar: 0)* |
-| **Comum** (`common`) | 2× | 1 / 2 / 3 *(por dif.)* | Dias 2–28 | 30 dias (28 gerados) | +R\$ 8.000 · +3,0 rep. | -R\$ 4.000 · -3,0 rep. |
+| **Comum** (`common`) | 2× | 0 / 1 / 1 *(por dif.)* | Dias 2–28 | 30 dias (28 gerados) | +R\$ 8.000 · +3,0 rep. | -R\$ 4.000 · -3,0 rep. |
 | **Prioritário** (`important`) | 3× | 1 | Dias 5–25 | 30 dias (28 gerados) | +R\$ 12.000 · +4,5 rep. | -R\$ 6.000 · -4,5 rep. |
-| **Urgente** (`urgent`) | 4× | 1 *(garantido)* | Dias 10–25 | **180 s em tempo real** | +R\$ 16.000 · +6,0 rep. | -R\$ 8.000 · -6,0 rep. |
+| **Urgente** (`urgent`) | 4× | 1 *(garantido)* | Dias 10–25 | **90 s (1 min 30 s) em tempo real** | +R\$ 16.000 · +6,0 rep. | -R\$ 8.000 · -6,0 rep. |
 
 > **Regras especiais de Problemas Urgentes:**
 > - Ao disparar um problema urgente, a velocidade do jogo é reduzida automaticamente para **Normal**.
-> - Diferente dos demais problemas (que pausam o relógio ao abrir), **o cronômetro de 180s continua correndo** enquanto o popup urgente está aberto (fases `PARA ABRIR` e `PARA RESPONDER`).
+> - Diferente dos demais problemas (que pausam o relógio ao abrir), **o cronômetro de 90s (1,5 min) continua correndo** enquanto o popup urgente está aberto (fases `PARA ABRIR` e `PARA RESPONDER`).
 > - Existe no máximo 1 urgente por mês; se houver fila acumulada, o próximo só inicia sua contagem após o atual ser resolvido ou expirar.
 
 ### 5.2 Tipos de Interação e Ferramentas de Apoio
@@ -271,7 +271,7 @@ stateDiagram-v2
 - **Banner Superior de Alerta Urgente:** visível apenas quando há problema urgente ativo, exibindo título, fila, fase (`PARA ABRIR` / `PARA RESPONDER`), contagem regressiva `MM:SS` e barra vermelha.
 - **Rodapé Inferior:**
   - Esquerda: Botão de **Saldo** (abre Painel de Investimentos e Obras).
-  - Centro: **TimeDock** com controles de Pausa, 3 velocidades, botão "Avançar até próxima ocorrência" e legenda de ritmo (`1 mês = 3 min`, etc.).
+  - Centro: **TimeDock** com controles de Pausa, 3 velocidades, botão "Avançar até próxima ocorrência" e legenda de ritmo (`1 mês = 1 min 30 s`, etc.).
   - Direita: Botão de **Reputação** com barra de progresso (abre Painel de Estatísticas e Projeções).
 
 ### 7.3 Direção de Arte e Estilo Visual

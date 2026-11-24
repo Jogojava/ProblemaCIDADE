@@ -157,7 +157,7 @@ func configure(problem_title: String, problem_description: String, problem_image
 	elif not option_buttons.is_empty():
 		option_buttons[0].grab_focus()
 
-func set_urgent_deadline(seconds: float, title: String, urgent_count: int, phase: String, total_seconds: float = 180.0) -> void:
+func set_urgent_deadline(seconds: float, title: String, urgent_count: int, phase: String, total_seconds: float = 90.0) -> void:
 	urgent_deadline.show()
 	urgent_deadline_button.text = tr("%s  (%d)") % [tr(title), maxi(1, urgent_count)]
 	urgent_deadline_phase.text = tr("PARA RESPONDER") if phase == "solving" else tr("PARA ABRIR")

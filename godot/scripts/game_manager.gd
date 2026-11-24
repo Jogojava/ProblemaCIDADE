@@ -1,6 +1,6 @@
 extends Node
 
-const URGENT_DEADLINE_SECONDS := 180.0
+const URGENT_DEADLINE_SECONDS := 90.0
 const PROBLEM_SCENE := preload("res://scenes/ui/problem_template.tscn")
 
 @onready var event_database: EventDatabase = $EventDatabase
@@ -73,8 +73,11 @@ func _ready() -> void:
 	visuals.z_index = 4
 	add_child(visuals)
 	visuals.bind(city)
+	$Camera2D.set_map_radius(visuals.map_radius)
+	visuals.map_expanded.connect($Camera2D.set_map_radius)
 	visuals.lot_selected.connect(_place_building)
 	visuals.placement_cancelled.connect(_cancel_placement)
+	city.housing_space_needed.connect(_on_housing_space_needed)
 	_create_placement_bar()
 	event_manager.enforce_one_urgent_per_month()
 	event_manager.start_system(time_manager.current_month, time_manager.current_year)
@@ -145,7 +148,12 @@ func _input(event: InputEvent) -> void:
 			_cancel_placement()
 		get_viewport().set_input_as_handled()
 		return
-	if _modal != null or city.outcome != "playing":
+	if _modal != null:
+		if is_instance_valid(_modal) and _modal.has_meta("is_feedback") and event.keycode in [KEY_ENTER, KEY_KP_ENTER]:
+			_close_dialog()
+			get_viewport().set_input_as_handled()
+		return
+	if city.outcome != "playing":
 		return
 	if _current_problem_popup != null and is_instance_valid(_current_problem_popup):
 		if event.keycode == KEY_ESCAPE:
@@ -172,6 +180,33 @@ func _input(event: InputEvent) -> void:
 	elif event.keycode == KEY_ESCAPE:
 		if not hud.close_panels():
 			_on_menu_requested()
+		get_viewport().set_input_as_handled()
+	elif event.keycode in [KEY_ENTER, KEY_KP_ENTER]:
+		_skip_to_next()
+		get_viewport().set_input_as_handled()
+	elif event.keycode in [KEY_1, KEY_KP_1]:
+		time_manager.set_speed(TimeManager.Speed.NORMAL)
+		get_viewport().set_input_as_handled()
+	elif event.keycode in [KEY_2, KEY_KP_2]:
+		time_manager.set_speed(TimeManager.Speed.FAST)
+		get_viewport().set_input_as_handled()
+	elif event.keycode in [KEY_3, KEY_KP_3]:
+		time_manager.set_speed(TimeManager.Speed.VERY_FAST)
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_C:
+		$Camera2D.reset_view()
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_I:
+		hud.toggle_investment_panel()
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_R:
+		hud.toggle_statistics_panel()
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_M:
+		_begin_placement("home")
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_U:
+		hud.open_urgent_from_shortcut()
 		get_viewport().set_input_as_handled()
 
 func open_problem(event_id: String) -> void:
@@ -459,6 +494,10 @@ func _place_building(lot: Dictionary) -> void:
 func _on_building_completed(project: Dictionary) -> void:
 	hud.show_notice(tr("Obra concluída: %s. Serviços e reputação atualizados.") % tr(GameRules.BUILDING_NAMES[project.area]))
 
+func _on_housing_space_needed() -> void:
+	if visuals != null and visuals.expand_map():
+		city.fulfill_housing_demand()
+
 func _skip_to_next() -> void:
 	if _modal != null or pause_menu.visible or not _current_problem_id.is_empty() or city.outcome != "playing":
 		return
@@ -497,10 +536,13 @@ func _show_answer_feedback(definition: Dictionary, correct: bool) -> void:
 		return
 	SettingsService.play_feedback(correct)
 	var column := _dialog(tr("Resposta correta") if correct else tr("Vamos conferir o resultado"), 920)
+	_modal.set_meta("is_feedback", true)
 	column.add_child(UIFactory.label(tr(String(definition.get("explanation", ""))), 25))
 	var result: Dictionary = city.last_result
 	column.add_child(UIFactory.label(tr("Consequências: R$ %+.0f · reputação %+.1f pontos.") % [float(result.get("funds", 0)), float(result.get("reputation", 0))]))
-	column.add_child(UIFactory.button(tr("Continuar gestão"), _close_dialog))
+	var continue_button := UIFactory.button(tr("Continuar gestão"), _close_dialog)
+	column.add_child(continue_button)
+	continue_button.grab_focus()
 
 func _on_campaign_event(kind: String) -> void:
 	if _modal != null:
@@ -591,7 +633,7 @@ func _begin_placement(area: String) -> void:
 	$Camera2D.build_mode = true
 	visuals.begin_placement(area)
 	var title: String = tr("Nova moradia") if area == "home" else tr(GameRules.BUILDING_NAMES[area])
-	_placement_text.text = title + " · " + tr("Clique em um lote livre. Verde: disponível · Vermelho: bloqueado. Botão do meio: mover mapa.")
+	_placement_text.text = title + " · " + tr("Clique em um lote para casa ou no primeiro de quatro lotes contíguos para obra. Verde: disponível · Vermelho: bloqueado. Botão do meio: mover mapa.")
 	_placement_bar.show()
 
 func _cancel_placement() -> void:

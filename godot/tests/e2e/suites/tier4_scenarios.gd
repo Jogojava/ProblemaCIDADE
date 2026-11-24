@@ -55,6 +55,7 @@ func _t4_01(h: RefCounted, tree: SceneTree) -> void:
 		return
 	var city: CityState = game.get("city")
 	var vis: CityVisuals = game.get("visuals")
+	var population_before_growth := city.population
 	var tm: Node = game.get("time_manager")
 	var em: Node = game.get("event_manager")
 	var ed: Node = game.get("event_database")
@@ -189,11 +190,12 @@ func _t4_04(h: RefCounted, tree: SceneTree) -> void:
 		return
 	var city: CityState = game.get("city")
 	var vis: CityVisuals = game.get("visuals")
+	var population_before_growth := city.population
 	city.funds = 5000000.0
 	for area in GameRules.AREAS:
 		city.invest(area, 30000.0)
 	city.advance_month()
-	h.call("check_gt", city.population, GameRules.INITIAL_POPULATION, "Population grew")
+	h.call("check_gt", city.population, population_before_growth, "Population grew")
 	var occupied_set := {}
 	for r in city.residences:
 		var k := Vector2i(int(r.lot.x), int(r.lot.y))
@@ -209,9 +211,16 @@ func _t4_04(h: RefCounted, tree: SceneTree) -> void:
 	for idx in range(30):
 		var free_lot := {}
 		for lot in vis.lots:
-			if city.can_build(lot):
+			if city.can_build_footprint(lot):
 				free_lot = lot
 				break
+		if free_lot.is_empty():
+			if not vis.expand_map():
+				break
+			for lot in vis.lots:
+				if city.can_build_footprint(lot):
+					free_lot = lot
+					break
 		if free_lot.is_empty():
 			break
 		var area: String = GameRules.AREAS[idx % GameRules.AREAS.size()]
@@ -219,7 +228,7 @@ func _t4_04(h: RefCounted, tree: SceneTree) -> void:
 		city.advance_day(idx * 25 + 20)
 	h.call("check_eq", city.buildings.size(), 30, "Reached 30 buildings cap")
 	for lot in vis.lots:
-		if city.can_build(lot):
+		if city.can_build_footprint(lot):
 			h.call("check_false", city.construct("education", 1000, lot).is_empty(), "31st building rejected")
 			break
 

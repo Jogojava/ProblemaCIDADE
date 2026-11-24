@@ -36,7 +36,7 @@ A campanha tem **dois mandatos de 48 meses**. Para ser reeleito no mês 48, é p
 | **Problemas e ocorrências** | Resolva desafios de proporção, juros, estatística, lógica, equações e grafos; ocorrências urgentes têm prazo. |
 | **Ferramentas de apoio** | Use calculadora, lousa de rascunho e visualização de rotas quando disponíveis no problema. |
 | **Ritmo de jogo** | Pause, escolha entre três velocidades ou avance até a próxima ocorrência. |
-| **Projeções** | Consulte tendências para os seis meses seguintes após haver 12 observações mensais. |
+| **Projeções** | Consulte tendências para os seis meses seguintes após haver 6 observações mensais. |
 | **Partidas salvas** | Mantenha até três slots de campanha. |
 
 ### Ciclo de gestão
@@ -63,16 +63,16 @@ flowchart TD
 
 | Dificuldade | Reputação inicial | Problemas comuns por mês | Fator de orçamento |
 | --- | :---: | :---: | :---: |
-| Fácil | 65% | 1 | 1,15× |
-| Médio | 55% | 2 | 1,00× |
-| Difícil | 45% | 3 | 0,90× |
+| Fácil | 60% | 0 | 1,12× |
+| Médio | 52% | 1 | 1,00× |
+| Difícil | 42% | 1 | 0,90× |
 
 ### Regras rápidas
 
-- Você começa com **R$ 250.000**, população de **10.000** e seis serviços em **55 pontos**.
-- Investimentos começam em **R$ 5.000**; cada R$ 3.000 acrescenta um ponto à área selecionada, até o limite do indicador.
+- Você começa com **R$ 220.000**, população inicial entre ~6.800 e 10.000 habitantes (100 casas e 40–60 prédios residenciais) e seis serviços em **55 pontos**.
+- Investimentos começam em **R$ 5.000**; cada R$ 7.500 acrescenta um ponto à área selecionada, até o limite do indicador.
 - Uma construção custa **R$ 35.000** e leva **20 dias**. É possível manter até três obras em andamento, no máximo uma por área.
-- O calendário tem 30 dias por mês. Um mês dura 3 minutos no modo normal, 1 minuto e 30 segundos no rápido e 30 segundos no muito rápido.
+- O calendário tem 30 dias por mês. Um mês dura 1 minuto e 30 segundos no modo normal, 45 segundos no rápido e 15 segundos no muito rápido.
 - O impeachment acontece se a reputação chegar a zero ou permanecer abaixo de 10% por três meses consecutivos.
 
 ### Controles
@@ -80,6 +80,13 @@ flowchart TD
 | Ação | Controle |
 | --- | --- |
 | Pausar ou retomar o tempo | `Espaço` |
+| Avançar até a próxima ocorrência / pular feedback | `Enter` |
+| Velocidades (Normal / Rápido / Muito rápido) | `1` / `2` / `3` |
+| Abrir/fechar investimentos | `I` |
+| Abrir/fechar reputação e finanças | `R` |
+| Posicionar moradia pendente | `M` |
+| Abrir problema urgente | `U` |
+| Centralizar câmera | `C` |
 | Abrir/fechar menu ou painéis | `Esc` |
 | Mover a câmera | Arrastar com o botão esquerdo ou do meio do mouse |
 | Aproximar ou afastar | Roda do mouse |

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://fhgdevflsh3n"
-path="res://.godot/imported/92383eb7-e9fc-4ce4-9f63-a708f7d18a72.jpeg-8550e3cea9b7862dcdf84badec61982c.ctex"
+uid="uid://bjqq184xpo7b1"
+path="res://.godot/imported/education.png-e45efcdbedc8d5f6e87c73d6d4100098.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/92383eb7-e9fc-4ce4-9f63-a708f7d18a72.jpeg"
-dest_files=["res://.godot/imported/92383eb7-e9fc-4ce4-9f63-a708f7d18a72.jpeg-8550e3cea9b7862dcdf84badec61982c.ctex"]
+source_file="res://assets/city/buildings/education.png"
+dest_files=["res://.godot/imported/education.png-e45efcdbedc8d5f6e87c73d6d4100098.ctex"]
 
 [params]
 

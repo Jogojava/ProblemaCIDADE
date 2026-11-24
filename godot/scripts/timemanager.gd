@@ -17,9 +17,9 @@ enum Speed {
 @export var days_per_month: int = 30
 @export var months_per_year: int = 12
 
-@export var normal_month_duration_real_seconds: float = 180.0
-@export var fast_month_duration_real_seconds: float = 90.0
-@export var very_fast_month_duration_real_seconds: float = 30.0
+@export var normal_month_duration_real_seconds: float = 90.0
+@export var fast_month_duration_real_seconds: float = 45.0
+@export var very_fast_month_duration_real_seconds: float = 15.0
 
 var current_day: int = 1
 var current_month: int = 1

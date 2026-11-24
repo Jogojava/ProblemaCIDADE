@@ -147,7 +147,7 @@ func _run() -> void:
 	await _click(game.hud.get_node("HousingButton"))
 	check(game._placement_area == "home", "Demanda populacional permite escolher moradia.")
 	await _click_map_lot(_visible_free_lot())
-	check(game.city.residences.size() == CityState.INITIAL_HOMES + 1, "Clique posiciona nova moradia.")
+	check(game.city.homes_count() == CityState.INITIAL_HOMES + 1, "Clique posiciona nova moradia.")
 	check(game.city.housing_requests() == 0, "Moradia atende a demanda pendente.")
 	game.get_node("Camera2D").reset_view()
 	await _click(game.hud.get_node("InvestmentPanel/Content/Header/CloseButton"))
@@ -379,7 +379,8 @@ func _visible_free_lot() -> Dictionary:
 	for x in range(-3, 4):
 		for y in range(-3, 4):
 			var lot := {"x": x, "y": y}
-			if game.city.can_build(lot):
+			var can_place := game.city.can_build(lot) if game._placement_area == "home" else game.city.can_build_footprint(lot)
+			if can_place:
 				return lot
 	return {}
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bm6mhfmqexjqt"
-path="res://.godot/imported/92383eb7-e9fc-4ce4-9f63-a708f7d18a721.jpeg-08a0434ab64b0b505869151dadf925b8.ctex"
+uid="uid://dwm2ai6vcdd55"
+path="res://.godot/imported/road_intersection.png-9ba768eb0511016bb3248ff884488204.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/92383eb7-e9fc-4ce4-9f63-a708f7d18a721.jpeg"
-dest_files=["res://.godot/imported/92383eb7-e9fc-4ce4-9f63-a708f7d18a721.jpeg-08a0434ab64b0b505869151dadf925b8.ctex"]
+source_file="res://assets/city/ground/road_intersection.png"
+dest_files=["res://.godot/imported/road_intersection.png-9ba768eb0511016bb3248ff884488204.ctex"]
 
 [params]
 

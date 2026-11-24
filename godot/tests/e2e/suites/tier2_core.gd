@@ -210,7 +210,7 @@ func _t2_f03_3(h: RefCounted, tree: SceneTree) -> void:
 	rt1["deadline_remaining_seconds"] = 0.5
 	game.call("_process", 1.0)
 	h.call("check_eq", String(rt2.get("deadline_phase", "")), "opening", "Second urgent becomes opening after first expires")
-	h.call("check_approx", float(rt2.get("deadline_remaining_seconds", 0.0)), 180.0, 0.01, "Second urgent starts at 180.0s")
+	h.call("check_approx", float(rt2.get("deadline_remaining_seconds", 0.0)), 90.0, 0.01, "Second urgent starts at 90.0s")
 
 func _t2_f03_4(h: RefCounted, tree: SceneTree) -> void:
 	var game: Node = await h.call("start_new_game", tree, "UrgSpd", "medium", true, true)

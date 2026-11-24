@@ -3,11 +3,18 @@ extends Node2D
 
 signal lot_selected(lot: Dictionary)
 signal placement_cancelled()
+signal map_expanded(new_radius: int)
 
-const MAP_RADIUS := 12
+const BLOCK_STRIDE := 6
+const INITIAL_MAP_RADIUS := 14
+const MAP_RADIUS_STEP := 4
+const MAX_MAP_RADIUS := 50
+const POPULATION_GROWTH_PER_EXPANSION := 400
 const HALF_TILE := Vector2(64, 40)
 var state: CityState
 var origin := Vector2(1056, 1780)
+var map_radius := INITIAL_MAP_RADIUS
+var _next_population_expansion := 0
 var placing := false
 var placement_area := ""
 var hovered := Vector2i(999, 999)
@@ -15,16 +22,56 @@ var lots: Array[Dictionary] = []
 
 func bind(city: CityState) -> void:
 	state = city
-	for x in range(-MAP_RADIUS, MAP_RADIUS + 1):
-		for y in range(-MAP_RADIUS, MAP_RADIUS + 1):
+	map_radius = _required_radius_for_city(city)
+	_generate_lots()
+	city.configure_lots(lots)
+	_next_population_expansion = city.population + POPULATION_GROWTH_PER_EXPANSION
+	city.changed.connect(_on_city_changed)
+	queue_redraw()
+
+func _required_radius_for_city(city: CityState) -> int:
+	var max_coord := INITIAL_MAP_RADIUS
+	for collection in [city.residences, city.buildings, city.projects]:
+		for item in collection:
+			if not (item is Dictionary):
+				continue
+			var lot: Variant = item.get("lot", {})
+			if lot is Dictionary and lot.has("x") and lot.has("y"):
+				var extra := CityState.BUILDING_FOOTPRINT_SIZE - 1 if String(item.get("area", "home")) != "home" else 0
+				max_coord = maxi(max_coord, absi(int(lot.x)) + extra)
+				max_coord = maxi(max_coord, absi(int(lot.y)) + extra)
+	if max_coord <= INITIAL_MAP_RADIUS:
+		return INITIAL_MAP_RADIUS
+	var steps := ceili(float(max_coord - INITIAL_MAP_RADIUS) / float(MAP_RADIUS_STEP))
+	return clampi(INITIAL_MAP_RADIUS + steps * MAP_RADIUS_STEP, INITIAL_MAP_RADIUS, MAX_MAP_RADIUS)
+
+func _generate_lots() -> void:
+	lots.clear()
+	for x in range(-map_radius, map_radius + 1):
+		for y in range(-map_radius, map_radius + 1):
 			if not _road(x, y):
 				lots.append({"x": x, "y": y})
-	city.configure_lots(lots)
-	city.changed.connect(queue_redraw)
+
+func expand_map() -> bool:
+	if map_radius >= MAX_MAP_RADIUS:
+		return false
+	map_radius = mini(MAX_MAP_RADIUS, map_radius + MAP_RADIUS_STEP)
+	_generate_lots()
+	if state != null:
+		state.configure_lots(lots)
+	map_expanded.emit(map_radius)
+	queue_redraw()
+	return true
+
+func _on_city_changed() -> void:
+	while state != null and state.population >= _next_population_expansion and map_radius < MAX_MAP_RADIUS:
+		_next_population_expansion += POPULATION_GROWTH_PER_EXPANSION
+		if not expand_map():
+			break
 	queue_redraw()
 
 func _road(x: int, y: int) -> bool:
-	return x == 0 or y == 0 or absi(x) == 6 or absi(y) == 6
+	return posmod(x, BLOCK_STRIDE) == 0 or posmod(y, BLOCK_STRIDE) == 0
 
 func point(lot: Dictionary) -> Vector2:
 	return origin + Vector2((float(lot.x) - float(lot.y)) * HALF_TILE.x, (float(lot.x) + float(lot.y)) * HALF_TILE.y)
@@ -36,8 +83,19 @@ func lot_at(world: Vector2) -> Dictionary:
 func begin_placement(area: String) -> void:
 	placement_area = area
 	placing = true
+	while not _has_available_plot(area) and expand_map():
+		pass
 	hovered = Vector2i(999, 999)
 	queue_redraw()
+
+func _has_available_plot(area: String) -> bool:
+	if state == null:
+		return false
+	for lot in lots:
+		var available := state.can_build(lot) if area == "home" else state.can_build_footprint(lot)
+		if available:
+			return true
+	return false
 
 func end_placement() -> void:
 	placing = false
@@ -66,10 +124,10 @@ func _diamond(base: Vector2, inset := 0.0) -> PackedVector2Array:
 
 func _draw() -> void:
 	# All lots, previews and buildings share the same isometric transform.
-	for depth in range(-MAP_RADIUS * 2, MAP_RADIUS * 2 + 1):
-		for x in range(-MAP_RADIUS, MAP_RADIUS + 1):
+	for depth in range(-map_radius * 2, map_radius * 2 + 1):
+		for x in range(-map_radius, map_radius + 1):
 			var y := depth - x
-			if absi(y) > MAP_RADIUS:
+			if absi(y) > map_radius:
 				continue
 			var base := point({"x": x, "y": y})
 			var road := _road(x, y)
@@ -78,37 +136,60 @@ func _draw() -> void:
 			draw_colored_polygon(_diamond(base), color)
 			if not road:
 				draw_polyline(_closed(_diamond(base)), Color(0.27, 0.39, 0.22, 0.12), 1)
-				if placing and state != null and state.can_build_coord(Vector2i(x, y)):
-					draw_polyline(_closed(_diamond(base, 3)), Color(0.8, 1, 0.76, 0.35), 1.5)
-				if not placing and state != null and state.can_build_coord(Vector2i(x, y)) and posmod(x * 19 + y * 31, 17) == 0:
+				if placing and state != null:
+					var lot := {"x": x, "y": y}
+					var placement_valid := state.can_build(lot) if placement_area == "home" else state.can_build_footprint(lot)
+					if placement_valid:
+						draw_polyline(_closed(_diamond(base, 3)), Color(0.8, 1, 0.76, 0.35), 1.5)
+				elif state != null and state.can_build_coord(Vector2i(x, y)) and posmod(x * 19 + y * 31, 17) == 0:
 					_tree(base + Vector2(15, -3))
 			elif not _road(x - 1, y) or not _road(x, y - 1):
 				draw_polyline(_closed(_diamond(base, 3)), Color("52676a"), 3)
-			if road and x != 0 and y == 0 and posmod(x, 2) == 1:
+			if road and posmod(x, BLOCK_STRIDE) != 0 and y == 0 and posmod(x, 2) == 1:
 				draw_line(base + Vector2(-16, -10), base + Vector2(16, 10), Color("bec9ad"), 2)
 	if state == null:
 		return
 	var objects: Array[Dictionary] = []
 	objects.append({"lot": state.town_hall, "area": "hall"})
 	for home in state.residences:
-		objects.append({"lot": home.lot, "area": "home", "variant": home.variant})
+		objects.append({"lot": home.lot, "area": home.get("area", "home"), "variant": home.get("variant", 0), "residents": home.get("residents", 0)})
 	for building in state.buildings:
 		objects.append(building)
 	for project in state.projects:
 		var item := project.duplicate()
 		item["construction"] = true
 		objects.append(item)
-	objects.sort_custom(func(a: Dictionary, b: Dictionary): return point(a.lot).y < point(b.lot).y)
+	objects.sort_custom(func(a: Dictionary, b: Dictionary): return _structure_base(a).y < _structure_base(b).y)
 	for item in objects:
-		_draw_structure(point(item.lot), String(item.get("area", "home")), int(item.get("variant", 0)), bool(item.get("construction", false)))
+		var area := String(item.get("area", "home"))
+		var base := _structure_base(item)
+		_draw_structure(base, area, int(item.get("variant", 0)), bool(item.get("construction", false)))
 	if placing and hovered != Vector2i(999, 999):
-		var valid := state.can_build_coord(hovered)
-		var base := point({"x": hovered.x, "y": hovered.y})
+		var anchor := {"x": hovered.x, "y": hovered.y}
+		var is_home := placement_area == "home"
+		var valid := state.can_build(anchor) if is_home else state.can_build_footprint(anchor)
+		var base := point(anchor)
+		if not is_home:
+			base = point({"x": hovered.x + 0.5, "y": hovered.y + 0.5})
 		var tint := Color("a3e9ac") if valid else Color("f18170")
-		draw_colored_polygon(_diamond(base, 2), Color(tint, 0.55))
-		draw_polyline(_closed(_diamond(base, 2)), tint, 3)
+		var footprint_centers: Array[Vector2] = [base]
+		if not is_home:
+			footprint_centers.clear()
+			for x in range(CityState.BUILDING_FOOTPRINT_SIZE):
+				for y in range(CityState.BUILDING_FOOTPRINT_SIZE):
+					footprint_centers.append(point({"x": hovered.x + x, "y": hovered.y + y}))
+		for footprint_center in footprint_centers:
+			draw_colored_polygon(_diamond(footprint_center, 2), Color(tint, 0.55))
+			draw_polyline(_closed(_diamond(footprint_center, 2)), tint, 3)
 		if valid:
 			_draw_structure(base, placement_area, 0, true)
+
+func _structure_base(item: Dictionary) -> Vector2:
+	var area := String(item.get("area", "home"))
+	var lot: Dictionary = item.lot
+	if area != "home" and area != "hall":
+		return point({"x": int(lot.x) + 0.5, "y": int(lot.y) + 0.5})
+	return point(lot)
 
 func _closed(polygon: PackedVector2Array) -> PackedVector2Array:
 	var result := polygon.duplicate()
@@ -118,9 +199,9 @@ func _closed(polygon: PackedVector2Array) -> PackedVector2Array:
 func _draw_structure(base: Vector2, area: String, variant: int, construction: bool) -> void:
 	var home := area == "home"
 	var colors := [Color("e2c29a"), Color("cbd4bf"), Color("a5c4ca"), Color("e4ceaa")]
-	var accent: Color = {"education": Color("e9bf59"), "health": Color("d37871"), "water": Color("63b3cc"), "security": Color("6e8bbb"), "culture": Color("ac86b8"), "social": Color("a2bd7c"), "hall": Color("5aa5a0")}.get(area, colors[variant % 4])
-	var h := 40.0 + variant * 8 if home else 68.0
-	var width := 32.0 if home else 42.0
+	var accent: Color = {"education": Color("e9bf59"), "health": Color("d37871"), "water": Color("63b3cc"), "security": Color("6e8bbb"), "culture": Color("ac86b8"), "social": Color("a2bd7c"), "hall": Color("5aa5a0"), "apartment": Color("9baec0")}.get(area, colors[variant % 4])
+	var h := 40.0 + variant * 8 if home else (110.0 if area == "apartment" else 92.0)
+	var width := 32.0 if home else 54.0
 	var a := base + Vector2(-width, 0)
 	var b := base + Vector2(0, width * 0.62)
 	var c := base + Vector2(width, 0)
@@ -146,7 +227,7 @@ func _draw_structure(base: Vector2, area: String, variant: int, construction: bo
 	draw_rect(Rect2(base + Vector2(8, -18), Vector2(9, 20)), Color("5e665b"))
 	if not home:
 		draw_circle(base + Vector2(16, -h + 18), 7, accent)
-		var symbol: String = {"health": "+", "education": "E", "water": "~", "security": "S", "culture": "C", "social": "A", "hall": "P"}.get(area, "")
+		var symbol: String = {"health": "+", "education": "E", "water": "~", "security": "S", "culture": "C", "social": "A", "hall": "P", "apartment": "A"}.get(area, "")
 		draw_string(ThemeDB.fallback_font, base + Vector2(11, -h + 23), symbol, HORIZONTAL_ALIGNMENT_LEFT, 25, 14, Color.WHITE)
 		if area == "hall":
 			draw_string(ThemeDB.fallback_font, base + Vector2(-48, 39), tr("Prefeitura"), HORIZONTAL_ALIGNMENT_LEFT, 120, 17, Color("f5f1dc"))

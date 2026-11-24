@@ -110,8 +110,8 @@ func set_city_indicators(funds: Variant = null, reputation: Variant = null) -> v
 	$FundsLabel.text = "R$ —" if funds == null else "R$ %.2f" % float(funds)
 	$ReputationInfo/ValueLabel.text = "—" if reputation == null else "%d%%" % roundi(clampf(float(reputation), 0.0, 100.0))
 	$ReputationInfo/ReputationBar.value = 0.0 if reputation == null else clampf(float(reputation), 0.0, 100.0)
-	funds_button.tooltip_text = "Investimentos • saldo ainda não definido." if funds == null else "Abrir investimentos."
-	reputation_button.tooltip_text = "Reputação e finanças • ainda não há registros." if reputation == null else "Consultar reputação e finanças."
+	funds_button.tooltip_text = "Investimentos (I) • saldo ainda não definido." if funds == null else "Abrir investimentos (I)."
+	reputation_button.tooltip_text = "Reputação e finanças (R) • ainda não há registros." if reputation == null else "Consultar reputação e finanças (R)."
 
 func close_panels() -> bool:
 	var was_open := investment_panel.visible or statistics_panel.visible
@@ -237,17 +237,17 @@ func _update_urgent_alert(runtime_event: Dictionary) -> void:
 		urgent_open_button.text = tr("Problema urgente")
 		return
 	var phase := String(runtime_event.get("deadline_phase", "opening"))
-	var remaining := maxf(0.0, float(runtime_event.get("deadline_remaining_seconds", 180.0)))
+	var remaining := maxf(0.0, float(runtime_event.get("deadline_remaining_seconds", 90.0)))
 	var urgent_count := 0
 	for event_category in _problem_button_categories.values():
 		if String(event_category) == EventDatabase.CATEGORY_URGENT:
 			urgent_count += 1
 	var title := tr(String(runtime_event.get("title", "Problema urgente")))
 	urgent_open_button.text = tr("%s  (%d)") % [title, urgent_count]
-	urgent_open_button.tooltip_text = tr("Abrir problema urgente%s") % (tr(" • %d na fila") % urgent_count if urgent_count > 1 else "")
+	urgent_open_button.tooltip_text = tr("Abrir problema urgente (U)%s") % (tr(" • %d na fila") % urgent_count if urgent_count > 1 else "")
 	urgent_phase.text = tr("PARA RESPONDER") if phase == "solving" else tr("PARA ABRIR")
 	urgent_countdown.text = _format_countdown(remaining)
-	urgent_progress.max_value = 180.0
+	urgent_progress.max_value = 90.0
 	urgent_progress.value = remaining
 	urgent_open_button.disabled = _problem_mode
 
@@ -340,6 +340,15 @@ func _format_countdown(seconds: float) -> String:
 	var total_seconds := maxi(0, ceili(seconds))
 	return "%02d:%02d" % [floori(float(total_seconds) / 60.0), total_seconds % 60]
 
+func toggle_investment_panel() -> void:
+	_toggle_panel(investment_panel)
+
+func toggle_statistics_panel() -> void:
+	_toggle_panel(statistics_panel)
+
+func open_urgent_from_shortcut() -> void:
+	_on_urgent_button_pressed()
+
 func _toggle_panel(panel: Control) -> void:
 	var was_open := panel.visible
 	close_panels()
@@ -385,11 +394,11 @@ func _refresh_status() -> void:
 		return
 	match _time_manager.current_speed:
 		TimeManager.Speed.NORMAL:
-			status_label.text = "1 mês = 3 min"
+			status_label.text = tr("1 mês = 1 min 30 s")
 		TimeManager.Speed.FAST:
-			status_label.text = "1 mês = 1 min 30 s"
+			status_label.text = tr("1 mês = 45 s")
 		TimeManager.Speed.VERY_FAST:
-			status_label.text = "1 mês = 30 s"
+			status_label.text = tr("1 mês = 15 s")
 
 func _setup_sidebar() -> void:
 	theme = SettingsService.game_theme
@@ -438,7 +447,7 @@ func _setup_city_panels() -> void:
 	_notice_label.size = Vector2(1100, 54)
 	_notice_label.add_theme_color_override("font_color", Color("f1dc9c"))
 	_notice_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var skip := UIFactory.button("", func(): skip_requested.emit(), tr("Até a próxima ocorrência: avançar os dias até o próximo problema, mantendo receitas, obras e eleições."))
+	var skip := UIFactory.button("", func(): skip_requested.emit(), tr("Até a próxima ocorrência (Enter): avançar os dias até o próximo problema, mantendo receitas, obras e eleições."))
 	skip.name = "SkipButton"
 	skip.custom_minimum_size = Vector2(84, 84)
 	skip.icon = preload("res://assets/ui/hud/skip_next.svg")
@@ -450,7 +459,7 @@ func _setup_city_panels() -> void:
 	$TimeDock.offset_top = -134
 	$TimeDock.offset_bottom = -16
 	$Footer.offset_top = -160
-	var center_button := UIFactory.button("⌖", func(): map_center_requested.emit(), tr("Restaurar posição e zoom da câmera"))
+	var center_button := UIFactory.button("⌖", func(): map_center_requested.emit(), tr("Restaurar posição e zoom da câmera (C)"))
 	center_button.name = "CenterMapButton"
 	center_button.position = Vector2(136, 28)
 	center_button.size = Vector2(84, 84)
@@ -524,13 +533,15 @@ func refresh_city() -> void:
 	if _city == null:
 		return
 	set_city_indicators(_city.funds, _city.reputation)
-	_housing_button.text = tr("Pop. %d · Moradias %d (+%d/mês)") % [_city.population, _city.residences.size(), _city.homes_built_this_month]
+	_housing_button.text = tr("Pop. %d · Moradias %d") % [_city.population, _city.dwelling_units_count()]
 	_housing_button.add_theme_color_override("font_disabled_color", Color("dce4dc"))
 	_housing_button.disabled = _city.housing_requests() <= 0 or _city.outcome != "playing"
-	_housing_button.tooltip_text = tr("Moradias novas neste mês: %d. Demanda pendente: %d. A população cresce pelo menos 50 habitantes/mês com média de serviços a partir de 45, e cresce mais quando os serviços melhoram. Nessa situação, novas casas ocupam lotes livres conforme a demanda. Clique para posicionar uma moradia pendente.") % [_city.homes_built_this_month, _city.housing_requests()]
+	_housing_button.tooltip_text = tr("Cada casa acomoda 4 pessoas; cada prédio residencial acomoda 160. Há %d vagas residenciais e demanda para %d casas. A população cresce conforme a qualidade e a melhoria dos serviços, gerando novas casas e prédios residenciais. Clique ou pressione M para posicionar uma casa pendente.") % [_city.housing_capacity(), _city.housing_requests()]
 	_city_label.text = "%s · %s %d/2 · %s" % [_city.city_name, tr("Mandato"), _city.term, tr(GameRules.DIFFICULTIES[_city.difficulty].name)]
 	$InvestmentPanel/Content/AmountLabel.text = (tr("Valor: R$ %.0f") % $InvestmentPanel/Content/AmountSlider.value) if _investment_mode.selected == 0 else tr("Obra: R$ 35.000 · prazo de 20 dias")
-	$InvestmentPanel/Content/EmptyBalance.text = tr("Escolha o serviço. Para construir, selecione depois um lote no mapa. Obras: %d/3.") % _city.projects.size()
+	$InvestmentPanel/Content/EmptyBalance.text = tr("Escolha o serviço. Para construir, selecione uma área contínua de quatro lotes no mapa. Obras: %d/3.") % _city.projects.size()
+	if not _city.has_required_buildings():
+		$InvestmentPanel/Content/EmptyBalance.text += "\n" + tr("Construa ao menos %d instalação(ões) para destravar o crescimento de reputação e população.") % _city.required_buildings()
 	for area in GameRules.AREAS:
 		var cell_name: String = {"education": "Education", "health": "Health", "water": "Water", "security": "Security", "culture": "Culture", "social": "Social"}[area]
 		var cell := $InvestmentPanel/Content/Categories.get_node(cell_name + "Cell")

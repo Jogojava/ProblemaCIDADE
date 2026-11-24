@@ -8,6 +8,7 @@ var dragging := false
 var build_mode := false
 var _start_position: Vector2
 var _start_zoom: Vector2
+var _pan_limits := Vector2(1800, 1300)
 
 func _ready() -> void:
 	_start_position = position
@@ -16,6 +17,9 @@ func _ready() -> void:
 func reset_view() -> void:
 	position = _start_position
 	zoom = _start_zoom
+
+func set_map_radius(radius: int) -> void:
+	_pan_limits = Vector2(maxf(1800.0, float(radius) * 128.0), maxf(1300.0, float(radius) * 80.0))
 
 func _input(event: InputEvent) -> void:
 	# A release over the HUD must also end a drag that started on the map.
@@ -40,4 +44,4 @@ func _unhandled_input(event):
 
 	elif event is InputEventMouseMotion and dragging:
 		position -= event.relative / zoom.x
-		position = position.clamp(_start_position - Vector2(1800, 1300), _start_position + Vector2(1800, 1300))
+		position = position.clamp(_start_position - _pan_limits, _start_position + _pan_limits)

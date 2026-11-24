@@ -4,12 +4,20 @@ extends RefCounted
 signal changed()
 signal building_completed(project: Dictionary)
 signal campaign_event(kind: String)
+signal housing_space_needed()
 
-const INITIAL_HOMES := 18
-const RESIDENTS_PER_HOME := 150
-const MONTHLY_POPULATION_GROWTH := 50
-const RESIDENTS_PER_SERVICE_IMPROVEMENT := 75.0
+const INITIAL_HOMES := 100
+const MIN_INITIAL_APARTMENTS := 40
+const MAX_INITIAL_APARTMENTS := 60
+const RESIDENTS_PER_APARTMENT := 160
+const RESIDENTS_PER_HOME := 4
+const MONTHLY_POPULATION_GROWTH := 16
+const RESIDENTS_PER_SERVICE_POINT := 1.2
+const RESIDENTS_PER_SERVICE_IMPROVEMENT := 8.0
+const BUILDING_FOOTPRINT_SIZE := 2
 var residences: Array[Dictionary] = []
+var initial_apartment_count := 50
+var apartment_growth_progress := 0
 var town_hall := {"x": -1, "y": -1}
 var layout_initialized := false
 var grass_lots: Array[Dictionary] = []
@@ -40,6 +48,8 @@ var played_seconds := 0.0
 
 func start(name_value: String, difficulty_value: String) -> void:
 	population = GameRules.INITIAL_POPULATION
+	initial_apartment_count = randi_range(MIN_INITIAL_APARTMENTS, MAX_INITIAL_APARTMENTS)
+	apartment_growth_progress = 0
 	residences.clear()
 	layout_initialized = false
 	grass_lots.clear()
@@ -87,14 +97,14 @@ func invest(area: String, amount: float) -> String:
 		return "Esta área já atingiu 100 pontos."
 	funds -= amount
 	indicators[area] = minf(100.0, float(indicators[area]) + amount / GameRules.INVESTMENT_PER_POINT)
-	change_reputation(minf(3.0, amount / 15000.0))
+	change_reputation(minf(1.5, amount / 30000.0))
 	add_ledger("Investimento", -amount)
 	changed.emit()
 	return ""
 
 func construct(area: String, day_index: int, lot: Dictionary = {}) -> String:
-	if (layout_initialized and lot.is_empty()) or (not lot.is_empty() and not can_build(lot)):
-		return "Escolha um lote livre na grama."
+	if (layout_initialized and lot.is_empty()) or (not lot.is_empty() and not can_build_footprint(lot)):
+		return "Escolha quatro lotes livres e conectados na grama."
 	if outcome != "playing" or not GameRules.AREAS.has(area):
 		return "Construção indisponível."
 	if funds < GameRules.BUILDING_COST:
@@ -108,9 +118,7 @@ func construct(area: String, day_index: int, lot: Dictionary = {}) -> String:
 			return "Já existe uma obra em andamento nesta área."
 	funds -= GameRules.BUILDING_COST
 	projects.append({"area": area, "started": day_index, "due": day_index + GameRules.BUILDING_DAYS, "cost": GameRules.BUILDING_COST, "lot": lot.duplicate()})
-	var lot_key: Variant = _lot_key(lot)
-	if lot_key != null:
-		_occupied_lots[lot_key] = true
+	_occupy_footprint(lot)
 	add_ledger("Construção", -GameRules.BUILDING_COST)
 	changed.emit()
 	return ""
@@ -123,7 +131,7 @@ func advance_day(day_index: int) -> void:
 			buildings.append(project.duplicate(true))
 			var area := String(project.area)
 			indicators[area] = minf(100.0, float(indicators[area]) + 12.0)
-			change_reputation(3.0)
+			change_reputation(2.5)
 			building_completed.emit(project)
 	changed.emit()
 
@@ -144,19 +152,27 @@ func advance_month() -> void:
 	var previous_service_mean := _service_mean_from_snapshot(history.back()) if not history.is_empty() else service_mean
 	indicators.unemployment = clampf(18.0 - float(indicators.education) * 0.1 - buildings.size() * 0.1, 2.0, 35.0)
 	indicators.hunger = clampf(20.0 - float(indicators.social) * 0.2, 0.0, 40.0)
-	change_reputation((service_mean - 50.0) / 25.0 - (3.0 if funds < 0 else 0.0))
+	var construction_ok := has_required_buildings()
+	var rep_delta := (service_mean - 50.0) / 25.0 - (3.0 if funds < 0 else 0.0)
+	if not construction_ok:
+		rep_delta = minf(0.0, rep_delta) - (0.5 if buildings.is_empty() else 0.0)
+	change_reputation(rep_delta)
 	if reputation < GameRules.IMPEACHMENT_APPROVAL:
 		crisis_months += 1
 	else:
 		crisis_months = 0
-	# Population grows while services remain healthy. New homes appear only when
-	# the service average also improves, and can_build protects occupied lots.
-	if service_mean >= 45.0:
+	# Population grows steadily according to service quality and improvements,
+	# provided the city has built the required public infrastructure.
+	if service_mean >= 45.0 and construction_ok:
 		var service_improvement := maxf(0.0, service_mean - previous_service_mean)
-		var monthly_growth := MONTHLY_POPULATION_GROWTH + floori(service_improvement * RESIDENTS_PER_SERVICE_IMPROVEMENT)
+		var service_quality_growth := floori((service_mean - 45.0) * RESIDENTS_PER_SERVICE_POINT)
+		var monthly_growth := MONTHLY_POPULATION_GROWTH + service_quality_growth + floori(service_improvement * RESIDENTS_PER_SERVICE_IMPROVEMENT)
 		population += monthly_growth
-		if service_improvement > 0.0:
-			_spawn_growth_homes()
+		apartment_growth_progress += monthly_growth
+		while apartment_growth_progress >= RESIDENTS_PER_APARTMENT:
+			apartment_growth_progress -= RESIDENTS_PER_APARTMENT
+			population += RESIDENTS_PER_APARTMENT
+		_spawn_growth_homes()
 	record_snapshot()
 	if crisis_months >= GameRules.CRISIS_MONTHS or reputation <= 0.0:
 		outcome = "impeachment"
@@ -225,29 +241,36 @@ func record_snapshot() -> void:
 	history.append(item)
 
 func projection(key: String) -> Dictionary:
-	if history.size() < 12 or completed_months < 12:
+	if history.size() < 6 or completed_months < 6:
 		return {"ready": false, "samples": history.size()}
+	var window_size := mini(12, history.size())
 	var series: Array[float] = []
-	for item in history.slice(-12):
+	for item in history.slice(-window_size):
 		series.append(float(item.get(key, 0.0)))
+	var n := series.size()
 	var mean := 0.0
 	for value in series:
-		mean += value / 12.0
+		mean += value / float(n)
+	var x_mean := float(n - 1) / 2.0
+	var denom := 0.0
 	var slope := 0.0
-	for i in range(12):
-		slope += (float(i) - 5.5) * (series[i] - mean) / 143.0
+	for i in range(n):
+		var dx := float(i) - x_mean
+		denom += dx * dx
+		slope += dx * (series[i] - mean)
+	slope = slope / denom if denom > 0.0 else 0.0
 	var forecast: Array[float] = []
 	for i in range(6):
-		var value := mean + slope * (12.0 + i - 5.5)
+		var value := mean + slope * (float(n) + float(i) - x_mean)
 		forecast.append(value if key == "funds" else clampf(value, 0.0, 100.0))
 	return {"ready": true, "history": series, "forecast": forecast, "slope": slope}
 
 func get_save_data() -> Dictionary:
-	return {"residences": residences.duplicate(true), "layout_initialized": layout_initialized, "city_name": city_name, "difficulty": difficulty, "funds": funds, "reputation": reputation, "population": population, "indicators": indicators.duplicate(true), "projects": projects.duplicate(true), "buildings": buildings.duplicate(true), "history": history.duplicate(true), "ledger": ledger.duplicate(true), "completed_months": completed_months, "homes_built_this_month": homes_built_this_month, "crisis_months": crisis_months, "term": term, "outcome": outcome, "solved_count": solved_count, "correct_count": correct_count, "expired_count": expired_count, "last_day": last_day, "played_seconds": played_seconds}
+	return {"housing_model_version": 3, "residences": residences.duplicate(true), "layout_initialized": layout_initialized, "apartment_growth_progress": apartment_growth_progress, "city_name": city_name, "difficulty": difficulty, "funds": funds, "reputation": reputation, "population": population, "indicators": indicators.duplicate(true), "projects": projects.duplicate(true), "buildings": buildings.duplicate(true), "history": history.duplicate(true), "ledger": ledger.duplicate(true), "completed_months": completed_months, "homes_built_this_month": homes_built_this_month, "crisis_months": crisis_months, "term": term, "outcome": outcome, "solved_count": solved_count, "correct_count": correct_count, "expired_count": expired_count, "last_day": last_day, "played_seconds": played_seconds}
 
 func load_save_data(data: Dictionary) -> void:
 	start(String(data.get("city_name", "Vila Esperança")), String(data.get("difficulty", "medium")))
-	for key in ["funds", "reputation", "population", "completed_months", "homes_built_this_month", "crisis_months", "term", "outcome", "solved_count", "correct_count", "expired_count", "last_day", "played_seconds"]:
+	for key in ["funds", "reputation", "population", "completed_months", "homes_built_this_month", "apartment_growth_progress", "crisis_months", "term", "outcome", "solved_count", "correct_count", "expired_count", "last_day", "played_seconds"]:
 		if data.has(key):
 			set(key, data[key])
 	if data.get("indicators") is Dictionary:
@@ -259,6 +282,12 @@ func load_save_data(data: Dictionary) -> void:
 			if item is Dictionary:
 				items.append(item.duplicate(true))
 		set(key, items)
+	if int(data.get("housing_model_version", 0)) < 3:
+		# Keep existing progress and locations, then fill the new 100-home start
+		# when map lots are configured. The old population scale no longer fits.
+		population = GameRules.INITIAL_POPULATION
+		initial_apartment_count = randi_range(MIN_INITIAL_APARTMENTS, MAX_INITIAL_APARTMENTS)
+		layout_initialized = false
 	if ledger.size() > 120:
 		ledger = ledger.slice(ledger.size() - 120)
 	_rebuild_occupied_lots()
@@ -275,34 +304,71 @@ func configure_lots(lots: Array[Dictionary]) -> void:
 	_rebuild_occupied_lots()
 	var hall_key: Variant = _lot_key(town_hall)
 	if not layout_initialized:
-		var available := lots.duplicate(true)
-		available.shuffle()
-		for lot in available:
-			if residences.size() >= INITIAL_HOMES:
+		var apartments_placed := 0
+		for residence in residences:
+			if String(residence.get("area", "home")) == "apartment":
+				apartments_placed += 1
+		for lot in _ordered_footprint_candidates():
+			if apartments_placed >= initial_apartment_count:
+				break
+			if can_build_footprint(lot):
+				residences.append({"lot": lot.duplicate(), "area": "apartment", "residents": RESIDENTS_PER_APARTMENT})
+				_occupy_footprint(lot)
+				apartments_placed += 1
+		for lot in _ordered_home_candidates():
+			if homes_count() >= INITIAL_HOMES:
 				break
 			var lot_key: Variant = _lot_key(lot)
 			if lot_key == null or lot_key == hall_key or _occupied_lots.has(lot_key):
 				continue
-			if absi(lot_key.x) <= 5 and absi(lot_key.y) <= 5:
-				residences.append({"lot": lot.duplicate(), "variant": randi_range(0, 3)})
-				_occupied_lots[lot_key] = true
+			residences.append({"lot": lot.duplicate(), "area": "home", "variant": randi_range(0, 3)})
+			_occupied_lots[lot_key] = true
+		population = housing_capacity()
 		layout_initialized = true
 	# Migrate old saves with installations that did not yet have coordinates.
 	for collection in [buildings, projects]:
 		for item in collection:
 			if not item.has("lot") or not (item.lot is Dictionary) or item.lot.is_empty():
 				for lot in lots:
-					if can_build(lot):
+					if can_build_footprint(lot):
 						item.lot = lot.duplicate()
-						var migrated_key: Variant = _lot_key(item.lot)
-						if migrated_key != null:
-							_occupied_lots[migrated_key] = true
+						_occupy_footprint(item.lot)
 						break
 	changed.emit()
 
 func housing_requests() -> int:
-	var extra := maxi(0, population - GameRules.INITIAL_POPULATION)
-	return maxi(0, int(extra / RESIDENTS_PER_HOME) - maxi(0, residences.size() - INITIAL_HOMES))
+	var housing_capacity := housing_capacity()
+	var deficit := maxi(0, population - housing_capacity)
+	return floori(float(deficit) / float(RESIDENTS_PER_HOME))
+
+func housing_capacity() -> int:
+	var capacity := 0
+	for residence in residences:
+		capacity += int(residence.get("residents", RESIDENTS_PER_APARTMENT if String(residence.get("area", "home")) == "apartment" else RESIDENTS_PER_HOME))
+	return capacity
+
+func homes_count() -> int:
+	var count := 0
+	for residence in residences:
+		if String(residence.get("area", "home")) != "apartment":
+			count += 1
+	return count
+
+func apartments_count() -> int:
+	var count := 0
+	for residence in residences:
+		if String(residence.get("area", "home")) == "apartment":
+			count += 1
+	return count
+
+func dwelling_units_count() -> int:
+	var units := 0
+	for residence in residences:
+		if String(residence.get("area", "home")) == "apartment":
+			units += ceili(float(residence.get("residents", RESIDENTS_PER_APARTMENT)) / float(RESIDENTS_PER_HOME))
+		else:
+			units += 1
+	return units
 
 func _service_mean_from_snapshot(snapshot: Dictionary) -> float:
 	var mean := 0.0
@@ -311,22 +377,100 @@ func _service_mean_from_snapshot(snapshot: Dictionary) -> float:
 	return mean
 
 func _spawn_growth_homes() -> void:
-	var requested_homes := housing_requests()
-	if requested_homes <= 0:
+	var deficit := maxi(0, population - housing_capacity())
+	if deficit < RESIDENTS_PER_HOME:
 		return
-	var available_lots: Array[Dictionary] = []
+	var needs_space := false
+	var apartments_needed := floori(float(deficit) / float(RESIDENTS_PER_APARTMENT))
+	if apartments_needed > 0:
+		var footprint_candidates := _ordered_footprint_candidates()
+		var apartments_built := 0
+		for lot in footprint_candidates:
+			if apartments_built >= apartments_needed:
+				break
+			if can_build_footprint(lot):
+				residences.append({"lot": lot.duplicate(), "area": "apartment", "residents": RESIDENTS_PER_APARTMENT})
+				_occupy_footprint(lot)
+				apartments_built += 1
+		homes_built_this_month += apartments_built * ceili(float(RESIDENTS_PER_APARTMENT) / float(RESIDENTS_PER_HOME))
+		if apartments_built < apartments_needed:
+			var before_lots := grass_lots.size()
+			housing_space_needed.emit()
+			if grass_lots.size() > before_lots:
+				return
+			needs_space = true
+	var requested_homes := housing_requests()
+	if requested_homes > 0:
+		var available_lots := _ordered_home_candidates()
+		var homes_to_build := mini(requested_homes, available_lots.size())
+		for index in range(homes_to_build):
+			var chosen_lot: Dictionary = available_lots[index]
+			residences.append({"lot": chosen_lot.duplicate(), "area": "home", "variant": randi_range(0, 3)})
+			var lot_key: Variant = _lot_key(chosen_lot)
+			if lot_key != null:
+				_occupied_lots[lot_key] = true
+		homes_built_this_month += homes_to_build
+		if homes_to_build < requested_homes:
+			needs_space = true
+	if needs_space:
+		housing_space_needed.emit()
+
+func _is_block_corner_coord(coord: Vector2i) -> bool:
+	var rx := posmod(coord.x, 6)
+	var ry := posmod(coord.y, 6)
+	return (rx == 1 or rx == 4) and (ry == 1 or ry == 4)
+
+func _is_cross_corridor_coord(coord: Vector2i) -> bool:
+	return posmod(coord.x, 6) == 3 or posmod(coord.y, 6) == 3
+
+func _ordered_footprint_candidates() -> Array[Dictionary]:
+	var corners: Array[Dictionary] = []
+	var others: Array[Dictionary] = []
 	for lot in grass_lots:
-		if can_build(lot):
-			available_lots.append(lot)
-	available_lots.shuffle()
-	var homes_to_build := mini(requested_homes, available_lots.size())
-	for index in range(homes_to_build):
-		var chosen_lot: Dictionary = available_lots[index]
-		residences.append({"lot": chosen_lot.duplicate(), "variant": randi_range(0, 3)})
-		var lot_key: Variant = _lot_key(chosen_lot)
-		if lot_key != null:
-			_occupied_lots[lot_key] = true
-	homes_built_this_month += homes_to_build
+		if not can_build_footprint(lot):
+			continue
+		var key: Variant = _lot_key(lot)
+		if key != null and _is_block_corner_coord(key as Vector2i):
+			corners.append(lot)
+		else:
+			others.append(lot)
+	corners.shuffle()
+	others.shuffle()
+	corners.append_array(others)
+	return corners
+
+func required_buildings() -> int:
+	if completed_months < 4:
+		return 0
+	return mini(8, 1 + floori(float(completed_months - 4) / 12.0))
+
+func has_required_buildings() -> bool:
+	return buildings.size() >= required_buildings()
+
+func _ordered_home_candidates() -> Array[Dictionary]:
+	var preferred: Array[Dictionary] = []
+	var others: Array[Dictionary] = []
+	for lot in grass_lots:
+		if not can_build(lot):
+			continue
+		var key: Variant = _lot_key(lot)
+		if key != null and _is_cross_corridor_coord(key as Vector2i):
+			if randf() < 0.78:
+				preferred.append(lot)
+			else:
+				others.append(lot)
+		elif randf() < 0.22:
+			preferred.append(lot)
+		else:
+			others.append(lot)
+	preferred.shuffle()
+	others.shuffle()
+	preferred.append_array(others)
+	return preferred
+
+func fulfill_housing_demand() -> void:
+	_spawn_growth_homes()
+	changed.emit()
 
 func _lot_key(lot: Dictionary) -> Variant:
 	if not lot.has("x") or not lot.has("y"):
@@ -341,15 +485,20 @@ func _lot_key(lot: Dictionary) -> Variant:
 
 func _rebuild_occupied_lots() -> void:
 	_occupied_lots.clear()
-	for collection in [residences, buildings, projects]:
+	for item in residences:
+		var raw_home_lot: Variant = item.get("lot", {})
+		if raw_home_lot is Dictionary:
+			if String(item.get("area", "home")) == "apartment":
+				_occupy_footprint(raw_home_lot)
+			else:
+				var home_key: Variant = _lot_key(raw_home_lot)
+				if home_key != null:
+					_occupied_lots[home_key] = true
+	for collection in [buildings, projects]:
 		for item in collection:
-			if not item is Dictionary:
-				continue
-			var raw_lot: Variant = item.get("lot")
+			var raw_lot: Variant = item.get("lot", {})
 			if raw_lot is Dictionary:
-				var key: Variant = _lot_key(raw_lot as Dictionary)
-				if key != null:
-					_occupied_lots[key] = true
+				_occupy_footprint(raw_lot)
 
 func can_build_coord(coord: Vector2i) -> bool:
 	if not _grass_lot_keys.has(coord):
@@ -364,6 +513,29 @@ func can_build(lot: Dictionary) -> bool:
 	if key == null:
 		return false
 	return can_build_coord(key as Vector2i)
+
+func can_build_footprint(lot: Dictionary) -> bool:
+	var anchor: Variant = _lot_key(lot)
+	if anchor == null:
+		return false
+	for coord in _footprint_coords(anchor as Vector2i):
+		if not can_build_coord(coord):
+			return false
+	return true
+
+func _footprint_coords(anchor: Vector2i) -> Array[Vector2i]:
+	var coords: Array[Vector2i] = []
+	for x in range(BUILDING_FOOTPRINT_SIZE):
+		for y in range(BUILDING_FOOTPRINT_SIZE):
+			coords.append(anchor + Vector2i(x, y))
+	return coords
+
+func _occupy_footprint(lot: Dictionary) -> void:
+	var anchor: Variant = _lot_key(lot)
+	if anchor == null:
+		return
+	for coord in _footprint_coords(anchor as Vector2i):
+		_occupied_lots[coord] = true
 
 func place_home(lot: Dictionary) -> String:
 	if outcome != "playing" or housing_requests() <= 0:

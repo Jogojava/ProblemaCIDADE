@@ -271,11 +271,11 @@ msgstr " · Estimate in 6 months: R$ %.0f"
 msgid "Reputação: %.1f%% · Educação: %.0f · Saúde: %.0f · Segurança: %.0f\nDesemprego: %.1f%% · Fome: %.1f%%"
 msgstr "Reputation: %.1f%% · Education: %.0f · Health: %.0f · Security: %.0f\nUnemployment: %.1f%% · Hunger: %.1f%%"
 
-msgid "Dados insuficientes: são necessárias 12 observações mensais."
-msgstr "Insufficient data: 12 monthly observations are required."
+msgid "Dados insuficientes: são necessárias 6 observações mensais."
+msgstr "Insufficient data: 6 monthly observations are required."
 
-msgid "12 observações · linha contínua: histórico · tracejada: estimativa de 6 meses"
-msgstr "12 observations · solid line: history · dashed: 6-month estimate"
+msgid "%d observações · linha contínua: histórico · tracejada: estimativa de 6 meses"
+msgstr "%d observations · solid line: history · dashed: 6-month estimate"
 
 msgid "Estimativa por tendência linear; não é uma garantia. Reage às decisões futuras."
 msgstr "Linear trend estimate; not a guarantee. Future decisions affect outcomes."
@@ -783,3 +783,36 @@ msgstr "Until the next event: advance days until the next problem, including inc
 
 msgid "km, min, pedágio (R$)"
 msgstr "km, min, toll (R$)"
+
+msgid "1 mês = 45 s"
+msgstr "1 month = 45 s"
+
+msgid "1 mês = 15 s"
+msgstr "1 month = 15 s"
+
+msgid "Até a próxima ocorrência (Enter): avançar os dias até o próximo problema, mantendo receitas, obras e eleições."
+msgstr "Until the next event (Enter): advance days until the next problem, including income, construction and elections."
+
+msgid "Restaurar posição e zoom da câmera (C)"
+msgstr "Reset camera position and zoom (C)"
+
+msgid "Abrir problema urgente (U)%s"
+msgstr "Open urgent problem (U)%s"
+
+msgid "Cada casa acomoda 4 pessoas; cada prédio residencial acomoda 160. Há %d vagas residenciais e demanda para %d casas. A população cresce conforme a qualidade e a melhoria dos serviços, gerando novas casas e prédios residenciais. Clique ou pressione M para posicionar uma casa pendente."
+msgstr "Each house holds 4 people; each apartment building holds 160. There are %d housing places available and demand for %d more houses. Population grows based on service quality and improvements, adding new houses and apartment buildings. Click or press M to place a requested house."
+
+msgid "Pop. %d · Moradias %d"
+msgstr "Pop. %d · Homes %d"
+
+msgid "Cada casa acomoda 4 pessoas; cada prédio residencial acomoda 160. Há %d vagas residenciais e demanda para %d casas. A população cresce conforme a qualidade e a melhoria dos serviços, gerando novas casas e prédios residenciais. Clique para posicionar uma casa pendente."
+msgstr "Each house holds 4 people; each apartment building holds 160. There are %d housing places available and demand for %d more houses. Population grows based on service quality and improvements, adding new houses and apartment buildings. Click to place a requested house."
+
+msgid "Escolha o serviço. Para construir, selecione uma área contínua de quatro lotes no mapa. Obras: %d/3."
+msgstr "Choose a service. To build, select a contiguous four-lot area on the map. Construction projects: %d/3."
+
+msgid "Clique em um lote para casa ou no primeiro de quatro lotes contíguos para obra. Verde: disponível · Vermelho: bloqueado. Botão do meio: mover mapa."
+msgstr "Click one lot for a house or the first of four contiguous lots for construction. Green: available · Red: blocked. Middle mouse button: move the map."
+
+msgid "Escolha quatro lotes livres e conectados na grama."
+msgstr "Choose four connected, free grass lots."

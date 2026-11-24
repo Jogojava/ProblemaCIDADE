@@ -29,7 +29,7 @@ func _make_popup() -> void:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var viewport_size := get_viewport_rect().size
-	var popup_size := Vector2(minf(1240.0, viewport_size.x - 48.0), minf(680.0, viewport_size.y - 48.0))
+	var popup_size := Vector2(minf(1320.0, viewport_size.x - 36.0), minf(980.0, viewport_size.y - 24.0))
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = popup_size
 	center.add_child(panel)
