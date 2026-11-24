@@ -9,6 +9,7 @@ var _active_popup: Control
 
 func _ready() -> void:
 	theme = SettingsService.game_theme
+	SettingsService.play_main_menu_music()
 	$SoundButton.pressed.connect(_on_sound_pressed)
 	$ExitButton.pressed.connect(_on_exit_pressed)
 	quit_confirmation.confirmed.connect(func() -> void: get_tree().quit())
@@ -123,9 +124,18 @@ func _sync_sound_button() -> void:
 func _apply_design() -> void:
 	$Background.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	$Background.modulate = Color.WHITE
-	$TitleGroup/HBoxContainer.add_theme_constant_override("separation", 16)
-	$TitleGroup/HBoxContainer/Label.custom_minimum_size.x = 520
-	$TitleGroup/HBoxContainer/Label.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	if has_node("TitleGroup/LogoTexture"):
+		var logo_rect: TextureRect = $TitleGroup/LogoTexture
+		logo_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		if logo_rect.texture != null and not (logo_rect.texture is AtlasTexture):
+			var img := logo_rect.texture.get_image()
+			if img != null:
+				var used := img.get_used_rect()
+				if used.size.x > 0 and used.size.y > 0:
+					var atlas := AtlasTexture.new()
+					atlas.atlas = logo_rect.texture
+					atlas.region = Rect2(used.position, used.size)
+					logo_rect.texture = atlas
 	var portuguese := not String(SettingsService.values.locale).begins_with("en")
 	var names := ["jogar", "continuar", "opcoes", "creditos"]
 	var art := ["play", "continue", "options", "credits"]

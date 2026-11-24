@@ -55,7 +55,7 @@ text = "!  Problema urgente (1)"
 text_overrun_behavior = 3
 
 [node name="UrgentTimer" type="VBoxContainer" parent="UrgentDeadline/Row"]
-custom_minimum_size = Vector2(270, 0)
+custom_minimum_size = Vector2(290, 0)
 layout_mode = 2
 theme_override_constants/separation = 2
 
@@ -70,7 +70,7 @@ layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="Progress" type="ProgressBar" parent="UrgentDeadline/Row/UrgentTimer/TimerRow"]
-custom_minimum_size = Vector2(196, 22)
+custom_minimum_size = Vector2(186, 22)
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
@@ -78,7 +78,7 @@ max_value = 90.0
 show_percentage = false
 
 [node name="Countdown" type="Label" parent="UrgentDeadline/Row/UrgentTimer/TimerRow"]
-custom_minimum_size = Vector2(62, 0)
+custom_minimum_size = Vector2(92, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "01:30"

@@ -370,8 +370,17 @@ msgstr "Open problems in the sidebar, read the explanations and invest in servic
 msgid "Abaixo de 10% de reputação por três meses, ou ao chegar a zero, ocorre impeachment. Os valores são regras desta simulação."
 msgstr "Reputation below 10% for three months, or reaching zero, leads to impeachment. These thresholds are rules of this simulation."
 
-msgid "Use as velocidades ou avance até a próxima ocorrência. Espaço pausa a gestão; Esc abre o menu. Problemas comuns pausam o calendário. Um prazo urgente pausa com o jogo enquanto o problema está fechado e continua contando enquanto o problema está aberto."
-msgstr "Choose a speed or advance to the next event. Space pauses the game; Esc opens the menu. Common problems pause the calendar. An urgent deadline pauses with the game while its problem is closed and keeps counting while the problem is open."
+msgid "Use as velocidades ou avance até a próxima ocorrência. Espaço pausa a gestão; Esc abre o menu. Durante um problema, o calendário corre em velocidade reduzida (1 mês = 6 min). Um prazo urgente pausa com o jogo enquanto o problema está fechado e continua contando enquanto o problema está aberto."
+msgstr "Choose a speed or advance to the next event. Space pauses the game; Esc opens the menu. During a problem, the calendar runs at reduced speed (1 month = 6 min). An urgent deadline pauses with the game while its problem is closed and keeps counting while the problem is open."
+
+msgid "1 mês = 6 min"
+msgstr "1 month = 6 min"
+
+msgid "%d dia"
+msgstr "%d day"
+
+msgid "%d dias"
+msgstr "%d days"
 
 msgid "Iniciar mandato"
 msgstr "Start term"

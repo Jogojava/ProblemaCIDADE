@@ -423,6 +423,9 @@ func _is_block_corner_coord(coord: Vector2i) -> bool:
 func _is_cross_corridor_coord(coord: Vector2i) -> bool:
 	return posmod(coord.x, 6) == 3 or posmod(coord.y, 6) == 3
 
+func _blocks_town_hall_view(coord: Vector2i) -> bool:
+	return coord.x >= -3 and coord.x <= 2 and coord.y >= -2 and coord.y <= 3
+
 func _ordered_footprint_candidates() -> Array[Dictionary]:
 	var corners: Array[Dictionary] = []
 	var others: Array[Dictionary] = []
@@ -430,6 +433,8 @@ func _ordered_footprint_candidates() -> Array[Dictionary]:
 		if not can_build_footprint(lot):
 			continue
 		var key: Variant = _lot_key(lot)
+		if key != null and _blocks_town_hall_view(key as Vector2i):
+			continue
 		if key != null and _is_block_corner_coord(key as Vector2i):
 			corners.append(lot)
 		else:
@@ -483,8 +488,21 @@ func _lot_key(lot: Dictionary) -> Variant:
 		return null
 	return Vector2i(int(x), int(y))
 
+func town_hall_coords() -> Array[Vector2i]:
+	var hall_key: Variant = _lot_key(town_hall)
+	if hall_key == null:
+		return []
+	var anchor := hall_key as Vector2i
+	var coords: Array[Vector2i] = []
+	for dx in range(-2, 1):
+		for dy in range(-1, 1):
+			coords.append(Vector2i(anchor.x + dx, anchor.y + dy))
+	return coords
+
 func _rebuild_occupied_lots() -> void:
 	_occupied_lots.clear()
+	for coord in town_hall_coords():
+		_occupied_lots[coord] = true
 	for item in residences:
 		var raw_home_lot: Variant = item.get("lot", {})
 		if raw_home_lot is Dictionary:

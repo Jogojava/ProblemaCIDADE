@@ -20,6 +20,7 @@ enum Speed {
 @export var normal_month_duration_real_seconds: float = 90.0
 @export var fast_month_duration_real_seconds: float = 45.0
 @export var very_fast_month_duration_real_seconds: float = 15.0
+@export var problem_month_duration_real_seconds: float = 360.0
 
 var current_day: int = 1
 var current_month: int = 1
@@ -33,41 +34,62 @@ var _pause_reasons: Dictionary = {}
 
 var _accumulated_real_time: float = 0.0
 var _total_game_seconds: int = 0
+var _suppress_next_hitch: bool = false
 
 
 func _process(delta: float) -> void:
 	if paused:
 		return
 
-	_accumulated_real_time += delta
+	var effective_delta := delta
+	if _suppress_next_hitch:
+		_suppress_next_hitch = false
+		effective_delta = minf(delta, 0.05)
+
+	_accumulated_real_time += effective_delta
 
 	var seconds_per_game_day := _get_real_seconds_per_game_day()
 
 	while not paused and _accumulated_real_time >= seconds_per_game_day:
 		_accumulated_real_time -= seconds_per_game_day
 		_advance_one_day()
+		seconds_per_game_day = _get_real_seconds_per_game_day()
 
+
+func _get_current_month_duration_real_seconds() -> float:
+	if challenge_active:
+		return problem_month_duration_real_seconds
+
+	match current_speed:
+		Speed.FAST:
+			return fast_month_duration_real_seconds
+		Speed.VERY_FAST:
+			return very_fast_month_duration_real_seconds
+		_:
+			return normal_month_duration_real_seconds
 
 func _get_real_seconds_per_game_day() -> float:
-	var month_duration := 0.0
-
-	match current_speed:
-		Speed.NORMAL:
-			month_duration = normal_month_duration_real_seconds
-		Speed.FAST:
-			month_duration = fast_month_duration_real_seconds
-		Speed.VERY_FAST:
-			month_duration = very_fast_month_duration_real_seconds
-
+	var month_duration := _get_current_month_duration_real_seconds()
 	return maxf(0.001, month_duration / float(maxi(1, days_per_month)))
 
+func get_day_progress() -> float:
+	var seconds_per_game_day := _get_real_seconds_per_game_day()
+	if seconds_per_game_day <= 0.0:
+		return 0.0
+	return clampf(_accumulated_real_time / seconds_per_game_day, 0.0, 1.0)
+
+func _rescale_accumulated_time(previous_seconds_per_day: float) -> void:
+	if previous_seconds_per_day <= 0.0:
+		_accumulated_real_time = 0.0
+		return
+	var day_fraction := clampf(_accumulated_real_time / previous_seconds_per_day, 0.0, 0.999999)
+	_accumulated_real_time = day_fraction * _get_real_seconds_per_game_day()
+
+func suppress_next_delta_hitch() -> void:
+	_suppress_next_hitch = true
+
 func get_game_speed_multiplier() -> float:
-	var current_month_duration := normal_month_duration_real_seconds
-	match current_speed:
-		Speed.FAST:
-			current_month_duration = fast_month_duration_real_seconds
-		Speed.VERY_FAST:
-			current_month_duration = very_fast_month_duration_real_seconds
+	var current_month_duration := _get_current_month_duration_real_seconds()
 	if current_month_duration <= 0.0:
 		return 1.0
 	return maxf(0.0, normal_month_duration_real_seconds) / current_month_duration
@@ -97,7 +119,9 @@ func set_speed(speed: int) -> void:
 	var requested_speed := clampi(speed, Speed.NORMAL, Speed.VERY_FAST)
 	if challenge_active and requested_speed != Speed.NORMAL:
 		return
+	var previous_seconds_per_day := _get_real_seconds_per_game_day()
 	current_speed = requested_speed
+	_rescale_accumulated_time(previous_seconds_per_day)
 	speed_changed.emit(current_speed)
 
 func pause_game() -> void:
@@ -129,11 +153,12 @@ func _update_pause() -> void:
 		paused_changed.emit(paused)
 
 func set_challenge_active(value: bool) -> void:
+	if challenge_active == value:
+		return
+	var previous_seconds_per_day := _get_real_seconds_per_game_day()
 	challenge_active = value
-	if challenge_active:
-		hold("challenge")
-	else:
-		release("challenge")
+	_rescale_accumulated_time(previous_seconds_per_day)
+	speed_changed.emit(current_speed)
 
 func skip_until_next_event(event_checker: Callable) -> void:
 	if not event_checker.is_valid():
@@ -143,10 +168,14 @@ func skip_until_next_event(event_checker: Callable) -> void:
 	# Never bypass an existing manual pause or a modal dialog.
 	if paused:
 		return
+	var skipped_any := false
 	for _day in range(360):
 		if event_checker.call() or paused:
 			break
 		_advance_one_day()
+		skipped_any = true
+	if skipped_any:
+		_accumulated_real_time = 0.0
 
 func get_date_text() -> String:
 	return "Dia %d / Mês %d / Ano %d" % [current_day, current_month, current_year]
@@ -169,9 +198,11 @@ func load_save_data(data: Dictionary) -> void:
 	current_speed = clampi(int(data.get("current_speed", Speed.NORMAL)), Speed.NORMAL, Speed.VERY_FAST)
 	_manual_paused = bool(data.get("paused", false))
 	_pause_reasons.clear()
+	challenge_active = false
 	paused = _manual_paused
-	_accumulated_real_time = maxf(0.0, float(data.get("accumulated_real_time", 0.0)))
+	_accumulated_real_time = clampf(float(data.get("accumulated_real_time", 0.0)), 0.0, _get_real_seconds_per_game_day() * 0.999999)
 	_total_game_seconds = data.get("total_game_seconds", 0)
+	_suppress_next_hitch = false
 
 	paused_changed.emit(paused)
 	speed_changed.emit(current_speed)
@@ -192,6 +223,7 @@ func reset_time() -> void:
 	challenge_active = false
 	_manual_paused = false
 	_pause_reasons.clear()
+	_suppress_next_hitch = false
 
 	paused_changed.emit(paused)
 	speed_changed.emit(current_speed)

@@ -11,6 +11,49 @@ const MAP_RADIUS_STEP := 4
 const MAX_MAP_RADIUS := 50
 const POPULATION_GROWTH_PER_EXPANSION := 400
 const HALF_TILE := Vector2(64, 40)
+
+const GRASS_PATH := "res://assets/city/ground/tile_grass.png"
+const ROAD_LINE_PATH := "res://assets/city/ground/road_line.png"
+const ROAD_INTERSECTION_PATH := "res://assets/city/ground/road_intersection.png"
+const LAKE_PATH := "res://assets/city/ground/lake.png"
+const CONSTRUCTION_SHEET_PATH := "res://assets/city/buildings/construction_sheet.png"
+const TREE_PATHS := [
+	"res://assets/city/ground/tree_1.png",
+	"res://assets/city/ground/tree_2.png",
+	"res://assets/city/ground/tree_3.png",
+]
+const CULTURE_PATHS := [
+	"res://assets/city/buildings/culture_1.png",
+	"res://assets/city/buildings/culture_2.png",
+]
+const BUILDING_PATHS := {
+	"hall": "res://assets/city/buildings/prefeitura.png",
+	"education": "res://assets/city/buildings/education.png",
+	"health": "res://assets/city/buildings/health.png",
+	"water": "res://assets/city/buildings/water.png",
+	"security": "res://assets/city/buildings/security.png",
+	"social": "res://assets/city/buildings/social.png",
+}
+const HOUSE_PATHS := [
+	"res://assets/city/buildings/house_1.png",
+	"res://assets/city/buildings/house_2.png",
+	"res://assets/city/buildings/house_3.png",
+	"res://assets/city/buildings/house_4.png",
+	"res://assets/city/buildings/house_5.png",
+]
+const APARTMENT_PATHS := [
+	"res://assets/city/buildings/apartment_1.png",
+	"res://assets/city/buildings/apartment_2.png",
+	"res://assets/city/buildings/apartment_3.png",
+	"res://assets/city/buildings/apartment_4.png",
+	"res://assets/city/buildings/apartment_5.png",
+]
+
+static var _used_rect_cache: Dictionary = {}
+
+var _textures: Dictionary = {}
+var _construction_anim_time := 0.0
+var _construction_frame := 0
 var state: CityState
 var origin := Vector2(1056, 1780)
 var map_radius := INITIAL_MAP_RADIUS
@@ -19,6 +62,89 @@ var placing := false
 var placement_area := ""
 var hovered := Vector2i(999, 999)
 var lots: Array[Dictionary] = []
+
+func _init() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+func _process(delta: float) -> void:
+	if state == null or state.projects.is_empty():
+		return
+	_construction_anim_time += delta
+	var next_frame := int(floor(_construction_anim_time * 4.5)) % 4
+	if next_frame != _construction_frame:
+		_construction_frame = next_frame
+		queue_redraw()
+
+func _get_sprite_entry(path: String) -> Dictionary:
+	var tex: Texture2D = _textures.get(path, null) as Texture2D
+	if tex == null and not _textures.has(path):
+		tex = load(path) as Texture2D
+		_textures[path] = tex
+	if tex == null:
+		return {}
+	var src_rect: Rect2
+	if _used_rect_cache.has(path):
+		src_rect = _used_rect_cache[path]
+	else:
+		src_rect = Rect2(Vector2.ZERO, tex.get_size())
+		var img := tex.get_image()
+		if img != null:
+			var used := img.get_used_rect()
+			if used.size.x > 0 and used.size.y > 0:
+				src_rect = Rect2(used.position, used.size)
+		_used_rect_cache[path] = src_rect
+	return {"texture": tex, "src_rect": src_rect}
+
+func _draw_sprite_entry(entry: Dictionary, dest: Rect2, flip_h: bool = false, modulate: Color = Color.WHITE) -> void:
+	if entry.is_empty():
+		return
+	var tex: Texture2D = entry["texture"]
+	var src_rect: Rect2 = entry["src_rect"]
+	if flip_h:
+		draw_set_transform(Vector2(dest.position.x + dest.size.x * 0.5, dest.position.y + dest.size.y * 0.5), 0.0, Vector2(-1.0, 1.0))
+		draw_texture_rect_region(tex, Rect2(-dest.size * 0.5, dest.size), src_rect, modulate)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	else:
+		draw_texture_rect_region(tex, dest, src_rect, modulate)
+
+func _building_sprite_path(area: String, lot: Dictionary, variant: int) -> String:
+	if BUILDING_PATHS.has(area):
+		return String(BUILDING_PATHS[area])
+	var lx := int(lot.get("x", 0))
+	var ly := int(lot.get("y", 0))
+	if area == "culture":
+		var cidx := posmod(absi(lx * 13 + ly * 29 + variant), CULTURE_PATHS.size())
+		return CULTURE_PATHS[cidx]
+	var idx := posmod(absi(lx * 31 + ly * 17 + variant * 13), 5)
+	if area == "apartment":
+		return APARTMENT_PATHS[idx % APARTMENT_PATHS.size()]
+	return HOUSE_PATHS[idx % HOUSE_PATHS.size()]
+
+func _should_flip_building(lot: Dictionary, area: String, sprite_path: String = "") -> bool:
+	if area == "hall":
+		return false
+	var lx := int(lot.get("x", 0))
+	var ly := int(lot.get("y", 0))
+	var size := 1 if area == "home" else CityState.BUILDING_FOOTPRINT_SIZE
+	var flip := false
+	var road_br := _road(lx + size, ly)
+	var road_bl := _road(lx, ly + size)
+	if road_br and not road_bl:
+		flip = true
+	elif road_bl and not road_br:
+		flip = false
+	else:
+		var road_tl := _road(lx - 1, ly)
+		var road_tr := _road(lx, ly - 1)
+		if road_tr and not road_tl:
+			flip = true
+		elif road_tl and not road_tr:
+			flip = false
+		else:
+			flip = posmod(absi(lx * 7 + ly * 11), 2) == 1
+	if area == "security" or area == "water" or sprite_path.ends_with("/house_2.png"):
+		return not flip
+	return flip
 
 func bind(city: CityState) -> void:
 	state = city
@@ -124,29 +250,87 @@ func _diamond(base: Vector2, inset := 0.0) -> PackedVector2Array:
 
 func _draw() -> void:
 	# All lots, previews and buildings share the same isometric transform.
+	var grass_sprite := _get_sprite_entry(GRASS_PATH)
+	var road_line_sprite := _get_sprite_entry(ROAD_LINE_PATH)
+	var road_inter_sprite := _get_sprite_entry(ROAD_INTERSECTION_PATH)
+	var lake_sprite := _get_sprite_entry(LAKE_PATH) if ResourceLoader.exists(LAKE_PATH) else {}
+	var tile_size := HALF_TILE * 2.0 + Vector2(2.0, 1.5)
+	var tile_offset := HALF_TILE + Vector2(1.0, 0.75)
+	var lake_anchors: Array[Vector2i] = []
+	var lake_tiles: Dictionary = {}
+	if not lake_sprite.is_empty() and state != null:
+		var fallback_lake := Vector2i(999, 999)
+		var max_lakes := maxi(1, floori(float(map_radius) / 10.0))
+		for x in range(-map_radius, map_radius):
+			if lake_anchors.size() >= max_lakes:
+				break
+			for y in range(-map_radius, map_radius):
+				if lake_anchors.size() >= max_lakes:
+					break
+				if lake_tiles.has(Vector2i(x, y)) or not state.can_build_footprint({"x": x, "y": y}):
+					continue
+				if fallback_lake.x == 999 and absi(x) >= 3 and absi(y) >= 3:
+					fallback_lake = Vector2i(x, y)
+				if posmod(absi(x * 37 + y * 53), 47) != 0:
+					continue
+				var too_close := false
+				for existing in lake_anchors:
+					if absi(x - existing.x) < 10 and absi(y - existing.y) < 10:
+						too_close = true
+						break
+				if not too_close:
+					lake_anchors.append(Vector2i(x, y))
+					for dx in range(2):
+						for dy in range(2):
+							lake_tiles[Vector2i(x + dx, y + dy)] = true
+		if lake_anchors.is_empty() and fallback_lake.x != 999:
+			lake_anchors.append(fallback_lake)
+			for dx in range(2):
+				for dy in range(2):
+					lake_tiles[Vector2i(fallback_lake.x + dx, fallback_lake.y + dy)] = true
 	for depth in range(-map_radius * 2, map_radius * 2 + 1):
 		for x in range(-map_radius, map_radius + 1):
 			var y := depth - x
 			if absi(y) > map_radius:
 				continue
 			var base := point({"x": x, "y": y})
-			var road := _road(x, y)
-			var shade := posmod(x * 7 + y * 13, 4)
-			var color := Color("334a50") if road else Color("73945b").lightened(shade * 0.018)
-			draw_colored_polygon(_diamond(base), color)
+			var tile_rect := Rect2(base - tile_offset, tile_size)
+			var is_road_x := posmod(x, BLOCK_STRIDE) == 0
+			var is_road_y := posmod(y, BLOCK_STRIDE) == 0
+			var road := is_road_x or is_road_y
 			if not road:
-				draw_polyline(_closed(_diamond(base)), Color(0.27, 0.39, 0.22, 0.12), 1)
+				var shade := posmod(x * 7 + y * 13, 4)
+				if not grass_sprite.is_empty():
+					_draw_sprite_entry(grass_sprite, tile_rect, posmod(x + y, 2) == 1, Color.WHITE.darkened(shade * 0.02))
+				else:
+					draw_colored_polygon(_diamond(base), Color("73945b").lightened(shade * 0.018))
+					draw_polyline(_closed(_diamond(base)), Color(0.27, 0.39, 0.22, 0.12), 1)
 				if placing and state != null:
 					var lot := {"x": x, "y": y}
 					var placement_valid := state.can_build(lot) if placement_area == "home" else state.can_build_footprint(lot)
 					if placement_valid:
-						draw_polyline(_closed(_diamond(base, 3)), Color(0.8, 1, 0.76, 0.35), 1.5)
-				elif state != null and state.can_build_coord(Vector2i(x, y)) and posmod(x * 19 + y * 31, 17) == 0:
-					_tree(base + Vector2(15, -3))
-			elif not _road(x - 1, y) or not _road(x, y - 1):
-				draw_polyline(_closed(_diamond(base, 3)), Color("52676a"), 3)
-			if road and posmod(x, BLOCK_STRIDE) != 0 and y == 0 and posmod(x, 2) == 1:
-				draw_line(base + Vector2(-16, -10), base + Vector2(16, 10), Color("bec9ad"), 2)
+						draw_polyline(_closed(_diamond(base, 3)), Color(0.8, 1, 0.76, 0.45), 1.5)
+			else:
+				if is_road_x and is_road_y and not road_inter_sprite.is_empty():
+					_draw_sprite_entry(road_inter_sprite, tile_rect, false)
+				elif not road_line_sprite.is_empty():
+					# road_line.png runs top-left to bottom-right (along X axis, when y % stride == 0).
+					# Flip horizontally for roads running top-right to bottom-left (along Y axis, when x % stride == 0).
+					_draw_sprite_entry(road_line_sprite, tile_rect, is_road_x and not is_road_y)
+				else:
+					draw_colored_polygon(_diamond(base), Color("334a50"))
+					if not _road(x - 1, y) or not _road(x, y - 1):
+						draw_polyline(_closed(_diamond(base, 3)), Color("52676a"), 3)
+					if posmod(x, BLOCK_STRIDE) != 0 and y == 0 and posmod(x, 2) == 1:
+						draw_line(base + Vector2(-16, -10), base + Vector2(16, 10), Color("bec9ad"), 2)
+	if not lake_sprite.is_empty():
+		var lake_src: Vector2 = lake_sprite["src_rect"].size
+		for anchor in lake_anchors:
+			var lbase := point({"x": anchor.x + 0.5, "y": anchor.y + 0.5})
+			var lw := 240.0
+			var lh := lw * (lake_src.y / maxf(1.0, lake_src.x))
+			var ldest := Rect2(Vector2(lbase.x - lw * 0.5, lbase.y + HALF_TILE.y * 1.9 - lh), Vector2(lw, lh))
+			_draw_sprite_entry(lake_sprite, ldest, posmod(absi(anchor.x + anchor.y), 2) == 1)
 	if state == null:
 		return
 	var objects: Array[Dictionary] = []
@@ -159,11 +343,19 @@ func _draw() -> void:
 		var item := project.duplicate()
 		item["construction"] = true
 		objects.append(item)
-	objects.sort_custom(func(a: Dictionary, b: Dictionary): return _structure_base(a).y < _structure_base(b).y)
+	if not placing:
+		for x in range(-map_radius, map_radius + 1):
+			for y in range(-map_radius, map_radius + 1):
+				if not _road(x, y) and not lake_tiles.has(Vector2i(x, y)) and state.can_build_coord(Vector2i(x, y)) and posmod(x * 19 + y * 31, 17) == 0:
+					objects.append({"lot": {"x": x, "y": y}, "area": "tree"})
+	objects.sort_custom(func(a: Dictionary, b: Dictionary): return _structure_sort_y(a) < _structure_sort_y(b))
 	for item in objects:
 		var area := String(item.get("area", "home"))
 		var base := _structure_base(item)
-		_draw_structure(base, area, int(item.get("variant", 0)), bool(item.get("construction", false)))
+		if area == "tree":
+			_tree(base + Vector2(0, 10), int(item.lot.x), int(item.lot.y))
+		else:
+			_draw_structure(base, area, int(item.get("variant", 0)), bool(item.get("construction", false)), item.lot, false)
 	if placing and hovered != Vector2i(999, 999):
 		var anchor := {"x": hovered.x, "y": hovered.y}
 		var is_home := placement_area == "home"
@@ -182,22 +374,65 @@ func _draw() -> void:
 			draw_colored_polygon(_diamond(footprint_center, 2), Color(tint, 0.55))
 			draw_polyline(_closed(_diamond(footprint_center, 2)), tint, 3)
 		if valid:
-			_draw_structure(base, placement_area, 0, true)
+			_draw_structure(base, placement_area, 0, true, anchor, true)
 
 func _structure_base(item: Dictionary) -> Vector2:
 	var area := String(item.get("area", "home"))
 	var lot: Dictionary = item.lot
-	if area != "home" and area != "hall":
+	if area == "hall":
+		return point({"x": int(lot.x) - 1.0, "y": int(lot.y) - 0.5})
+	if area != "home" and area != "tree":
 		return point({"x": int(lot.x) + 0.5, "y": int(lot.y) + 0.5})
 	return point(lot)
+
+func _structure_sort_y(item: Dictionary) -> float:
+	var area := String(item.get("area", "home"))
+	var base := _structure_base(item)
+	if area == "home" or area == "tree":
+		return base.y + HALF_TILE.y
+	if area == "hall":
+		return base.y + HALF_TILE.y * 2.5
+	return base.y + HALF_TILE.y * 2.0
 
 func _closed(polygon: PackedVector2Array) -> PackedVector2Array:
 	var result := polygon.duplicate()
 	result.append(polygon[0])
 	return result
 
-func _draw_structure(base: Vector2, area: String, variant: int, construction: bool) -> void:
+func _draw_structure(base: Vector2, area: String, variant: int, construction: bool, lot: Dictionary = {}, preview: bool = false) -> void:
 	var home := area == "home"
+	if construction and not preview:
+		var sheet_entry := _get_sprite_entry(CONSTRUCTION_SHEET_PATH)
+		if not sheet_entry.is_empty():
+			var tex: Texture2D = sheet_entry["texture"]
+			var cell := tex.get_size() * 0.5
+			var col := _construction_frame % 2
+			var row := _construction_frame / 2
+			var src_rect := Rect2(Vector2(col * cell.x, row * cell.y), cell)
+			var target_w := 120.0 if home else 248.0
+			var target_h := target_w * (cell.y / maxf(1.0, cell.x))
+			var anchor_bottom_y := base.y + (HALF_TILE.y * 0.95 if home else HALF_TILE.y * 1.92)
+			var dest := Rect2(Vector2(base.x - target_w * 0.5, anchor_bottom_y - target_h), Vector2(target_w, target_h))
+			draw_texture_rect_region(tex, dest, src_rect, Color.WHITE)
+			return
+	var sprite_path := _building_sprite_path(area, lot, variant)
+	var sprite_entry := _get_sprite_entry(sprite_path)
+	if not sprite_entry.is_empty():
+		var src_size: Vector2 = sprite_entry["src_rect"].size
+		var is_park := sprite_path.ends_with("/culture_2.png")
+		var target_w := 116.0 if home else (258.0 if area == "hall" else (248.0 if is_park else (204.0 if area == "water" else (228.0 if area == "apartment" else 236.0))))
+		var target_h := target_w * (src_size.y / maxf(1.0, src_size.x))
+		var anchor_bottom_y := base.y + (HALF_TILE.y * 0.92 if home else (HALF_TILE.y * 1.82 if area == "hall" else (HALF_TILE.y * 1.95 if is_park else (HALF_TILE.y * 1.72 if area == "water" else HALF_TILE.y * 1.85))))
+		var x_offset := 12.0 if area == "hall" else 0.0
+		var dest := Rect2(Vector2(base.x + x_offset - target_w * 0.5, anchor_bottom_y - target_h), Vector2(target_w, target_h))
+		var flip_h := _should_flip_building(lot, area, sprite_path)
+		if construction:
+			_draw_sprite_entry(sprite_entry, dest, flip_h, Color(1.0, 1.0, 1.0, 0.5))
+			return
+		_draw_sprite_entry(sprite_entry, dest, flip_h, Color.WHITE)
+		if area == "hall":
+			draw_string(ThemeDB.fallback_font, base + Vector2(-42, HALF_TILE.y * 2.55), tr("Prefeitura"), HORIZONTAL_ALIGNMENT_LEFT, 120, 17, Color("f5f1dc"))
+		return
 	var colors := [Color("e2c29a"), Color("cbd4bf"), Color("a5c4ca"), Color("e4ceaa")]
 	var accent: Color = {"education": Color("e9bf59"), "health": Color("d37871"), "water": Color("63b3cc"), "security": Color("6e8bbb"), "culture": Color("ac86b8"), "social": Color("a2bd7c"), "hall": Color("5aa5a0"), "apartment": Color("9baec0")}.get(area, colors[variant % 4])
 	var h := 40.0 + variant * 8 if home else (110.0 if area == "apartment" else 92.0)
@@ -232,7 +467,17 @@ func _draw_structure(base: Vector2, area: String, variant: int, construction: bo
 		if area == "hall":
 			draw_string(ThemeDB.fallback_font, base + Vector2(-48, 39), tr("Prefeitura"), HORIZONTAL_ALIGNMENT_LEFT, 120, 17, Color("f5f1dc"))
 
-func _tree(base: Vector2) -> void:
+func _tree(base: Vector2, x: int = 0, y: int = 0) -> void:
+	var idx := posmod(absi(x * 11 + y * 23), TREE_PATHS.size())
+	var entry := _get_sprite_entry(TREE_PATHS[idx])
+	if not entry.is_empty():
+		draw_ellipse_shadow(base)
+		var src_size: Vector2 = entry["src_rect"].size
+		var tw := 64.0
+		var th := tw * (src_size.y / maxf(1.0, src_size.x))
+		var dest := Rect2(Vector2(base.x - tw * 0.5, base.y + 4.0 - th), Vector2(tw, th))
+		_draw_sprite_entry(entry, dest, posmod(absi(x * 5 + y * 7), 2) == 1)
+		return
 	draw_ellipse_shadow(base)
 	draw_line(base, base + Vector2(0, -24), Color("77654b"), 5)
 	draw_circle(base + Vector2(0, -29), 19, Color("436e53"))

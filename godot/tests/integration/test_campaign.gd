@@ -97,8 +97,8 @@ func _answer_all() -> void:
 		if game._current_problem_popup == null:
 			check(false, "Problema deve abrir: " + id)
 			continue
-		var is_urgent := String(event.get("category", "")) == EventManager.CATEGORY_URGENT
-		check(game.time_manager.paused != is_urgent, "Problemas comuns pausam o tempo; urgentes mantêm o prazo correndo.")
+		check(not game.time_manager.paused and game.time_manager.challenge_active, "Problemas mantêm o calendário rodando em velocidade reduzida.")
+		check(is_equal_approx(game.time_manager.get_game_speed_multiplier(), 0.25), "Velocidade durante problemas é 1 mês = 6 min (0,25x da normal).")
 		var before: int = game.city.solved_count
 		var answer := String(definition.get("correct_answer", ""))
 		var payload: Dictionary = definition.get("payload", {})

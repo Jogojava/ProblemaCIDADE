@@ -32,6 +32,7 @@ var _calculator_stored_value := 0.0
 var _calculator_operator := ""
 var _calculator_replace_value := true
 var _draft_snapshot: Array = []
+var _deadline_style_category := ""
 
 func _ready() -> void:
 	_apply_popup_styles()
@@ -158,6 +159,7 @@ func configure(problem_title: String, problem_description: String, problem_image
 		option_buttons[0].grab_focus()
 
 func set_urgent_deadline(seconds: float, title: String, urgent_count: int, phase: String, total_seconds: float = 90.0) -> void:
+	_apply_deadline_style(EventDatabase.CATEGORY_URGENT)
 	urgent_deadline.show()
 	urgent_deadline_button.text = tr("%s  (%d)") % [tr(title), maxi(1, urgent_count)]
 	urgent_deadline_phase.text = tr("PARA RESPONDER") if phase == "solving" else tr("PARA ABRIR")
@@ -165,6 +167,55 @@ func set_urgent_deadline(seconds: float, title: String, urgent_count: int, phase
 	urgent_deadline_progress.value = clampf(seconds, 0.0, urgent_deadline_progress.max_value)
 	var whole_seconds := maxi(0, ceili(seconds))
 	urgent_deadline_countdown.text = "%02d:%02d" % [floori(float(whole_seconds) / 60.0), whole_seconds % 60]
+
+func set_days_deadline(remaining_days: float, total_days: float, title: String, category: String) -> void:
+	_apply_deadline_style(category)
+	urgent_deadline.show()
+	urgent_deadline_button.text = tr(title)
+	urgent_deadline_phase.text = tr("PARA RESPONDER")
+	urgent_deadline_progress.max_value = maxf(1.0, total_days)
+	urgent_deadline_progress.value = clampf(remaining_days, 0.0, urgent_deadline_progress.max_value)
+	var whole_days := maxi(0, ceili(remaining_days))
+	urgent_deadline_countdown.text = tr("%d dia") % whole_days if whole_days == 1 else tr("%d dias") % whole_days
+
+func _category_accent(category: String) -> Color:
+	match category:
+		"common": return Color(0.36, 0.66, 0.27, 1.0)
+		"important": return Color(0.88, 0.67, 0.12, 1.0)
+		"urgent": return Color(0.78, 0.2, 0.18, 1.0)
+		_: return Color(0.25, 0.62, 0.78, 1.0)
+
+func _category_progress_color(category: String) -> Color:
+	match category:
+		"common": return Color("47a83c")
+		"important": return Color("e0a91d")
+		"urgent": return Color("e23b32")
+		_: return Color("2b97c7")
+
+func _apply_deadline_style(category: String) -> void:
+	if _deadline_style_category == category:
+		return
+	_deadline_style_category = category
+	urgent_deadline_button.icon = load(DeboraDesign.ROOT + category + ".png")
+	var accent := _category_accent(category)
+	var button_normal := StyleBoxFlat.new()
+	button_normal.bg_color = accent.darkened(0.5)
+	button_normal.border_color = accent
+	button_normal.set_border_width_all(2)
+	button_normal.set_corner_radius_all(8)
+	var button_hover := button_normal.duplicate() as StyleBoxFlat
+	button_hover.bg_color = accent.darkened(0.3)
+	urgent_deadline_button.add_theme_stylebox_override("normal", button_normal)
+	urgent_deadline_button.add_theme_stylebox_override("hover", button_hover)
+	urgent_deadline_button.add_theme_stylebox_override("pressed", button_hover)
+	var deadline_fill := StyleBoxFlat.new()
+	deadline_fill.bg_color = _category_progress_color(category)
+	deadline_fill.set_corner_radius_all(6)
+	var deadline_background := StyleBoxFlat.new()
+	deadline_background.bg_color = Color("354b52")
+	deadline_background.set_corner_radius_all(6)
+	urgent_deadline_progress.add_theme_stylebox_override("fill", deadline_fill)
+	urgent_deadline_progress.add_theme_stylebox_override("background", deadline_background)
 
 func show_route_graph(distances: Dictionary) -> void:
 	answers_container.size_flags_horizontal = Control.SIZE_FILL
@@ -201,32 +252,13 @@ func _apply_popup_styles() -> void:
 	deadline_style.content_margin_bottom = 8
 	urgent_deadline.add_theme_stylebox_override("panel", deadline_style)
 	urgent_deadline_button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	urgent_deadline_button.icon = load(DeboraDesign.ROOT + EventDatabase.CATEGORY_URGENT + ".png")
 	urgent_deadline_button.expand_icon = true
 	urgent_deadline_button.add_theme_constant_override("icon_max_width", 28)
 	urgent_deadline_button.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	urgent_deadline_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var urgent_accent := Color(0.78, 0.2, 0.18)
-	var urgent_normal := StyleBoxFlat.new()
-	urgent_normal.bg_color = urgent_accent.darkened(0.5)
-	urgent_normal.border_color = urgent_accent
-	urgent_normal.set_border_width_all(2)
-	urgent_normal.set_corner_radius_all(8)
-	var urgent_hover := urgent_normal.duplicate() as StyleBoxFlat
-	urgent_hover.bg_color = urgent_accent.darkened(0.3)
-	urgent_deadline_button.add_theme_stylebox_override("normal", urgent_normal)
-	urgent_deadline_button.add_theme_stylebox_override("hover", urgent_hover)
-	urgent_deadline_button.add_theme_stylebox_override("pressed", urgent_hover)
 	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		urgent_deadline_button.add_theme_color_override(state, Color.WHITE)
-	var deadline_fill := StyleBoxFlat.new()
-	deadline_fill.bg_color = Color("e23b32")
-	deadline_fill.set_corner_radius_all(6)
-	var deadline_background := StyleBoxFlat.new()
-	deadline_background.bg_color = Color("354b52")
-	deadline_background.set_corner_radius_all(6)
-	urgent_deadline_progress.add_theme_stylebox_override("fill", deadline_fill)
-	urgent_deadline_progress.add_theme_stylebox_override("background", deadline_background)
+	_apply_deadline_style(EventDatabase.CATEGORY_URGENT)
 
 	var statement_style := StyleBoxFlat.new()
 	statement_style.bg_color = Color(0.91, 0.96, 0.98, 1.0)

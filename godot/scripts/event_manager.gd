@@ -5,6 +5,8 @@ const CATEGORY_OPTIONAL := "optional"
 const CATEGORY_COMMON := "common"
 const CATEGORY_IMPORTANT := "important"
 const CATEGORY_URGENT := "urgent"
+const FIRST_GAME_EVENT_ID := "aura_travessia"
+const FIRST_GAME_EVENT_DAY := 2
 
 signal event_scheduled(event_id: String, category: String, day: int, month: int, year: int)
 signal event_triggered(runtime_event: Dictionary)
@@ -163,10 +165,39 @@ func _create_month_schedule(month: int, year: int) -> void:
 		CATEGORY_URGENT: 0
 	}
 
+	var optional_amount := optional_events_per_month
+	var common_amount := common_events_per_month
+	var important_amount := important_events_per_month
+	var min_day_floor := 1
+
+	if _should_schedule_mandatory_first_event(month, year):
+		var first_event_data: Dictionary = _event_database.call("get_event", FIRST_GAME_EVENT_ID)
+		var first_category := String(first_event_data.get("category", CATEGORY_OPTIONAL))
+		if _event_database.has_method("mark_event_used"):
+			_event_database.call("mark_event_used", FIRST_GAME_EVENT_ID)
+		used_days.append(FIRST_GAME_EVENT_DAY)
+		scheduled_events.append({
+			"event_id": FIRST_GAME_EVENT_ID,
+			"category": first_category,
+			"day": FIRST_GAME_EVENT_DAY,
+			"month": month,
+			"year": year
+		})
+		created_counts[first_category] = int(created_counts.get(first_category, 0)) + 1
+		event_scheduled.emit(FIRST_GAME_EVENT_ID, first_category, FIRST_GAME_EVENT_DAY, month, year)
+		min_day_floor = FIRST_GAME_EVENT_DAY + 1
+		match first_category:
+			CATEGORY_OPTIONAL:
+				optional_amount = maxi(0, optional_amount - 1)
+			CATEGORY_COMMON:
+				common_amount = maxi(0, common_amount - 1)
+			CATEGORY_IMPORTANT:
+				important_amount = maxi(0, important_amount - 1)
+
 	_schedule_category(
 		CATEGORY_OPTIONAL,
-		optional_events_per_month,
-		min_day_for_optional,
+		optional_amount,
+		maxi(min_day_for_optional, min_day_floor),
 		max_day_for_optional,
 		month,
 		year,
@@ -176,8 +207,8 @@ func _create_month_schedule(month: int, year: int) -> void:
 
 	_schedule_category(
 		CATEGORY_COMMON,
-		common_events_per_month,
-		min_day_for_common,
+		common_amount,
+		maxi(min_day_for_common, min_day_floor),
 		max_day_for_common,
 		month,
 		year,
@@ -187,8 +218,8 @@ func _create_month_schedule(month: int, year: int) -> void:
 
 	_schedule_category(
 		CATEGORY_IMPORTANT,
-		important_events_per_month,
-		min_day_for_important,
+		important_amount,
+		maxi(min_day_for_important, min_day_floor),
 		max_day_for_important,
 		month,
 		year,
@@ -199,7 +230,7 @@ func _create_month_schedule(month: int, year: int) -> void:
 	_schedule_category(
 		CATEGORY_URGENT,
 		URGENT_EVENTS_PER_MONTH if not _has_urgent_for_month(month, year) else 0,
-		min_day_for_urgent,
+		maxi(min_day_for_urgent, min_day_floor),
 		max_day_for_urgent,
 		month,
 		year,
@@ -208,6 +239,19 @@ func _create_month_schedule(month: int, year: int) -> void:
 	)
 
 	monthly_schedule_created.emit(month, year, created_counts)
+
+func _should_schedule_mandatory_first_event(month: int, year: int) -> bool:
+	if month != 1 or year != 1:
+		return false
+	if _event_database == null or not _event_database.has_method("has_event"):
+		return false
+	if not bool(_event_database.call("has_event", FIRST_GAME_EVENT_ID)):
+		return false
+	for event_list in [scheduled_events, active_events, resolved_events, expired_events]:
+		for event_data in event_list:
+			if String(event_data.get("event_id", "")) == FIRST_GAME_EVENT_ID:
+				return false
+	return true
 
 func _has_urgent_for_month(month: int, year: int) -> bool:
 	var expected_key := "%d-%d" % [year, month]

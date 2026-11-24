@@ -2,6 +2,7 @@ extends Node
 
 const URGENT_DEADLINE_SECONDS := 90.0
 const PROBLEM_SCENE := preload("res://scenes/ui/problem_template.tscn")
+const SKY_BACKGROUND_SCRIPT := preload("res://game/city/sky_background.gd")
 
 @onready var event_database: EventDatabase = $EventDatabase
 @onready var event_manager: EventManager = $EventManager
@@ -21,10 +22,12 @@ var _last_refresh := 0.0
 var _current_problem_id := ""
 var _current_problem_popup: ProblemTemplate
 var _current_problem_runtime_event: Dictionary = {}
+var _suppress_next_process_hitch := false
 
 func _ready() -> void:
 	hud.theme = SettingsService.game_theme
 	return_dialog.theme = hud.theme
+	SettingsService.play_city_music(true)
 	hud.investment_requested.connect(_invest)
 	hud.construction_requested.connect(_construct)
 	hud.housing_requested.connect(func(): _begin_placement("home"))
@@ -67,6 +70,8 @@ func _ready() -> void:
 	time_manager.month_passed.connect(_on_game_month)
 	hud.bind_city(city)
 	RenderingServer.set_default_clear_color(Color("243d39"))
+	var sky_background: CanvasLayer = SKY_BACKGROUND_SCRIPT.new()
+	add_child(sky_background)
 	visuals = CityVisuals.new()
 	visuals.name = "CityVisuals"
 	visuals.origin = $Camera2D.position
@@ -94,13 +99,18 @@ func _ready() -> void:
 		hud.show_notice(tr("Save antigo recuperado. O estado da cidade foi inicializado porque não existia nesta versão."))
 	if OS.get_cmdline_user_args().has("--freeze"):
 		time_manager.set_process(false)
+		sky_background.set_process(false)
 		set_process(false)
 
 func _process(delta: float) -> void:
 	if city.outcome != "playing":
 		return
+	var effective_delta := delta
+	if _suppress_next_process_hitch:
+		_suppress_next_process_hitch = false
+		effective_delta = minf(delta, 0.05)
 	if not time_manager.paused:
-		city.played_seconds += delta
+		city.played_seconds += effective_delta
 	var expired_ids: Array[String] = []
 	for runtime_event in event_manager.active_events:
 		if String(runtime_event.get("category", "")) != EventManager.CATEGORY_URGENT:
@@ -111,8 +121,8 @@ func _process(delta: float) -> void:
 		var problem_is_open := String(runtime_event.get("event_id", "")) == _current_problem_id
 		if time_manager.paused and not problem_is_open:
 			continue
-		var speed_multiplier := time_manager.get_game_speed_multiplier()
-		var remaining := maxf(0.0, float(runtime_event.get("deadline_remaining_seconds", URGENT_DEADLINE_SECONDS)) - delta * speed_multiplier)
+		var speed_multiplier := 1.0 if problem_is_open else time_manager.get_game_speed_multiplier()
+		var remaining := maxf(0.0, float(runtime_event.get("deadline_remaining_seconds", URGENT_DEADLINE_SECONDS)) - effective_delta * speed_multiplier)
 		runtime_event["deadline_remaining_seconds"] = remaining
 		if problem_is_open and _current_problem_popup != null and is_instance_valid(_current_problem_popup):
 			_current_problem_popup.set_urgent_deadline(
@@ -128,14 +138,17 @@ func _process(delta: float) -> void:
 	for event_id in expired_ids:
 		event_manager.expire_event_immediately(event_id)
 
+	if not _current_problem_id.is_empty() and String(_current_problem_runtime_event.get("category", "")) != EventManager.CATEGORY_URGENT:
+		_update_open_problem_days_deadline()
+
 	if time_manager.paused:
-		_last_refresh += delta
+		_last_refresh += effective_delta
 		if _last_refresh > 0.15:
 			_last_refresh = 0.0
 			_refresh_problem_tabs()
 		return
 
-	_last_refresh += delta
+	_last_refresh += effective_delta
 	if _last_refresh > 0.15:
 		_last_refresh = 0.0
 		_refresh_problem_tabs()
@@ -233,10 +246,10 @@ func open_problem(event_id: String) -> void:
 		runtime_event["deadline_remaining_seconds"] = float(runtime_event.get("deadline_remaining_seconds", URGENT_DEADLINE_SECONDS))
 		time_manager.set_speed(TimeManager.Speed.NORMAL)
 
-	# Urgent deadlines keep running while the popup is open. Other problems
-	# retain the existing paused challenge mode.
-	time_manager.set_challenge_active(not is_urgent)
+	# City time keeps running at a reduced rate (1 month = 6 min) while any problem is open.
+	time_manager.set_challenge_active(true)
 	hud.set_problem_mode(true)
+	SettingsService.play_problem_music(event_id, String(problem_data.get("category", EventDatabase.CATEGORY_COMMON)))
 	var popup := PROBLEM_SCENE.instantiate() as ProblemTemplate
 	popup.theme = hud.theme
 	_current_problem_popup = popup
@@ -256,6 +269,8 @@ func open_problem(event_id: String) -> void:
 		input_placeholder,
 		String(problem_data.get("category", EventDatabase.CATEGORY_COMMON))
 	)
+	_suppress_next_process_hitch = true
+	time_manager.suppress_next_delta_hitch()
 	if is_urgent:
 		popup.set_urgent_deadline(
 			float(runtime_event.get("deadline_remaining_seconds", URGENT_DEADLINE_SECONDS)),
@@ -264,9 +279,43 @@ func open_problem(event_id: String) -> void:
 			String(runtime_event.get("deadline_phase", "solving")),
 			URGENT_DEADLINE_SECONDS
 		)
+	else:
+		_update_open_problem_days_deadline()
 	if problem_data.has("graph"):
 		popup.show_route_graph(problem_data.graph)
 	popup.restore_draft(runtime_event.get("draft_strokes", []), String(runtime_event.get("draft_answer", "")))
+
+func _get_event_days_deadline(runtime_event: Dictionary) -> Dictionary:
+	var expires_on: Variant = runtime_event.get("expires_on", null)
+	if not (expires_on is Dictionary):
+		return {}
+	var exp_day := int(expires_on.get("day", -1))
+	var exp_month := int(expires_on.get("month", -1))
+	var exp_year := int(expires_on.get("year", -1))
+	if exp_day < 1 or exp_month < 1 or exp_year < 1:
+		return {}
+	var current_index := GameRules.date_index(time_manager.current_day, time_manager.current_month, time_manager.current_year)
+	var expire_index := GameRules.date_index(exp_day, exp_month, exp_year)
+	var remaining := maxf(0.0, float(expire_index - current_index) - time_manager.get_day_progress())
+	var total_days := float(runtime_event.get("availability_duration_days", EventDatabase.PROBLEM_AVAILABILITY_DAYS))
+	if total_days <= 0.0:
+		total_days = maxf(remaining, float(EventDatabase.PROBLEM_AVAILABILITY_DAYS))
+	return {"remaining": remaining, "total": total_days}
+
+func _update_open_problem_days_deadline() -> void:
+	if _current_problem_popup == null or not is_instance_valid(_current_problem_popup):
+		return
+	if _current_problem_runtime_event.is_empty():
+		return
+	var deadline := _get_event_days_deadline(_current_problem_runtime_event)
+	if deadline.is_empty():
+		return
+	_current_problem_popup.set_days_deadline(
+		float(deadline["remaining"]),
+		float(deadline["total"]),
+		String(_current_problem_runtime_event.get("title", "Problema")),
+		String(_current_problem_runtime_event.get("category", EventDatabase.CATEGORY_COMMON))
+	)
 
 func _resolve_problem_image(image_value: Variant) -> Texture2D:
 	if image_value is Texture2D:
@@ -413,6 +462,7 @@ func _close_current_problem() -> void:
 	_current_problem_runtime_event = {}
 	time_manager.set_challenge_active(false)
 	hud.set_problem_mode(false)
+	SettingsService.play_city_music(false)
 	_refresh_problem_tabs()
 
 func _on_problem_close_requested() -> void:
@@ -528,7 +578,7 @@ func _show_briefing() -> void:
 	column.add_child(UIFactory.label(tr("Administre a cidade por quatro anos e alcance pelo menos 50% de reputação para a reeleição. Complete o segundo mandato para concluir a campanha.")))
 	column.add_child(UIFactory.label(tr("Resolva problemas pela barra lateral, confira as explicações e invista em serviços ou obras pelo botão de dinheiro. Obras custam R$ 35.000 e levam 20 dias.")))
 	column.add_child(UIFactory.label(tr("Abaixo de 10% de reputação por três meses, ou ao chegar a zero, ocorre impeachment. Os valores são regras desta simulação.")))
-	column.add_child(UIFactory.label(tr("Use as velocidades ou avance até a próxima ocorrência. Espaço pausa a gestão; Esc abre o menu. Problemas comuns pausam o calendário. Um prazo urgente pausa com o jogo enquanto o problema está fechado e continua contando enquanto o problema está aberto."), 22))
+	column.add_child(UIFactory.label(tr("Use as velocidades ou avance até a próxima ocorrência. Espaço pausa a gestão; Esc abre o menu. Durante um problema, o calendário corre em velocidade reduzida (1 mês = 6 min). Um prazo urgente pausa com o jogo enquanto o problema está fechado e continua contando enquanto o problema está aberto."), 22))
 	column.add_child(UIFactory.button(tr("Iniciar mandato"), _close_dialog))
 
 func _show_answer_feedback(definition: Dictionary, correct: bool) -> void:

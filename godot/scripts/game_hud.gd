@@ -42,7 +42,10 @@ var _pause_icon := preload("res://assets/ui/hud/pause.svg")
 var _play_icon := preload("res://assets/ui/hud/play.svg")
 var _problem_button_ids: Array[String] = []
 var _problem_button_categories: Dictionary = {}
+var _problem_items: Dictionary = {}
 var _problem_buttons: Dictionary = {}
+var _problem_deadline_bars: Dictionary = {}
+var _problem_deadline_labels: Dictionary = {}
 var _problem_button_titles: Dictionary = {}
 var _events_by_category: Dictionary = {}
 var _last_problem_events: Array[Dictionary] = []
@@ -155,22 +158,29 @@ func update_problem_tabs(events: Array[Dictionary]) -> void:
 	if problems_changed:
 		_update_category_counts()
 		_update_sidebar_layout()
+	_update_problem_deadlines(events)
 	_update_urgent_alert(urgent_event)
 
 func _rebuild_problem_buttons(events: Array[Dictionary], categories_by_id: Dictionary) -> void:
-	for button in _problem_buttons.values():
-		if is_instance_valid(button):
-			button.queue_free()
+	for item in _problem_items.values():
+		if is_instance_valid(item):
+			item.queue_free()
+	_problem_items.clear()
 	_problem_buttons.clear()
+	_problem_deadline_bars.clear()
+	_problem_deadline_labels.clear()
 	_problem_button_titles.clear()
 	for runtime_event in events:
 		var event_id := String(runtime_event.get("event_id", ""))
 		var category := String(categories_by_id.get(event_id, ""))
 		if event_id.is_empty() or category == EventDatabase.CATEGORY_URGENT:
 			continue
+		var item := VBoxContainer.new()
+		item.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		item.add_theme_constant_override("separation", 4)
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(312, 68)
-		button.size = Vector2(312, 68)
+		button.custom_minimum_size = Vector2(312, 60)
+		button.size = Vector2(312, 60)
 		button.add_theme_font_size_override("font_size", 19)
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.text_overrun_behavior = 3
@@ -180,9 +190,79 @@ func _rebuild_problem_buttons(events: Array[Dictionary], categories_by_id: Dicti
 		button.text = tr(title)
 		button.tooltip_text = "%s • %s" % [tr(_category_label(category)), tr(title)]
 		_style_problem_button(button, category)
-		_problem_list.add_child(button)
+		item.add_child(button)
+		if runtime_event.get("expires_on", null) is Dictionary:
+			var timer_row := HBoxContainer.new()
+			timer_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			timer_row.add_theme_constant_override("separation", 8)
+			timer_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			var progress := ProgressBar.new()
+			progress.custom_minimum_size = Vector2(0, 12)
+			progress.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			progress.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			progress.show_percentage = false
+			progress.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			var fill := StyleBoxFlat.new()
+			fill.bg_color = _category_progress_color(category)
+			fill.set_corner_radius_all(5)
+			var bg := StyleBoxFlat.new()
+			bg.bg_color = Color("354b52")
+			bg.set_corner_radius_all(5)
+			progress.add_theme_stylebox_override("fill", fill)
+			progress.add_theme_stylebox_override("background", bg)
+			var days_label := Label.new()
+			days_label.custom_minimum_size = Vector2(74, 0)
+			days_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			days_label.add_theme_font_size_override("font_size", 15)
+			days_label.add_theme_color_override("font_color", Color("20383f"))
+			days_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			timer_row.add_child(progress)
+			timer_row.add_child(days_label)
+			item.add_child(timer_row)
+			_problem_deadline_bars[event_id] = progress
+			_problem_deadline_labels[event_id] = days_label
+		_problem_list.add_child(item)
+		_problem_items[event_id] = item
 		_problem_buttons[event_id] = button
 		_problem_button_titles[event_id] = title
+
+func _update_problem_deadlines(events: Array[Dictionary]) -> void:
+	if _time_manager == null:
+		return
+	var current_index := GameRules.date_index(_time_manager.current_day, _time_manager.current_month, _time_manager.current_year)
+	var day_progress := _time_manager.get_day_progress()
+	for runtime_event in events:
+		var event_id := String(runtime_event.get("event_id", ""))
+		if not _problem_deadline_bars.has(event_id):
+			continue
+		var expires_on: Variant = runtime_event.get("expires_on", null)
+		if not (expires_on is Dictionary):
+			continue
+		var exp_day := int(expires_on.get("day", -1))
+		var exp_month := int(expires_on.get("month", -1))
+		var exp_year := int(expires_on.get("year", -1))
+		if exp_day < 1 or exp_month < 1 or exp_year < 1:
+			continue
+		var expire_index := GameRules.date_index(exp_day, exp_month, exp_year)
+		var remaining := maxf(0.0, float(expire_index - current_index) - day_progress)
+		var total_days := float(runtime_event.get("availability_duration_days", EventDatabase.PROBLEM_AVAILABILITY_DAYS))
+		if total_days <= 0.0:
+			total_days = maxf(remaining, float(EventDatabase.PROBLEM_AVAILABILITY_DAYS))
+		var bar: ProgressBar = _problem_deadline_bars[event_id]
+		var label: Label = _problem_deadline_labels[event_id]
+		if is_instance_valid(bar):
+			bar.max_value = maxf(1.0, total_days)
+			bar.value = clampf(remaining, 0.0, bar.max_value)
+		if is_instance_valid(label):
+			var whole_days := maxi(0, ceili(remaining))
+			label.text = tr("%d dia") % whole_days if whole_days == 1 else tr("%d dias") % whole_days
+
+func _category_progress_color(category: String) -> Color:
+	match category:
+		"common": return Color("47a83c")
+		"important": return Color("e0a91d")
+		"urgent": return Color("e23b32")
+		_: return Color("2b97c7")
 
 func _update_category_counts() -> void:
 	var categories := [EventDatabase.CATEGORY_IMPORTANT, EventDatabase.CATEGORY_COMMON, EventDatabase.CATEGORY_OPTIONAL]
@@ -219,9 +299,12 @@ func _update_sidebar_layout() -> void:
 		badge.visible = true
 		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for event_id in _problem_buttons:
+		var is_visible := expanded and String(_problem_button_categories[event_id]) == _hovered_category
+		if _problem_items.has(event_id) and is_instance_valid(_problem_items[event_id]):
+			_problem_items[event_id].visible = is_visible
 		var button: Button = _problem_buttons[event_id]
-		button.visible = expanded and String(_problem_button_categories[event_id]) == _hovered_category
-		button.custom_minimum_size = Vector2(360, 64)
+		button.visible = is_visible
+		button.custom_minimum_size = Vector2(360, 60)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.text = tr(String(_problem_button_titles[event_id]))
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -270,6 +353,8 @@ func set_problem_mode(active: bool) -> void:
 		normal_button.set_pressed_no_signal(true)
 		fast_button.set_pressed_no_signal(false)
 		very_fast_button.set_pressed_no_signal(false)
+	elif not active and _time_manager != null:
+		_on_speed_changed(_time_manager.current_speed)
 	_update_urgent_alert(_find_urgent_event())
 
 func _style_problem_button(button: Button, category: String) -> void:
@@ -391,6 +476,9 @@ func _refresh_status() -> void:
 		return
 	if _time_manager.paused:
 		status_label.text = "Tempo pausado"
+		return
+	if _time_manager.challenge_active:
+		status_label.text = tr("1 mês = 6 min")
 		return
 	match _time_manager.current_speed:
 		TimeManager.Speed.NORMAL:

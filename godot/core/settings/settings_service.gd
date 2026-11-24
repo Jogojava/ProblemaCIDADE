@@ -3,11 +3,29 @@ extends Node
 signal changed()
 
 const PATH := "user://settings.cfg"
+const TRACK_MAIN_MENU := "res://assets/soundtrack/src_aud_lobby-classic-game.mp3"
+const TRACK_CITY_1 := "res://assets/soundtrack/city_1_st.mp3"
+const TRACK_CITY_2 := "res://assets/soundtrack/city_2_st.mp3"
+const TRACK_PROBLEM_OPTIONAL := "res://assets/soundtrack/optionalproblem_st.mp3"
+const TRACK_PROBLEM_COMMON := "res://assets/soundtrack/commonproblem_st.mp3"
+const TRACK_PROBLEM_PRIORITY := "res://assets/soundtrack/priorityproblem_st.mp3"
+const TRACK_PROBLEM_URGENT := "res://assets/soundtrack/urgentproblem_st.mp3"
+const SPECIAL_KAHOOT_PROBLEM_ID := "aura_travessia"
+const MUSIC_TRANSITION_SECONDS := 0.85
+const SILENT_DB := -80.0
+
 var storage_path := PATH
 var values := {"master": 80.0, "music": 65.0, "effects": 80.0, "muted": false, "mode": 0, "resolution": 0, "quality": 1, "locale": "pt_BR", "pause_unfocused": true}
 var game_theme: Theme
 var test_mode := false
 var _music: AudioStreamPlayer
+var _music_standby: AudioStreamPlayer
+var _music_tween: Tween
+var _music_cache: Dictionary = {}
+var _current_track_path := ""
+var _music_mode := "menu"
+var _city_track_index := 0
+var _city_playback_position := 0.0
 
 func _ready() -> void:
 	test_mode = OS.get_cmdline_user_args().has("--test")
@@ -25,12 +43,139 @@ func _ready() -> void:
 	apply_settings()
 	get_tree().node_added.connect(_on_node_added)
 	if not test_mode:
-		_music = AudioStreamPlayer.new()
-		_music.bus = "Music"
-		_music.stream = load("res://assets/soundtrack/src_aud_lobby-classic-game.mp3")
-		add_child(_music)
-		_music.finished.connect(_music.play)
-		_music.play()
+		_music = _create_music_player()
+		_music_standby = _create_music_player()
+	play_main_menu_music(true)
+
+func _exit_tree() -> void:
+	if _music_tween != null and is_instance_valid(_music_tween):
+		_music_tween.kill()
+		_music_tween = null
+	_music_cache.clear()
+
+
+func _create_music_player() -> AudioStreamPlayer:
+	var player := AudioStreamPlayer.new()
+	player.bus = "Music"
+	add_child(player)
+	player.finished.connect(_on_music_player_finished.bind(player))
+	return player
+
+func _get_music_stream(track_path: String) -> AudioStream:
+	if _music_cache.has(track_path):
+		return _music_cache[track_path]
+	var loaded := load(track_path)
+	if loaded is AudioStream:
+		_music_cache[track_path] = loaded
+		return loaded
+	push_warning("Trilha sonora não encontrada ou inválida: %s" % track_path)
+	return null
+
+func get_current_track_path() -> String:
+	return _current_track_path
+
+func get_problem_track_path(event_id: String, category: String) -> String:
+	if event_id == SPECIAL_KAHOOT_PROBLEM_ID:
+		return TRACK_MAIN_MENU
+	match category:
+		"optional":
+			return TRACK_PROBLEM_OPTIONAL
+		"common":
+			return TRACK_PROBLEM_COMMON
+		"important":
+			return TRACK_PROBLEM_PRIORITY
+		"urgent":
+			return TRACK_PROBLEM_URGENT
+		_:
+			return TRACK_PROBLEM_COMMON
+
+func play_main_menu_music(immediate: bool = false) -> void:
+	_music_mode = "menu"
+	_city_track_index = 0
+	_city_playback_position = 0.0
+	_transition_to_track(TRACK_MAIN_MENU, 0.0, immediate)
+
+func play_city_music(reset_playlist: bool = false) -> void:
+	if reset_playlist:
+		_city_track_index = 0
+		_city_playback_position = 0.0
+	_music_mode = "city"
+	var track_path := _get_city_track_path(_city_track_index)
+	_transition_to_track(track_path, _city_playback_position, false)
+
+func play_problem_music(event_id: String, category: String) -> void:
+	if _music_mode == "city" and _music != null and _music.playing:
+		_city_playback_position = _music.get_playback_position()
+	_music_mode = "problem"
+	var track_path := get_problem_track_path(event_id, category)
+	_transition_to_track(track_path, 0.0, false)
+
+func _get_city_track_path(index: int) -> String:
+	return TRACK_CITY_1 if (index % 2) == 0 else TRACK_CITY_2
+
+func _transition_to_track(track_path: String, start_position: float = 0.0, immediate: bool = false) -> void:
+	if track_path.is_empty():
+		return
+	if _current_track_path == track_path and (test_mode or (_music != null and _music.playing)):
+		return
+	_current_track_path = track_path
+	if test_mode or _music == null or _music_standby == null:
+		return
+	var stream := _get_music_stream(track_path)
+	if stream == null:
+		return
+	var safe_start := maxf(0.0, start_position)
+	var stream_length := stream.get_length()
+	if stream_length > 0.0 and safe_start >= stream_length - 0.1:
+		safe_start = 0.0
+	if _music_tween != null and is_instance_valid(_music_tween):
+		_music_tween.kill()
+	if immediate or not _music.playing:
+		_music_standby.stop()
+		_music.stream = stream
+		_music.volume_db = 0.0
+		_music.play(safe_start)
+		return
+
+	var outgoing := _music
+	var incoming := _music_standby
+	_music = incoming
+	_music_standby = outgoing
+
+	var outgoing_start_linear := db_to_linear(outgoing.volume_db) if outgoing.playing else 0.0
+	incoming.stop()
+	incoming.stream = stream
+	incoming.volume_db = SILENT_DB
+	incoming.play(safe_start)
+
+	_music_tween = create_tween()
+	_music_tween.set_trans(Tween.TRANS_LINEAR)
+	_music_tween.tween_method(func(progress: float) -> void:
+		var clamped := clampf(progress, 0.0, 1.0)
+		var eased := clamped * clamped * (3.0 - 2.0 * clamped)
+		var in_linear := sin(eased * PI * 0.5)
+		var out_linear := outgoing_start_linear * cos(eased * PI * 0.5)
+		incoming.volume_db = SILENT_DB if in_linear <= 0.0001 else linear_to_db(in_linear)
+		if outgoing.playing:
+			outgoing.volume_db = SILENT_DB if out_linear <= 0.0001 else linear_to_db(out_linear)
+	, 0.0, 1.0, MUSIC_TRANSITION_SECONDS)
+	_music_tween.tween_callback(func() -> void:
+		outgoing.stop()
+		outgoing.volume_db = 0.0
+		incoming.volume_db = 0.0
+	)
+
+func _on_music_player_finished(player: AudioStreamPlayer) -> void:
+	if player != _music:
+		return
+	if _music_mode == "city":
+		_city_track_index = (_city_track_index + 1) % 2
+		_city_playback_position = 0.0
+		var next_track := _get_city_track_path(_city_track_index)
+		_current_track_path = ""
+		_transition_to_track(next_track, 0.0, false)
+	else:
+		player.play()
 
 
 func _ensure_bus(bus_name: String) -> void:
