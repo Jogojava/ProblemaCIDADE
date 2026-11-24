@@ -7,8 +7,6 @@ signal month_passed(month: int, year: int)
 signal year_passed(year: int)
 signal paused_changed(is_paused: bool)
 signal speed_changed(new_speed: int)
-signal skip_started()
-signal skip_finished()
 
 enum Speed {
 	NORMAL,
@@ -36,8 +34,6 @@ var _pause_reasons: Dictionary = {}
 var _accumulated_real_time: float = 0.0
 var _total_game_seconds: int = 0
 
-var _skip_until_event: bool = false
-var _event_checker: Callable = Callable()
 
 func _process(delta: float) -> void:
 	if paused:
@@ -51,13 +47,6 @@ func _process(delta: float) -> void:
 		_accumulated_real_time -= seconds_per_game_day
 		_advance_one_day()
 
-		if _skip_until_event and _event_checker.is_valid():
-			if _event_checker.call():
-				_skip_until_event = false
-				paused = true
-				skip_finished.emit()
-				paused_changed.emit(paused)
-				break
 
 func _get_real_seconds_per_game_day() -> float:
 	var month_duration := 0.0
@@ -150,24 +139,14 @@ func skip_until_next_event(event_checker: Callable) -> void:
 	if not event_checker.is_valid():
 		return
 
-	_event_checker = event_checker
-	_skip_until_event = true
-	skip_started.emit()
 	# Bounded simulation: pass actual game days, including income, projects and elections.
 	# Never bypass an existing manual pause or a modal dialog.
 	if paused:
-		_skip_until_event = false
-		skip_finished.emit()
 		return
 	for _day in range(360):
-		if _event_checker.call() or paused:
+		if event_checker.call() or paused:
 			break
 		_advance_one_day()
-	_skip_until_event = false
-	skip_finished.emit()
-
-func stop_skip() -> void:
-	_skip_until_event = false
 
 func get_date_text() -> String:
 	return "Dia %d / Mês %d / Ano %d" % [current_day, current_month, current_year]
@@ -210,8 +189,6 @@ func reset_time() -> void:
 	paused = false
 	_accumulated_real_time = 0.0
 	_total_game_seconds = 0
-	_skip_until_event = false
-	_event_checker = Callable()
 	challenge_active = false
 	_manual_paused = false
 	_pause_reasons.clear()

@@ -30,6 +30,7 @@ func _ready() -> void:
 		_music.stream = load("res://assets/soundtrack/src_aud_lobby-classic-game.mp3")
 		add_child(_music)
 		_music.finished.connect(_music.play)
+		_music.play()
 
 
 func _ensure_bus(bus_name: String) -> void:
@@ -147,11 +148,8 @@ func make_theme() -> Theme:
 	var ink := Color("20383f")
 	var teal := Color("17687b")
 	var cream := Color("f3f7f5")
-	for type in ["Label", "Button", "CheckBox", "OptionButton", "LineEdit"]:
+	for type in ["Label", "CheckBox", "OptionButton", "LineEdit"]:
 		result.set_color("font_color", type, ink)
-	result.set_color("font_hover_color", "Button", ink)
-	result.set_color("font_focus_color", "Button", ink)
-	result.set_color("font_pressed_color", "Button", Color.WHITE)
 	result.set_color("icon_pressed_color", "Button", Color.WHITE)
 	result.set_color("font_disabled_color", "Button", Color("7a8b91"))
 	result.set_color("font_color", "TooltipLabel", Color.WHITE)
@@ -164,10 +162,6 @@ func make_theme() -> Theme:
 	result.set_stylebox("panel", "TooltipPanel", _style(Color("163b48"), Color("51b7cf"), 10, 1, 14))
 	result.set_stylebox("normal", "LineEdit", _style(Color.WHITE, Color("a8bec4"), 10, 2, 12))
 	result.set_stylebox("focus", "LineEdit", _style(Color.WHITE, teal, 10, 3, 12))
-	result.set_stylebox("normal", "Button", _style(Color("e7f1f2"), Color("94bbc3"), 12, 1, 12))
-	result.set_stylebox("hover", "Button", _style(Color("cfeaf0"), teal, 12, 2, 12))
-	result.set_stylebox("pressed", "Button", _style(teal, teal, 12, 2, 12))
-	result.set_stylebox("disabled", "Button", _style(Color("e2e7e5"), Color("c3cecb"), 12, 1, 12))
 	var focus := _style(Color.TRANSPARENT, Color("20a7cb"), 12, 3, 0)
 	result.set_stylebox("focus", "Button", focus)
 	result.set_stylebox("focus", "OptionButton", focus)

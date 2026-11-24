@@ -174,68 +174,6 @@ layout_mode = 2
 tooltip_text = "Voltar ao menu encerra a partida atual."
 text = "Voltar ao menu"
 
-[node name="OptionsPanel" type="PanelContainer" parent="Center"]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(720, 0)
-layout_mode = 2
-
-[node name="Margin" type="MarginContainer" parent="Center/OptionsPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 28
-
-[node name="Content" type="VBoxContainer" parent="Center/OptionsPanel/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 18
-
-[node name="Title" type="Label" parent="Center/OptionsPanel/Margin/Content"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 40
-text = "Opções"
-horizontal_alignment = 1
-
-[node name="Description" type="Label" parent="Center/OptionsPanel/Margin/Content"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "As alterações são aplicadas à partida atual."
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="VolumeHeading" type="HBoxContainer" parent="Center/OptionsPanel/Margin/Content"]
-layout_mode = 2
-
-[node name="VolumeLabel" type="Label" parent="Center/OptionsPanel/Margin/Content/VolumeHeading"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Volume geral"
-
-[node name="VolumeValue" type="Label" parent="Center/OptionsPanel/Margin/Content/VolumeHeading"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "100%"
-
-[node name="VolumeSlider" type="HSlider" parent="Center/OptionsPanel/Margin/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 60)
-layout_mode = 2
-tooltip_text = "Ajusta o volume geral do jogo."
-value = 100.0
-
-[node name="FullscreenCheckBox" type="CheckBox" parent="Center/OptionsPanel/Margin/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 84)
-layout_mode = 2
-text = "Tela cheia"
-
-[node name="OptionsBackButton" type="Button" parent="Center/OptionsPanel/Margin/Content"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 84)
-layout_mode = 2
-text = "Voltar"
-
 [node name="CreditsPanel" type="PanelContainer" parent="Center"]
 unique_name_in_owner = true
 visible = false

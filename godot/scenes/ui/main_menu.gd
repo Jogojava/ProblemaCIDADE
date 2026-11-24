@@ -25,6 +25,12 @@ func _ready() -> void:
 	SettingsService.changed.connect(_apply_design)
 	_apply_design()
 
+func _input(event: InputEvent) -> void:
+	if has_node("GameDialog") and not quit_confirmation.visible:
+		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+			_close_game_dialog()
+			get_viewport().set_input_as_handled()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if _active_popup != null and is_instance_valid(_active_popup):
 		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
@@ -58,8 +64,17 @@ func _on_btjogar_pressed() -> void:
 	column.add_child(UIFactory.button(tr("Começar"), func():
 		SaveManager.start_new(city_name.text, ["easy", "medium", "hard"][difficulty.selected])
 		get_tree().change_scene_to_file("res://scenes/game/Game.tscn")))
-	column.add_child(UIFactory.button(tr("Cancelar"), func(): dialog.overlay.queue_free()))
+	column.add_child(UIFactory.button(tr("Cancelar"), _close_game_dialog))
 	city_name.grab_focus()
+
+func _close_game_dialog() -> void:
+	var dialog := get_node_or_null("GameDialog") as Control
+	if dialog == null or not is_instance_valid(dialog):
+		return
+	dialog.hide()
+	remove_child(dialog)
+	dialog.queue_free()
+	$Menu/VBoxContainer/jogar.grab_focus()
 
 func _on_btcontinuar_pressed() -> void:
 	_open_popup(SAVES_SCENE)

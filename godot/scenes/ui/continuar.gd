@@ -30,7 +30,7 @@ func _refresh_slots() -> void:
 		var row: HBoxContainer = $Center/Panel/Margin/Content/Slots.get_node("Slot%d" % slot)
 		var data := SaveManager.read_slot(slot)
 		var info := row.get_node("Info") as Label
-		info.text = "Slot %d • %s" % [slot, _slot_description(data)]
+		info.text = tr("Slot %d · %s") % [slot, _slot_description(data)]
 		info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.custom_minimum_size.x = 440
 		row.get_node("LoadButton").disabled = data.is_empty()
@@ -38,7 +38,7 @@ func _refresh_slots() -> void:
 
 func _slot_description(data: Dictionary) -> String:
 	if data.is_empty():
-		return "Vazio"
+		return tr("Vazio")
 	var time_data: Dictionary = data.get("time", {})
 	var city: Dictionary = data.get("city", {})
 	return "%s\n%s\n%s" % [String(city.get("city_name", "Cidade")), tr("Dia %d / Mês %d / Ano %d") % [int(time_data.get("current_day", 1)), int(time_data.get("current_month", 1)), int(time_data.get("current_year", 1))], tr("Reputação: %.0f%% · Saldo: R$ %.0f") % [float(city.get("reputation", 0)), float(city.get("funds", 0))]]

@@ -20,6 +20,8 @@ var _used_ids_by_category: Dictionary = {
 	CATEGORY_IMPORTANT: [],
 	CATEGORY_URGENT: []
 }
+var _default_event_ids: Dictionary = {}
+var _procedural_event_ids: Dictionary = {}
 
 func _ready() -> void:
 	_rng.randomize()
@@ -72,6 +74,9 @@ func register_default_problems() -> void:
 				{"id": "nao", "text": "Não"}
 			]},
 			"correct_answer": "sim",
+			"success_effects": {"social": 2.0},
+			"failure_effects": {"social": -1.0},
+			"expiration_effects": {},
 			"explanation": "Ela gasta 8 segundos andando, 3 descansando uma vez e 3 para reagir ao sinal: 14 segundos, menos que os 15 disponíveis."
 		},
 		"merenda_escolar": {
@@ -82,6 +87,9 @@ func register_default_problems() -> void:
 			"interaction_type": INTERACTION_NUMBER_INPUT,
 			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
 			"payload": {"prompt": "Digite o valor sem símbolos", "correct_value": 1700, "placeholder": "Ex.: 1700"},
+			"success_effects": {"education": 2.0},
+			"failure_effects": {"education": -1.0},
+			"expiration_effects": {"education": -1.0},
 			"explanation": "25% de 80 são 20 refeições extras. Então, 500 + 12 × (80 + 20) = R$ 1.700."
 		},
 		"transporte_proporcional": {
@@ -98,6 +106,9 @@ func register_default_problems() -> void:
 				{"id": "d", "text": "R$ 75 mil, R$ 50 mil e R$ 175 mil"}
 			]},
 			"correct_answer": "b",
+			"success_effects": {"social": 2.0},
+			"failure_effects": {"social": -1.0},
+			"expiration_effects": {"social": -1.0},
 			"explanation": "São 150 famílias ao todo. Cada família corresponde a R$ 2 mil, resultando em R$ 100 mil, R$ 60 mil e R$ 140 mil."
 		},
 		"juros_bancos": {
@@ -111,6 +122,9 @@ func register_default_problems() -> void:
 				{"id": "nuhbanho", "text": "NuhBanho"}
 			]},
 			"correct_answer": "nuhbanho",
+			"success_effects": {"water": 2.0},
+			"failure_effects": {"water": -1.0},
+			"expiration_effects": {"water": -1.0},
 			"explanation": "O Grotesco cobra 1 × (1 + 0,25 × 2) = R$ 1,5 milhão. O NuhBanho cobra 1 × 1,2² = R$ 1,44 milhão."
 		},
 		"rota_medicamentos": {
@@ -124,6 +138,9 @@ func register_default_problems() -> void:
 				{"id": "rota_b", "text": "Rota B: 2h, R$ 800 (mais rápida)"}
 			]},
 			"accepted_answers": ["rota_a", "rota_b"],
+			"success_effects": {},
+			"failure_effects": {"health": -1.0},
+			"expiration_effects": {"health": -1.0},
 			"explanation": "A Rota A leva 2h30 e custa menos. A Rota B leva 2h e custa mais. A escolha depende de priorizar economia ou rapidez."
 		},
 		"moradias_enchente": {
@@ -139,6 +156,9 @@ func register_default_problems() -> void:
 				{"id": "c", "text": "Modelo C"}
 			]},
 			"correct_answer": "c",
+			"success_effects": {"social": 2.0},
+			"failure_effects": {"social": -1.0},
+			"expiration_effects": {"social": -1.0},
 			"explanation": "O modelo C precisa de 12 unidades. Mesmo com o custo unitário maior, o total aproximado é R$ 1,86 milhão, menor que os modelos A e B."
 		},
 		"verba_imss": {
@@ -152,6 +172,9 @@ func register_default_problems() -> void:
 				{"id": "nao", "text": "Não"}
 			]},
 			"correct_answer": "sim",
+			"success_effects": {"social": 2.0},
+			"failure_effects": {"social": -1.0},
+			"expiration_effects": {"social": -1.0},
 			"explanation": "Elegíveis cresceram cerca de 9,84%, então P é verdadeiro. O aumento para aproximadamente R$ 1,49 milhão fica abaixo de 10% de R$ 17,8 milhões (R$ 1,78 milhão), então Q também é verdadeiro."
 		},
 		"rota_presidio": {
@@ -165,7 +188,36 @@ func register_default_problems() -> void:
 				{"id": "nao", "text": "Não"}
 			]},
 			"correct_answer": "sim",
-			"explanation": "A viagem leva 22 minutos e paga R$ 4 de pedágio. O combustível custa R$ 18, totalizando R$ 22; as duas restrições são atendidas."
+			"success_effects": {"security": 2.0},
+			"failure_effects": {"security": -1.0},
+			"expiration_effects": {"security": -1.0},
+			"explanation": "A viagem leva 22 minutos e paga R$ 4 de pedágio. O combustível custa R$ 18, totalizando R$ 22; as duas restrições são atendidas.",
+			"graph": {
+				"legend": "km, min, pedágio (R$)",
+				"nodes": [
+					{"id": "H", "label": "H", "pos": Vector2(0.04, 0.50)},
+					{"id": "A", "label": "A", "pos": Vector2(0.26, 0.22)},
+					{"id": "B", "label": "B", "pos": Vector2(0.26, 0.78)},
+					{"id": "C", "label": "C", "pos": Vector2(0.48, 0.50)},
+					{"id": "D", "label": "D", "pos": Vector2(0.55, 0.08)},
+					{"id": "E", "label": "E", "pos": Vector2(0.56, 0.92)},
+					{"id": "F", "label": "F", "pos": Vector2(0.74, 0.44)},
+					{"id": "R", "label": "R", "pos": Vector2(0.96, 0.52)}
+				],
+				"edges": [
+					{"from": "H", "to": "A", "label": "4, 6, 0", "label_offset": Vector2(-14, -12)},
+					{"from": "H", "to": "B", "label": "2, 10, 2", "label_offset": Vector2(-14, 12)},
+					{"from": "A", "to": "C", "label": "5, 5, 1", "label_offset": Vector2(-10, 4)},
+					{"from": "A", "to": "D", "label": "3, 12, 0", "label_offset": Vector2(2, -11)},
+					{"from": "B", "to": "C", "label": "6, 4, 3", "label_offset": Vector2(-10, -4)},
+					{"from": "B", "to": "E", "label": "4, 7, 1", "label_offset": Vector2(-6, 12)},
+					{"from": "C", "to": "F", "label": "2, 3, 2", "label_offset": Vector2(0, 14)},
+					{"from": "D", "to": "F", "label": "7, 8, 0", "label_offset": Vector2(-16, 10)},
+					{"from": "E", "to": "R", "label": "3, 5, 1", "label_offset": Vector2(6, 12)},
+					{"from": "F", "to": "R", "label": "5, 6, 2", "label_offset": Vector2(0, 14)},
+					{"from": "D", "to": "R", "label": "9, 15, 0", "label_offset": Vector2(10, -14)}
+				]
+			}
 		},
 		"pesquisa_satisfacao": {
 			"title": "Pesquisa satisfatória",
@@ -180,6 +232,9 @@ func register_default_problems() -> void:
 				{"id": "d", "text": "20% e 35%"}
 			]},
 			"correct_answer": "a",
+			"success_effects": {"culture": 2.0},
+			"failure_effects": {"culture": -1.0},
+			"expiration_effects": {},
 			"explanation": "540 ÷ 1.200 = 45% de aprovação; 420 ÷ 1.200 = 35% de desaprovação."
 		},
 		"obras_combinacoes": {
@@ -195,6 +250,9 @@ func register_default_problems() -> void:
 				{"id": "d", "text": "25"}
 			]},
 			"correct_answer": "b",
+			"success_effects": {"water": 2.0},
+			"failure_effects": {"water": -1.0},
+			"expiration_effects": {"water": -1.0},
 			"explanation": "A combinação é C(5, 2) = 5 × 4 ÷ 2 = 10."
 		}
 	}
@@ -202,6 +260,7 @@ func register_default_problems() -> void:
 	for event_id in problems:
 		if event_id == "rota_medicamentos":
 			problems[event_id]["choice_effects"] = {"rota_a": {"funds": -600.0, "health": 1.0}, "rota_b": {"funds": -800.0, "health": 2.0}}
+		_default_event_ids[String(event_id)] = true
 		register_event(String(event_id), problems[event_id])
 
 func has_event(event_id: String) -> bool:
@@ -214,6 +273,8 @@ func get_event(event_id: String) -> Dictionary:
 
 func remove_event(event_id: String) -> void:
 	events.erase(event_id)
+	_default_event_ids.erase(event_id)
+	_procedural_event_ids.erase(event_id)
 
 	for category in _used_ids_by_category.keys():
 		_used_ids_by_category[category].erase(event_id)
@@ -229,6 +290,8 @@ func mark_event_used(event_id: String) -> void:
 
 func clear_all() -> void:
 	events.clear()
+	_default_event_ids.clear()
+	_procedural_event_ids.clear()
 
 	for category in _used_ids_by_category.keys():
 		_used_ids_by_category[category].clear()
@@ -295,14 +358,48 @@ func reset_all_category_usage() -> void:
 		_used_ids_by_category[category].clear()
 
 func get_usage_save_data() -> Dictionary:
-	return {"used_ids_by_category": _used_ids_by_category.duplicate(true), "definitions": events.duplicate(true)}
+	var custom_definitions: Dictionary = {}
+	for event_id in events.keys():
+		var id := String(event_id)
+		if _default_event_ids.has(id) or _procedural_event_ids.has(id) or id.begins_with("municipal_"):
+			continue
+		custom_definitions[id] = events[event_id].duplicate(true)
+	var result := {"used_ids_by_category": _used_ids_by_category.duplicate(true)}
+	if not custom_definitions.is_empty():
+		result["definitions"] = custom_definitions
+	return result
+
+func ensure_months_through(month: int, year: int) -> void:
+	if year < 1 or month < 1:
+		return
+	var target_index := (year - 1) * 12 + month
+	for idx in range(1, target_index + 1):
+		var y := floori(float(idx - 1) / 12.0) + 1
+		var m := ((idx - 1) % 12) + 1
+		ensure_month_content(m, y)
+
+func _ensure_procedural_event_if_needed(event_id: String) -> void:
+	if not event_id.begins_with("municipal_") or events.has(event_id):
+		return
+	var parts := event_id.split("_")
+	if parts.size() != 3 or not parts[1].is_valid_int() or not parts[2].is_valid_int():
+		return
+	var idx := int(parts[1])
+	if idx < 1:
+		return
+	var y := floori(float(idx - 1) / 12.0) + 1
+	var m := ((idx - 1) % 12) + 1
+	ensure_month_content(m, y)
 
 func load_usage_save_data(data: Dictionary) -> void:
 	var definitions: Variant = data.get("definitions", {})
 	if definitions is Dictionary:
 		for event_id in definitions:
+			var id := String(event_id)
+			if _default_event_ids.has(id) or id.begins_with("municipal_"):
+				continue
 			if definitions[event_id] is Dictionary:
-				register_event(String(event_id), definitions[event_id])
+				register_event(id, definitions[event_id])
 	var saved_usage: Variant = data.get("used_ids_by_category", {})
 	if not saved_usage is Dictionary:
 		return
@@ -312,6 +409,7 @@ func load_usage_save_data(data: Dictionary) -> void:
 			var validated_ids: Array[String] = []
 			for event_id in saved_ids:
 				var id := String(event_id)
+				_ensure_procedural_event_if_needed(id)
 				if events.has(id) and String(events[id].get("category", "")) == category and not validated_ids.has(id):
 					validated_ids.append(id)
 			_used_ids_by_category[category] = validated_ids
@@ -336,7 +434,7 @@ func ensure_month_content(month: int, year: int) -> void:
 			1:
 				definition.title = "Planejamento de obra"
 				definition.construction_days_saved = 5
-				definition.description_pattern = "Uma obra custa R$ 5.000 fixos e R$ 200 por metro. O orçamento é R$ %d. Quantos metros podem ser construídos? Resolva 5000 + 200x = orçamento."
+				definition.description_pattern = "Uma obra custa R$ 5.000 fixos e R$ 200 por metro. O orçamento é R$ %d. Quantos metros podem ser construídos? Resolva 5000 + 200x = orçamento. Bônus: acertar reduz em 5 dias o prazo das obras em andamento."
 				definition.description_values = [(5000 + n * 200)]
 				definition.description = definition.description_pattern % definition.description_values
 				definition.payload = {"correct_value": n}
@@ -356,15 +454,27 @@ func ensure_month_content(month: int, year: int) -> void:
 				definition.payload = {"correct_value": 10000 + n * 100}
 				definition.explanation = "Use M = C × (1 + i × t), com C = 10000 e i = 0,01."
 			4:
+				var a_is_shorter := (index % 2) == 1
+				var pa := n if a_is_shorter else n + 6
+				var pb := n + 2 if a_is_shorter else n
+				var total_a := pa + 4
+				var total_b := pb + 7
+				var opt_a := {"id": "a", "text": "P → A → H · %d km · R$ %d · %d min" % [total_a, total_a * 2, total_a * 2]}
+				var opt_b := {"id": "b", "text": "P → B → H · %d km · R$ %d · %d min" % [total_b, total_b * 2, total_b * 2]}
+				var swap_options := floori(float(index - 1) / 2.0) % 2 == 1
+				var shorter_branch := "A" if a_is_shorter else "B"
+				var diff_km := absi(total_b - total_a)
 				definition.title = "Rotas de abastecimento"
 				definition.description_pattern = "Escolha a rota de menor distância entre a prefeitura P e o hospital H. Trechos: P–A = %d km; A–H = 4 km; P–B = %d km; B–H = 7 km. O veículo anda a 30 km/h e gasta R$ 2 por km."
-				definition.description_values = [n, n + 2]
+				definition.description_values = [pa, pb]
 				definition.description = definition.description_pattern % definition.description_values
 				definition.interaction_type = INTERACTION_CHOICE
-				definition.payload = {"options": [{"id": "a", "text": "P → A → H · %d km · R$ %d · %d min" % [n + 4, (n + 4) * 2, (n + 4) * 2]}, {"id": "b", "text": "P → B → H · %d km · R$ %d · %d min" % [n + 9, (n + 9) * 2, (n + 9) * 2]}]}
-				definition.correct_answer = "a"
-				definition.explanation = "Some as distâncias de cada caminho. A rota por A é 5 km menor; a 30 km/h cada quilômetro leva 2 minutos."
-				definition.graph = {"a": n, "b": n + 2}
+				definition.payload = {"options": [opt_b, opt_a] if swap_options else [opt_a, opt_b]}
+				definition.correct_answer = "a" if a_is_shorter else "b"
+				definition.explanation_pattern = "Some as distâncias de cada caminho. A rota por %s é %d km menor; a 30 km/h cada quilômetro leva 2 minutos."
+				definition.explanation_values = [shorter_branch, diff_km]
+				definition.explanation = definition.explanation_pattern % definition.explanation_values
+				definition.graph = {"a": pa, "b": pb}
 			5:
 				definition.title = "Média de atendimentos"
 				definition.description_pattern = "Uma unidade atendeu %d, %d e %d pessoas em três dias. Qual é a média diária?"
@@ -393,6 +503,7 @@ func ensure_month_content(month: int, year: int) -> void:
 		definition.success_effects = {area: 2.0}
 		definition.failure_effects = {area: -1.0}
 		definition.expiration_effects = {} if String(categories[i]) == CATEGORY_OPTIONAL else {area: -1.0}
+		_procedural_event_ids[event_id] = true
 		register_event(event_id, definition)
 
 
@@ -443,7 +554,7 @@ func validate_event_structure(event_data: Dictionary) -> bool:
 	if not event_data.has("interaction_type"):
 		return false
 
-	if not event_data.has("payload"):
+	if not event_data.has("payload") or not (event_data["payload"] is Dictionary):
 		return false
 
 	if not _is_valid_category(String(event_data["category"])):
@@ -475,22 +586,23 @@ func _validate_choice_payload(payload: Dictionary) -> bool:
 	return options is Array and options.size() > 0
 
 func _validate_number_input_payload(payload: Dictionary) -> bool:
-	if not payload.has("prompt"):
+	if payload.has("prompt") and not (payload["prompt"] is String):
 		return false
 
 	if not payload.has("correct_value"):
 		return false
 
-	return true
+	var correct_value: Variant = payload["correct_value"]
+	return (correct_value is int or correct_value is float) and is_finite(float(correct_value))
 
 func _validate_text_input_payload(payload: Dictionary) -> bool:
-	if not payload.has("prompt"):
+	if payload.has("prompt") and not (payload["prompt"] is String):
 		return false
 
 	if not payload.has("accepted_answers"):
 		return false
 
-	var accepted_answers = payload["accepted_answers"]
+	var accepted_answers: Variant = payload["accepted_answers"]
 	return accepted_answers is Array and accepted_answers.size() > 0
 
 func get_save_data() -> Dictionary:

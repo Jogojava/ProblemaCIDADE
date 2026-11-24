@@ -13,6 +13,8 @@ var residences: Array[Dictionary] = []
 var town_hall := {"x": -1, "y": -1}
 var layout_initialized := false
 var grass_lots: Array[Dictionary] = []
+var _grass_lot_keys: Dictionary = {}
+var _occupied_lots: Dictionary = {}
 
 var city_name := "Vila Esperança"
 var difficulty := "medium"
@@ -41,6 +43,8 @@ func start(name_value: String, difficulty_value: String) -> void:
 	residences.clear()
 	layout_initialized = false
 	grass_lots.clear()
+	_grass_lot_keys.clear()
+	_occupied_lots.clear()
 	projects.clear()
 	buildings.clear()
 	history.clear()
@@ -104,6 +108,9 @@ func construct(area: String, day_index: int, lot: Dictionary = {}) -> String:
 			return "Já existe uma obra em andamento nesta área."
 	funds -= GameRules.BUILDING_COST
 	projects.append({"area": area, "started": day_index, "due": day_index + GameRules.BUILDING_DAYS, "cost": GameRules.BUILDING_COST, "lot": lot.duplicate()})
+	var lot_key: Variant = _lot_key(lot)
+	if lot_key != null:
+		_occupied_lots[lot_key] = true
 	add_ledger("Construção", -GameRules.BUILDING_COST)
 	changed.emit()
 	return ""
@@ -191,11 +198,15 @@ func apply_problem(definition: Dictionary, correct: bool, expired: bool = false,
 	for key in choice:
 		if indicators.has(key):
 			indicators[key] = clampf(float(indicators[key]) + float(choice[key]), 0.0, 100.0)
-	var days_saved := int(definition.get("construction_days_saved", 5 if String(definition.get("id", "")).contains("obra") else 0))
-	if correct and days_saved > 0:
+	var days_saved := int(definition.get("construction_days_saved", 0))
+	var applied_days_saved := 0
+	if correct and days_saved > 0 and not projects.is_empty():
+		applied_days_saved = days_saved
 		for project in projects:
 			project.due = maxi(last_day + 1, int(project.due) - days_saved)
 	last_result = {"correct": correct, "expired": expired, "funds": money_delta, "reputation": rep_delta * float(profile().gain if rep_delta >= 0 else profile().loss), "title": definition.get("title", "Problema")}
+	if applied_days_saved > 0:
+		last_result["construction_days_saved"] = applied_days_saved
 	add_ledger("Problema resolvido" if not expired else "Problema expirado", money_delta)
 	changed.emit()
 	if outcome == "playing" and reputation <= 0.0:
@@ -248,27 +259,44 @@ func load_save_data(data: Dictionary) -> void:
 			if item is Dictionary:
 				items.append(item.duplicate(true))
 		set(key, items)
+	if ledger.size() > 120:
+		ledger = ledger.slice(ledger.size() - 120)
+	_rebuild_occupied_lots()
 	reputation = clampf(reputation, 0.0, 100.0)
 
 # Spatial state belongs to the save; camera motion and rendering never reshuffle it.
 func configure_lots(lots: Array[Dictionary]) -> void:
 	grass_lots = lots
+	_grass_lot_keys.clear()
+	for lot in lots:
+		var key: Variant = _lot_key(lot)
+		if key != null:
+			_grass_lot_keys[key] = true
+	_rebuild_occupied_lots()
+	var hall_key: Variant = _lot_key(town_hall)
 	if not layout_initialized:
 		var available := lots.duplicate(true)
 		available.shuffle()
 		for lot in available:
 			if residences.size() >= INITIAL_HOMES:
 				break
-			if absi(int(lot.x)) <= 5 and absi(int(lot.y)) <= 5 and lot != town_hall:
+			var lot_key: Variant = _lot_key(lot)
+			if lot_key == null or lot_key == hall_key or _occupied_lots.has(lot_key):
+				continue
+			if absi(lot_key.x) <= 5 and absi(lot_key.y) <= 5:
 				residences.append({"lot": lot.duplicate(), "variant": randi_range(0, 3)})
+				_occupied_lots[lot_key] = true
 		layout_initialized = true
 	# Migrate old saves with installations that did not yet have coordinates.
 	for collection in [buildings, projects]:
 		for item in collection:
-			if not item.has("lot") or item.lot.is_empty():
+			if not item.has("lot") or not (item.lot is Dictionary) or item.lot.is_empty():
 				for lot in lots:
 					if can_build(lot):
 						item.lot = lot.duplicate()
+						var migrated_key: Variant = _lot_key(item.lot)
+						if migrated_key != null:
+							_occupied_lots[migrated_key] = true
 						break
 	changed.emit()
 
@@ -293,17 +321,49 @@ func _spawn_growth_homes() -> void:
 	available_lots.shuffle()
 	var homes_to_build := mini(requested_homes, available_lots.size())
 	for index in range(homes_to_build):
-		residences.append({"lot": available_lots[index].duplicate(), "variant": randi_range(0, 3)})
+		var chosen_lot: Dictionary = available_lots[index]
+		residences.append({"lot": chosen_lot.duplicate(), "variant": randi_range(0, 3)})
+		var lot_key: Variant = _lot_key(chosen_lot)
+		if lot_key != null:
+			_occupied_lots[lot_key] = true
 	homes_built_this_month += homes_to_build
 
-func can_build(lot: Dictionary) -> bool:
-	if not grass_lots.has(lot) or lot == town_hall:
-		return false
+func _lot_key(lot: Dictionary) -> Variant:
+	if not lot.has("x") or not lot.has("y"):
+		return null
+	var x: Variant = lot["x"]
+	var y: Variant = lot["y"]
+	if not (x is int or x is float) or not (y is int or y is float):
+		return null
+	if not is_finite(float(x)) or not is_finite(float(y)):
+		return null
+	return Vector2i(int(x), int(y))
+
+func _rebuild_occupied_lots() -> void:
+	_occupied_lots.clear()
 	for collection in [residences, buildings, projects]:
 		for item in collection:
-			if item.get("lot", {}) == lot:
-				return false
-	return true
+			if not item is Dictionary:
+				continue
+			var raw_lot: Variant = item.get("lot")
+			if raw_lot is Dictionary:
+				var key: Variant = _lot_key(raw_lot as Dictionary)
+				if key != null:
+					_occupied_lots[key] = true
+
+func can_build_coord(coord: Vector2i) -> bool:
+	if not _grass_lot_keys.has(coord):
+		return false
+	var hall_key: Variant = _lot_key(town_hall)
+	if hall_key != null and coord == hall_key:
+		return false
+	return not _occupied_lots.has(coord)
+
+func can_build(lot: Dictionary) -> bool:
+	var key: Variant = _lot_key(lot)
+	if key == null:
+		return false
+	return can_build_coord(key as Vector2i)
 
 func place_home(lot: Dictionary) -> String:
 	if outcome != "playing" or housing_requests() <= 0:
@@ -311,6 +371,9 @@ func place_home(lot: Dictionary) -> String:
 	if not can_build(lot):
 		return "Escolha um lote livre na grama."
 	residences.append({"lot": lot.duplicate(), "variant": randi_range(0, 3)})
+	var lot_key: Variant = _lot_key(lot)
+	if lot_key != null:
+		_occupied_lots[lot_key] = true
 	homes_built_this_month += 1
 	changed.emit()
 	return ""

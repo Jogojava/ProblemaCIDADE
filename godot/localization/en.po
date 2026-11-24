@@ -307,6 +307,9 @@ msgstr "TO ANSWER"
 msgid "PARA ABRIR"
 msgstr "TO OPEN"
 
+msgid "PRAZO URGENTE"
+msgstr "URGENT DEADLINE"
+
 msgid "DIGITE SUA RESPOSTA"
 msgstr "ENTER YOUR ANSWER"
 
@@ -367,8 +370,8 @@ msgstr "Open problems in the sidebar, read the explanations and invest in servic
 msgid "Abaixo de 10% de reputação por três meses, ou ao chegar a zero, ocorre impeachment. Os valores são regras desta simulação."
 msgstr "Reputation below 10% for three months, or reaching zero, leads to impeachment. These thresholds are rules of this simulation."
 
-msgid "Use as velocidades ou avance até a próxima ocorrência. Espaço pausa; Esc abre o menu. Problemas, painéis e menus pausam o calendário e os prazos."
-msgstr "Choose a speed or advance to the next event. Space pauses; Esc opens the menu. Problems, panels and menus pause the calendar and deadlines."
+msgid "Use as velocidades ou avance até a próxima ocorrência. Espaço pausa a gestão; Esc abre o menu. Problemas comuns pausam o calendário. Um prazo urgente pausa com o jogo enquanto o problema está fechado e continua contando enquanto o problema está aberto."
+msgstr "Choose a speed or advance to the next event. Space pauses the game; Esc opens the menu. Common problems pause the calendar. An urgent deadline pauses with the game while its problem is closed and keeps counting while the problem is open."
 
 msgid "Iniciar mandato"
 msgstr "Start term"
@@ -517,8 +520,8 @@ msgstr "Divide approving residents by 200 and multiply by 100."
 msgid "Planejamento de obra"
 msgstr "Construction planning"
 
-msgid "Uma obra custa R$ 5.000 fixos e R$ 200 por metro. O orçamento é R$ %d. Quantos metros podem ser construídos? Resolva 5000 + 200x = orçamento."
-msgstr "Construction costs R$ 5,000 plus R$ 200 per metre. The budget is R$ %d. How many metres can be built? Solve 5000 + 200x = budget."
+msgid "Uma obra custa R$ 5.000 fixos e R$ 200 por metro. O orçamento é R$ %d. Quantos metros podem ser construídos? Resolva 5000 + 200x = orçamento. Bônus: acertar reduz em 5 dias o prazo das obras em andamento."
+msgstr "Construction costs R$ 5,000 plus R$ 200 per metre. The budget is R$ %d. How many metres can be built? Solve 5000 + 200x = budget. Bonus: a correct answer reduces ongoing construction projects by 5 days."
 
 msgid "Subtraia R$ 5.000 do orçamento e divida o restante por R$ 200. Uma resposta correta reduz em 5 dias as obras em andamento."
 msgstr "Subtract R$ 5,000 from the budget and divide the remainder by R$ 200. A correct answer reduces current construction by 5 days."
@@ -547,8 +550,8 @@ msgstr "Supply routes"
 msgid "Escolha a rota de menor distância entre a prefeitura P e o hospital H. Trechos: P–A = %d km; A–H = 4 km; P–B = %d km; B–H = 7 km. O veículo anda a 30 km/h e gasta R$ 2 por km."
 msgstr "Choose the shortest route from city hall P to hospital H. Edges: P–A = %d km; A–H = 4 km; P–B = %d km; B–H = 7 km. The vehicle travels at 30 km/h and costs R$ 2 per km."
 
-msgid "Some as distâncias de cada caminho. A rota por A é 5 km menor; a 30 km/h cada quilômetro leva 2 minutos."
-msgstr "Add the distances along each path. The route via A is 5 km shorter; at 30 km/h each kilometre takes 2 minutes."
+msgid "Some as distâncias de cada caminho. A rota por %s é %d km menor; a 30 km/h cada quilômetro leva 2 minutos."
+msgstr "Add the distances along each path. The route via %s is %d km shorter; at 30 km/h each kilometre takes 2 minutes."
 
 msgid "Média de atendimentos"
 msgstr "Average daily service"
@@ -691,6 +694,12 @@ msgstr "Delete"
 msgid "!  Problema urgente"
 msgstr "!  Urgent problem"
 
+msgid "%s  (%d)"
+msgstr "%s  (%d)"
+
+msgid "Problema urgente"
+msgstr "Urgent problem"
+
 msgid "Acompanhe a evolução da cidade ao longo dos meses."
 msgstr "Track the city's progress over the months."
 
@@ -771,3 +780,6 @@ msgstr "Clear all drawing strokes"
 
 msgid "Até a próxima ocorrência: avançar os dias até o próximo problema, mantendo receitas, obras e eleições."
 msgstr "Until the next event: advance days until the next problem, including income, construction and elections."
+
+msgid "km, min, pedágio (R$)"
+msgstr "km, min, toll (R$)"

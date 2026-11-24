@@ -49,6 +49,7 @@ func _ready() -> void:
 func setup(time_manager: Node, event_database: Node) -> void:
 	_time_manager = time_manager
 	_event_database = event_database
+	_ensure_database_content_for_loaded_state()
 
 	if _time_manager != null:
 		if not _time_manager.day_passed.is_connected(_on_day_passed):
@@ -58,6 +59,8 @@ func setup(time_manager: Node, event_database: Node) -> void:
 			_time_manager.month_passed.connect(_on_month_passed)
 
 func start_system(current_month: int, current_year: int) -> void:
+	if _event_database != null and _event_database.has_method("ensure_months_through"):
+		_event_database.ensure_months_through(current_month, current_year)
 	_create_month_schedule(current_month, current_year)
 
 func _on_month_passed(month: int, year: int) -> void:
@@ -141,13 +144,14 @@ func _is_event_expired(runtime_event: Dictionary, current_day: int, current_mont
 	return false
 
 func _create_month_schedule(month: int, year: int) -> void:
+	if _event_database != null and _event_database.has_method("ensure_month_content"):
+		_event_database.ensure_month_content(month, year)
+
 	if _last_scheduled_month == month and _last_scheduled_year == year:
 		return
 
 	_last_scheduled_month = month
 	_last_scheduled_year = year
-	if _event_database != null and _event_database.has_method("ensure_month_content"):
-		_event_database.ensure_month_content(month, year)
 
 	_remove_old_scheduled_events(month, year)
 
@@ -361,6 +365,30 @@ func load_save_data(data: Dictionary) -> void:
 	expired_events.assign(data.get("expired_events", []))
 	_last_scheduled_month = int(data.get("last_scheduled_month", -1))
 	_last_scheduled_year = int(data.get("last_scheduled_year", -1))
+	_ensure_database_content_for_loaded_state()
+
+func _ensure_database_content_for_loaded_state() -> void:
+	if _event_database == null:
+		return
+	if _last_scheduled_month >= 1 and _last_scheduled_year >= 1:
+		if _event_database.has_method("ensure_months_through"):
+			_event_database.ensure_months_through(_last_scheduled_month, _last_scheduled_year)
+		elif _event_database.has_method("ensure_month_content"):
+			_event_database.ensure_month_content(_last_scheduled_month, _last_scheduled_year)
+	if not _event_database.has_method("ensure_month_content"):
+		return
+	for event_list in [scheduled_events, active_events, resolved_events, expired_events]:
+		for event_data in event_list:
+			var event_id := String(event_data.get("event_id", ""))
+			if not event_id.begins_with("municipal_"):
+				continue
+			var parts := event_id.split("_")
+			if parts.size() == 3 and parts[1].is_valid_int() and parts[2].is_valid_int():
+				var idx := int(parts[1])
+				if idx >= 1:
+					var y := floori(float(idx - 1) / 12.0) + 1
+					var m := ((idx - 1) % 12) + 1
+					_event_database.ensure_month_content(m, y)
 
 func enforce_one_urgent_per_month() -> void:
 	# Older saves could contain multiple urgent problems in a month. Treat any

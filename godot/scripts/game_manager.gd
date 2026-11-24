@@ -66,8 +66,6 @@ func _ready() -> void:
 	time_manager.day_passed.connect(_on_game_day)
 	time_manager.month_passed.connect(_on_game_month)
 	hud.bind_city(city)
-	$Ground.hide()
-	$Road.hide()
 	RenderingServer.set_default_clear_color(Color("243d39"))
 	visuals = CityVisuals.new()
 	visuals.name = "CityVisuals"
@@ -96,9 +94,10 @@ func _ready() -> void:
 		set_process(false)
 
 func _process(delta: float) -> void:
-	if time_manager.paused or city.outcome != "playing":
+	if city.outcome != "playing":
 		return
-	city.played_seconds += delta
+	if not time_manager.paused:
+		city.played_seconds += delta
 	var expired_ids: Array[String] = []
 	for runtime_event in event_manager.active_events:
 		if String(runtime_event.get("category", "")) != EventManager.CATEGORY_URGENT:
@@ -106,14 +105,32 @@ func _process(delta: float) -> void:
 		var deadline_phase := String(runtime_event.get("deadline_phase", "opening"))
 		if deadline_phase == "answered" or deadline_phase == "queued":
 			continue
+		var problem_is_open := String(runtime_event.get("event_id", "")) == _current_problem_id
+		if time_manager.paused and not problem_is_open:
+			continue
 		var speed_multiplier := time_manager.get_game_speed_multiplier()
 		var remaining := maxf(0.0, float(runtime_event.get("deadline_remaining_seconds", URGENT_DEADLINE_SECONDS)) - delta * speed_multiplier)
 		runtime_event["deadline_remaining_seconds"] = remaining
+		if problem_is_open and _current_problem_popup != null and is_instance_valid(_current_problem_popup):
+			_current_problem_popup.set_urgent_deadline(
+				remaining,
+				String(runtime_event.get("title", "Problema urgente")),
+				_urgent_event_count(),
+				deadline_phase,
+				URGENT_DEADLINE_SECONDS
+			)
 		if remaining <= 0.0:
 			expired_ids.append(String(runtime_event.get("event_id", "")))
 
 	for event_id in expired_ids:
 		event_manager.expire_event_immediately(event_id)
+
+	if time_manager.paused:
+		_last_refresh += delta
+		if _last_refresh > 0.15:
+			_last_refresh = 0.0
+			_refresh_problem_tabs()
+		return
 
 	_last_refresh += delta
 	if _last_refresh > 0.15:
@@ -135,7 +152,9 @@ func _input(event: InputEvent) -> void:
 			_current_problem_popup.dismiss()
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_SPACE:
-			get_viewport().set_input_as_handled()
+			# Let the focused LineEdit receive spaces in authored text answers.
+			if not (_current_problem_popup.answer_input.visible and _current_problem_popup.answer_input.has_focus()):
+				get_viewport().set_input_as_handled()
 		return
 	if return_dialog.visible:
 		return
@@ -202,6 +221,14 @@ func open_problem(event_id: String) -> void:
 		input_placeholder,
 		String(problem_data.get("category", EventDatabase.CATEGORY_COMMON))
 	)
+	if is_urgent:
+		popup.set_urgent_deadline(
+			float(runtime_event.get("deadline_remaining_seconds", URGENT_DEADLINE_SECONDS)),
+			String(runtime_event.get("title", problem_data.get("title", "Problema urgente"))),
+			_urgent_event_count(),
+			String(runtime_event.get("deadline_phase", "solving")),
+			URGENT_DEADLINE_SECONDS
+		)
 	if problem_data.has("graph"):
 		popup.show_route_graph(problem_data.graph)
 	popup.restore_draft(runtime_event.get("draft_strokes", []), String(runtime_event.get("draft_answer", "")))
@@ -268,6 +295,13 @@ func _find_active_event(event_id: String) -> Dictionary:
 		if String(runtime_event.get("event_id", "")) == event_id:
 			return runtime_event
 	return {}
+
+func _urgent_event_count() -> int:
+	var count := 0
+	for runtime_event in event_manager.active_events:
+		if String(runtime_event.get("category", "")) == EventManager.CATEGORY_URGENT:
+			count += 1
+	return count
 
 func _restore_urgent_deadlines() -> void:
 	var deadline_is_active := false
@@ -455,7 +489,7 @@ func _show_briefing() -> void:
 	column.add_child(UIFactory.label(tr("Administre a cidade por quatro anos e alcance pelo menos 50% de reputação para a reeleição. Complete o segundo mandato para concluir a campanha.")))
 	column.add_child(UIFactory.label(tr("Resolva problemas pela barra lateral, confira as explicações e invista em serviços ou obras pelo botão de dinheiro. Obras custam R$ 35.000 e levam 20 dias.")))
 	column.add_child(UIFactory.label(tr("Abaixo de 10% de reputação por três meses, ou ao chegar a zero, ocorre impeachment. Os valores são regras desta simulação.")))
-	column.add_child(UIFactory.label(tr("Use as velocidades ou avance até a próxima ocorrência. Espaço pausa; Esc abre o menu. Problemas, painéis e menus pausam o calendário e os prazos."), 22))
+	column.add_child(UIFactory.label(tr("Use as velocidades ou avance até a próxima ocorrência. Espaço pausa a gestão; Esc abre o menu. Problemas comuns pausam o calendário. Um prazo urgente pausa com o jogo enquanto o problema está fechado e continua contando enquanto o problema está aberto."), 22))
 	column.add_child(UIFactory.button(tr("Iniciar mandato"), _close_dialog))
 
 func _show_answer_feedback(definition: Dictionary, correct: bool) -> void:

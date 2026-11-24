@@ -41,6 +41,7 @@ func begin_placement(area: String) -> void:
 
 func end_placement() -> void:
 	placing = false
+	hovered = Vector2i(999, 999)
 	queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -48,8 +49,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseMotion:
 		var lot := lot_at(get_global_transform_with_canvas().affine_inverse() * event.position)
-		hovered = Vector2i(int(lot.x), int(lot.y))
-		queue_redraw()
+		var next_hovered := Vector2i(int(lot.x), int(lot.y))
+		if next_hovered != hovered:
+			hovered = next_hovered
+			queue_redraw()
 	elif event is InputEventMouseButton and event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT]:
 		get_viewport().set_input_as_handled()
 		if event.pressed:
@@ -75,9 +78,9 @@ func _draw() -> void:
 			draw_colored_polygon(_diamond(base), color)
 			if not road:
 				draw_polyline(_closed(_diamond(base)), Color(0.27, 0.39, 0.22, 0.12), 1)
-				if placing and state.can_build({"x": x, "y": y}):
+				if placing and state != null and state.can_build_coord(Vector2i(x, y)):
 					draw_polyline(_closed(_diamond(base, 3)), Color(0.8, 1, 0.76, 0.35), 1.5)
-				if not placing and state != null and state.can_build({"x": x, "y": y}) and posmod(x * 19 + y * 31, 17) == 0:
+				if not placing and state != null and state.can_build_coord(Vector2i(x, y)) and posmod(x * 19 + y * 31, 17) == 0:
 					_tree(base + Vector2(15, -3))
 			elif not _road(x - 1, y) or not _road(x, y - 1):
 				draw_polyline(_closed(_diamond(base, 3)), Color("52676a"), 3)
@@ -99,9 +102,8 @@ func _draw() -> void:
 	for item in objects:
 		_draw_structure(point(item.lot), String(item.get("area", "home")), int(item.get("variant", 0)), bool(item.get("construction", false)))
 	if placing and hovered != Vector2i(999, 999):
-		var lot := {"x": hovered.x, "y": hovered.y}
-		var valid := state.can_build(lot)
-		var base := point(lot)
+		var valid := state.can_build_coord(hovered)
+		var base := point({"x": hovered.x, "y": hovered.y})
 		var tint := Color("a3e9ac") if valid else Color("f18170")
 		draw_colored_polygon(_diamond(base, 2), Color(tint, 0.55))
 		draw_polyline(_closed(_diamond(base, 2)), tint, 3)

@@ -20,6 +20,11 @@ signal close_requested()
 @onready var calculator_overlay: Control = $CalculatorOverlay
 @onready var calculator_display: LineEdit = $CalculatorOverlay/Center/Panel/Margin/Content/Display
 @onready var calculator_keys: GridContainer = $CalculatorOverlay/Center/Panel/Margin/Content/Keys
+@onready var urgent_deadline: PanelContainer = $UrgentDeadline
+@onready var urgent_deadline_button: Button = $UrgentDeadline/Row/UrgentOpenButton
+@onready var urgent_deadline_phase: Label = $UrgentDeadline/Row/UrgentTimer/Phase
+@onready var urgent_deadline_progress: ProgressBar = $UrgentDeadline/Row/UrgentTimer/TimerRow/Progress
+@onready var urgent_deadline_countdown: Label = $UrgentDeadline/Row/UrgentTimer/TimerRow/Countdown
 
 var _option_ids: Array[String] = ["sim", "nao", "opcao_3", "opcao_4"]
 var _calculator_value := "0"
@@ -45,10 +50,75 @@ func _ready() -> void:
 	submit_button.pressed.connect(_submit_typed_answer)
 	answer_input.text_submitted.connect(func(_text: String): _submit_typed_answer())
 
+func _input(event: InputEvent) -> void:
+	if not visible or not calculator_overlay.visible:
+		return
+	if not event is InputEventKey or not event.pressed or event.echo:
+		return
+	var key_event := event as InputEventKey
+	if key_event.ctrl_pressed or key_event.alt_pressed or key_event.meta_pressed:
+		return
+	if key_event.keycode == KEY_ESCAPE:
+		return
+	var mapped_key := _map_calculator_key(key_event)
+	if mapped_key.is_empty():
+		return
+	_on_calculator_key_pressed(mapped_key)
+	get_viewport().set_input_as_handled()
+
+func _map_calculator_key(event: InputEventKey) -> String:
+	if event.unicode > 0:
+		var ch := String.chr(event.unicode)
+		if ch.length() == 1 and ch >= "0" and ch <= "9":
+			return ch
+		match ch:
+			",", ".":
+				return ","
+			"+":
+				return "+"
+			"-":
+				return "−"
+			"*":
+				return "×"
+			"/":
+				return "÷"
+			"%":
+				return "%"
+			"=":
+				return "="
+			"c", "C":
+				return "C"
+	match event.keycode:
+		KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
+			return str(event.keycode - KEY_0)
+		KEY_KP_0, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9:
+			return str(event.keycode - KEY_KP_0)
+		KEY_COMMA, KEY_PERIOD, KEY_KP_PERIOD:
+			return ","
+		KEY_PLUS, KEY_KP_ADD:
+			return "+"
+		KEY_MINUS, KEY_KP_SUBTRACT:
+			return "−"
+		KEY_ASTERISK, KEY_KP_MULTIPLY:
+			return "×"
+		KEY_SLASH, KEY_KP_DIVIDE:
+			return "÷"
+		KEY_PERCENT:
+			return "%"
+		KEY_ENTER, KEY_KP_ENTER, KEY_EQUAL:
+			return "="
+		KEY_BACKSPACE:
+			return "⌫"
+		KEY_C, KEY_DELETE:
+			return "C"
+		_:
+			return ""
+
 func configure(problem_title: String, problem_description: String, problem_image: Texture2D = null, options: Array = [], allow_board: bool = true, interaction_type: String = "choice", input_placeholder: String = "Digite sua resposta", category: String = "common") -> void:
 	if not is_node_ready():
 		await ready
 	title_label.text = problem_title
+	urgent_deadline.hide()
 	description_label.text = problem_description
 	category_label.text = tr("PROBLEMA %s") % tr(_category_label(category)).to_upper()
 	_apply_category_style(category)
@@ -57,7 +127,7 @@ func configure(problem_title: String, problem_description: String, problem_image
 	answers_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL if problem_image == null else Control.SIZE_FILL
 	$Center/Panel/Margin/Content/Body/ProblemTools/BoardButton.visible = allow_board
 	_hide_board()
-	_hide_calculator()
+	_hide_calculator(false)
 	_reset_calculator()
 	answer_input.clear()
 	answer_input.placeholder_text = input_placeholder
@@ -87,7 +157,17 @@ func configure(problem_title: String, problem_description: String, problem_image
 	elif not option_buttons.is_empty():
 		option_buttons[0].grab_focus()
 
+func set_urgent_deadline(seconds: float, title: String, urgent_count: int, phase: String, total_seconds: float = 180.0) -> void:
+	urgent_deadline.show()
+	urgent_deadline_button.text = tr("%s  (%d)") % [tr(title), maxi(1, urgent_count)]
+	urgent_deadline_phase.text = tr("PARA RESPONDER") if phase == "solving" else tr("PARA ABRIR")
+	urgent_deadline_progress.max_value = maxf(1.0, total_seconds)
+	urgent_deadline_progress.value = clampf(seconds, 0.0, urgent_deadline_progress.max_value)
+	var whole_seconds := maxi(0, ceili(seconds))
+	urgent_deadline_countdown.text = "%02d:%02d" % [floori(float(whole_seconds) / 60.0), whole_seconds % 60]
+
 func show_route_graph(distances: Dictionary) -> void:
+	answers_container.size_flags_horizontal = Control.SIZE_FILL
 	var graph := RouteGraph.new()
 	graph.distances = distances
 	graph.custom_minimum_size = Vector2(440, 230)
@@ -110,6 +190,43 @@ func _apply_popup_styles() -> void:
 	panel_style.shadow_size = 18
 	panel_style.shadow_offset = Vector2(0, 8)
 	$Center/Panel.add_theme_stylebox_override("panel", panel_style)
+	var deadline_style := StyleBoxFlat.new()
+	deadline_style.bg_color = Color("edf3f0")
+	deadline_style.border_color = Color("b7d0d1")
+	deadline_style.set_border_width_all(2)
+	deadline_style.set_corner_radius_all(24)
+	deadline_style.content_margin_left = 14
+	deadline_style.content_margin_right = 14
+	deadline_style.content_margin_top = 8
+	deadline_style.content_margin_bottom = 8
+	urgent_deadline.add_theme_stylebox_override("panel", deadline_style)
+	urgent_deadline_button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	urgent_deadline_button.icon = load(DeboraDesign.ROOT + EventDatabase.CATEGORY_URGENT + ".png")
+	urgent_deadline_button.expand_icon = true
+	urgent_deadline_button.add_theme_constant_override("icon_max_width", 28)
+	urgent_deadline_button.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	urgent_deadline_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var urgent_accent := Color(0.78, 0.2, 0.18)
+	var urgent_normal := StyleBoxFlat.new()
+	urgent_normal.bg_color = urgent_accent.darkened(0.5)
+	urgent_normal.border_color = urgent_accent
+	urgent_normal.set_border_width_all(2)
+	urgent_normal.set_corner_radius_all(8)
+	var urgent_hover := urgent_normal.duplicate() as StyleBoxFlat
+	urgent_hover.bg_color = urgent_accent.darkened(0.3)
+	urgent_deadline_button.add_theme_stylebox_override("normal", urgent_normal)
+	urgent_deadline_button.add_theme_stylebox_override("hover", urgent_hover)
+	urgent_deadline_button.add_theme_stylebox_override("pressed", urgent_hover)
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
+		urgent_deadline_button.add_theme_color_override(state, Color.WHITE)
+	var deadline_fill := StyleBoxFlat.new()
+	deadline_fill.bg_color = Color("e23b32")
+	deadline_fill.set_corner_radius_all(6)
+	var deadline_background := StyleBoxFlat.new()
+	deadline_background.bg_color = Color("354b52")
+	deadline_background.set_corner_radius_all(6)
+	urgent_deadline_progress.add_theme_stylebox_override("fill", deadline_fill)
+	urgent_deadline_progress.add_theme_stylebox_override("background", deadline_background)
 
 	var statement_style := StyleBoxFlat.new()
 	statement_style.bg_color = Color(0.91, 0.96, 0.98, 1.0)
@@ -150,14 +267,15 @@ func _apply_popup_styles() -> void:
 	board_normal.border_color = Color(0.34, 0.62, 0.72, 1.0)
 	board_normal.set_border_width_all(2)
 	board_normal.set_corner_radius_all(12)
-	$Center/Panel/Margin/Content/Body/ProblemTools/BoardButton.add_theme_stylebox_override("normal", board_normal)
-	$Center/Panel/Margin/Content/Body/ProblemTools/BoardButton.add_theme_stylebox_override("hover", option_hover)
-	$Center/Panel/Margin/Content/Body/ProblemTools/BoardButton.add_theme_font_size_override("font_size", 19)
-	$Center/Panel/Margin/Content/Body/ProblemTools/BoardButton.add_theme_color_override("font_color", Color(0.13, 0.22, 0.27, 1.0))
-	$Center/Panel/Margin/Content/Body/ProblemTools/CalculatorButton.add_theme_stylebox_override("normal", board_normal)
-	$Center/Panel/Margin/Content/Body/ProblemTools/CalculatorButton.add_theme_stylebox_override("hover", option_hover)
-	$Center/Panel/Margin/Content/Body/ProblemTools/CalculatorButton.add_theme_font_size_override("font_size", 19)
-	$Center/Panel/Margin/Content/Body/ProblemTools/CalculatorButton.add_theme_color_override("font_color", Color(0.13, 0.22, 0.27, 1.0))
+	for tool_button in [$Center/Panel/Margin/Content/Body/ProblemTools/BoardButton, $Center/Panel/Margin/Content/Body/ProblemTools/CalculatorButton]:
+		tool_button.add_theme_stylebox_override("normal", board_normal)
+		tool_button.add_theme_stylebox_override("hover", option_hover)
+		tool_button.add_theme_stylebox_override("pressed", option_hover)
+		tool_button.add_theme_font_size_override("font_size", 19)
+		tool_button.add_theme_color_override("font_color", Color(0.13, 0.22, 0.27, 1.0))
+		tool_button.add_theme_color_override("font_focus_color", Color(0.13, 0.22, 0.27, 1.0))
+		tool_button.add_theme_color_override("font_hover_color", Color(0.13, 0.22, 0.27, 1.0))
+		tool_button.add_theme_color_override("font_pressed_color", Color(0.13, 0.22, 0.27, 1.0))
 	var calculator_panel_style := StyleBoxFlat.new()
 	calculator_panel_style.bg_color = Color("f7fafb")
 	calculator_panel_style.border_color = Color("53727c")
@@ -171,6 +289,7 @@ func _apply_popup_styles() -> void:
 	display_style.set_corner_radius_all(10)
 	calculator_display.add_theme_stylebox_override("normal", display_style)
 	calculator_display.add_theme_stylebox_override("read_only", display_style)
+	calculator_display.add_theme_stylebox_override("focus", display_style)
 	calculator_display.add_theme_color_override("font_color", Color("f5fbfc"))
 	calculator_display.add_theme_color_override("font_uneditable_color", Color("f5fbfc"))
 	calculator_display.add_theme_color_override("caret_color", Color("f5fbfc"))
@@ -254,7 +373,7 @@ func _submit_typed_answer() -> void:
 	answer_selected.emit(answer)
 
 func _show_board() -> void:
-	_hide_calculator()
+	_hide_calculator(false)
 	drawing_area.import_strokes(_draft_snapshot)
 	board_overlay.show()
 
@@ -272,11 +391,13 @@ func dismiss() -> void:
 
 func _show_calculator() -> void:
 	_hide_board()
-	_reset_calculator()
 	calculator_overlay.show()
+	calculator_display.grab_focus()
 
-func _hide_calculator() -> void:
+func _hide_calculator(restore_focus: bool = true) -> void:
 	calculator_overlay.hide()
+	if restore_focus and is_inside_tree() and visible and answer_input.visible:
+		answer_input.grab_focus()
 
 func _reset_calculator() -> void:
 	_calculator_value = "0"

@@ -21,7 +21,6 @@ signal problem_open_requested(event_id: String)
 @onready var reputation_button: Button = $ReputationButton
 @onready var investment_panel: PanelContainer = $InvestmentPanel
 @onready var statistics_panel: PanelContainer = $StatisticsPanel
-@onready var occurrence_panel: PanelContainer = $OccurrencePanel
 @onready var problem_tabs: PanelContainer = $UrgentAlertLayer/ProblemTabs
 @onready var urgent_open_button: Button = $UrgentAlertLayer/ProblemTabs/UrgentLayout/UrgentOpenButton
 @onready var urgent_progress: ProgressBar = $UrgentAlertLayer/ProblemTabs/UrgentLayout/UrgentTimer/UrgentTimerRow/UrgentProgress
@@ -92,7 +91,7 @@ func _ready() -> void:
 	high_button.mouse_entered.connect(_on_category_mouse_entered.bind(EventDatabase.CATEGORY_IMPORTANT))
 	medium_button.mouse_entered.connect(_on_category_mouse_entered.bind(EventDatabase.CATEGORY_COMMON))
 	low_button.mouse_entered.connect(_on_category_mouse_entered.bind(EventDatabase.CATEGORY_OPTIONAL))
-	for panel in [investment_panel, statistics_panel, occurrence_panel]:
+	for panel in [investment_panel, statistics_panel]:
 		panel.get_node("Content/Header/CloseButton").pressed.connect(close_panels)
 	set_city_indicators()
 
@@ -115,17 +114,16 @@ func set_city_indicators(funds: Variant = null, reputation: Variant = null) -> v
 	reputation_button.tooltip_text = "Reputação e finanças • ainda não há registros." if reputation == null else "Consultar reputação e finanças."
 
 func close_panels() -> bool:
-	var was_open := investment_panel.visible or statistics_panel.visible or occurrence_panel.visible
+	var was_open := investment_panel.visible or statistics_panel.visible
 	investment_panel.hide()
 	statistics_panel.hide()
 	$StatisticsScrim.hide()
-	occurrence_panel.hide()
 	if was_open:
 		panels_changed.emit(false)
 	return was_open
 
 func has_open_panel() -> bool:
-	return investment_panel.visible or statistics_panel.visible or occurrence_panel.visible
+	return investment_panel.visible or statistics_panel.visible
 
 func update_problem_tabs(events: Array[Dictionary]) -> void:
 	var event_ids: Array[String] = []
@@ -236,7 +234,7 @@ func _update_urgent_alert(runtime_event: Dictionary) -> void:
 	_urgent_event_id = String(runtime_event.get("event_id", ""))
 	problem_tabs.visible = not _urgent_event_id.is_empty() and not _problem_mode
 	if _urgent_event_id.is_empty():
-		urgent_open_button.text = "Problema urgente"
+		urgent_open_button.text = tr("Problema urgente")
 		return
 	var phase := String(runtime_event.get("deadline_phase", "opening"))
 	var remaining := maxf(0.0, float(runtime_event.get("deadline_remaining_seconds", 180.0)))
@@ -244,10 +242,10 @@ func _update_urgent_alert(runtime_event: Dictionary) -> void:
 	for event_category in _problem_button_categories.values():
 		if String(event_category) == EventDatabase.CATEGORY_URGENT:
 			urgent_count += 1
-	var title := String(runtime_event.get("title", "Problema urgente"))
-	urgent_open_button.text = "%s  (%d)" % [title, urgent_count]
-	urgent_open_button.tooltip_text = "Abrir problema urgente%s" % (" • %d na fila" % urgent_count if urgent_count > 1 else "")
-	urgent_phase.text = "PARA RESPONDER" if phase == "solving" else "PARA ABRIR"
+	var title := tr(String(runtime_event.get("title", "Problema urgente")))
+	urgent_open_button.text = tr("%s  (%d)") % [title, urgent_count]
+	urgent_open_button.tooltip_text = tr("Abrir problema urgente%s") % (tr(" • %d na fila") % urgent_count if urgent_count > 1 else "")
+	urgent_phase.text = tr("PARA RESPONDER") if phase == "solving" else tr("PARA ABRIR")
 	urgent_countdown.text = _format_countdown(remaining)
 	urgent_progress.max_value = 180.0
 	urgent_progress.value = remaining
@@ -350,15 +348,6 @@ func _toggle_panel(panel: Control) -> void:
 		$StatisticsScrim.visible = panel == statistics_panel
 		panels_changed.emit(true)
 		panel.get_node("Content/Header/CloseButton").grab_focus()
-
-func _open_occurrences(category: String) -> void:
-	var was_open: bool = occurrence_panel.visible and $OccurrencePanel/Content/Header/Title.text == category
-	close_panels()
-	if not was_open:
-		$OccurrencePanel/Content/Header/Title.text = category
-		occurrence_panel.show()
-		panels_changed.emit(true)
-		$OccurrencePanel/Content/Header/CloseButton.grab_focus()
 
 func _on_day_passed(_day: int, _month: int, _year: int) -> void:
 	_refresh_date()

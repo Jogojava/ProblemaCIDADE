@@ -97,7 +97,8 @@ func _answer_all() -> void:
 		if game._current_problem_popup == null:
 			check(false, "Problema deve abrir: " + id)
 			continue
-		check(game.time_manager.paused, "Problema pausa o tempo.")
+		var is_urgent := String(event.get("category", "")) == EventManager.CATEGORY_URGENT
+		check(game.time_manager.paused != is_urgent, "Problemas comuns pausam o tempo; urgentes mantêm o prazo correndo.")
 		var before: int = game.city.solved_count
 		var answer := String(definition.get("correct_answer", ""))
 		var payload: Dictionary = definition.get("payload", {})
@@ -214,12 +215,14 @@ func _failure_paths() -> void:
 	check(urgent.deadline_remaining_seconds == 2.0, "Pausa congela prazo urgente.")
 	game.open_problem("moradias_enchente")
 	await process_frame
+	check(urgent.deadline_remaining_seconds < 2.0, "Problema urgente aberto mantém o prazo correndo durante a pausa do jogo.")
+	var opened_deadline: float = urgent.deadline_remaining_seconds
 	game._on_problem_close_requested()
 	check(game._current_problem_popup == null and game.event_manager.active_events.size() == 1, "Fechar urgente mantém a ocorrência pendente.")
-	check(urgent.deadline_remaining_seconds == 2.0 and urgent.deadline_phase == "opening", "Fechar urgente preserva prazo restante sem reiniciá-lo.")
+	check(urgent.deadline_remaining_seconds == opened_deadline and urgent.deadline_phase == "opening", "Fechar urgente congela o prazo restante sem reiniciá-lo.")
 	game.open_problem("moradias_enchente")
 	await process_frame
-	check(urgent.deadline_remaining_seconds == 2.0, "Reabrir urgente não concede tempo adicional.")
+	check(urgent.deadline_remaining_seconds < opened_deadline, "Reabrir urgente retoma a contagem durante a pausa.")
 	game._on_problem_close_requested()
 	var reputation_before := float(game.city.reputation)
 	game.time_manager.resume_game()
