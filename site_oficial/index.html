@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProblemaCIDADE</title>
+<meta name="description" content="ProblemaCIDADE: jogo de gestão de cidade em que cada decisão passa por um problema de matemática. Feito pela Pato Jogos.">
+<link rel="icon" href="img/pato_jogos_logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/efeitos.css">
+</head>
+<body class="carregando-site">
+
+<div class="tela-carregar" aria-hidden="true">
+  <p>Problema<b>CIDADE</b></p>
+  <div class="carregar-barra"><span></span></div>
+  <small>Carregando a prefeitura…</small>
+</div>
+<div class="transicao" aria-hidden="true"></div>
+
+<header class="topo">
+  <a class="marca" href="#inicio" data-aba="inicio">Problema<b>CIDADE</b></a>
+  <div class="controles">
+    <button type="button" class="controle" id="som" aria-pressed="false" aria-label="Ligar sons" title="Sons 8-bit"><span aria-hidden="true">♪</span></button>
+    <button type="button" class="controle" id="noite" aria-pressed="false" aria-label="Modo noite" title="Dia e noite"><span aria-hidden="true">☾</span></button>
+  </div>
+  <button class="menu-btn" type="button" aria-expanded="false" aria-controls="abas" aria-label="Abrir menu">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="abas" class="abas" role="tablist" aria-label="Seções do site">
+    <a href="#inicio" role="tab" data-aba="inicio">Início</a>
+    <a href="#jogo" role="tab" data-aba="jogo">O jogo</a>
+    <a href="#download" role="tab" data-aba="download">Download</a>
+    <a href="#equipe" role="tab" data-aba="equipe">Equipe</a>
+  </nav>
+</header>
+
+<aside class="visitas-site" role="status" aria-live="polite" aria-label="Visitas no site">
+  <svg viewBox="0 0 48 32" aria-hidden="true" shape-rendering="crispEdges"><path d="M10 28V22H4V12h6V6h8V2h14v4h8v8h4v10h-6v4z" fill="#e9dccb" stroke="#000" stroke-width="3"/></svg>
+  <span class="visitas-info"><span>Visitas</span><strong id="visitas-total">…</strong></span>
+</aside>
+
+<main>
+
+  <!-- INÍCIO -->
+  <div id="inicio" class="inicio-painel" role="tabpanel" data-painel="inicio">
+  <section class="painel heroi">
+    <div class="ceu" aria-hidden="true">
+      <span class="nuvem n1"></span><span class="nuvem n2"></span><span class="nuvem n3"></span>
+      <span class="estrelas"></span>
+    </div>
+    <div class="rua" aria-hidden="true">
+      <span class="carro c1"></span><span class="carro c2"></span><span class="carro c3"></span>
+    </div>
+    <div class="heroi-conteudo">
+      <span class="etiqueta">Projeto escolar · IFSP</span>
+      <h1 class="titulo"><span>Problema</span> <span class="ciano">CIDADE</span></h1>
+      <p class="chamada">Administre a cidade. Resolva problemas. Seja reeleito.</p>
+      <p class="chamada-sub">Você é o prefeito: tome decisões durante um mandato de 4 anos, enfrente desafios matemáticos e conduza a cidade ao desenvolvimento — ou ao impeachment.</p>
+      <div class="botoes-pixel">
+        <a class="pixel-btn azul" href="#download" data-aba="download">Baixar o jogo</a>
+        <a class="pixel-btn cinza" href="#jogo" data-aba="jogo">Como funciona</a>
+        <a class="pixel-btn verde" href="#previa-jogo">Ver prévia</a>
+        <a class="pixel-btn amarelo" href="#equipe" data-aba="equipe">Créditos</a>
+      </div>
+      <ul class="plataformas" aria-label="Plataformas">
+        <li>Windows 10/11</li>
+        <li>Linux Debian</li>
+        <li>GitHub</li>
+      </ul>
+    </div>
+  </section>
+  <section class="previa-faixa" aria-label="Prévia visual do jogo">
+    <div class="previa-ornamentos" aria-hidden="true">
+      <span class="parque-arbusto um"></span><span class="parque-arbusto dois"></span>
+      <span class="parque-arvore um"></span><span class="parque-arvore dois"></span>
+      <span class="parque-poste um"></span><span class="parque-poste dois"></span>
+    </div>
+    <div class="previa-jogo" id="previa-jogo" aria-labelledby="previa-titulo">
+      <div class="previa-topo">
+        <div>
+          <p class="previa-etiqueta">Prévia do jogo</p>
+          <h2 id="previa-titulo">Um passeio por ProblemaCIDADE</h2>
+          <p>Use as setas para navegar; clique na captura para ampliá-la.</p>
+        </div>
+        <div class="previa-controles" role="group" aria-label="Controles da prévia">
+          <button type="button" id="previa-anterior" aria-label="Mostrar captura anterior">‹</button>
+          <span id="previa-contador" aria-live="polite">1 / 6</span>
+          <button type="button" id="previa-proxima" aria-label="Mostrar próxima captura">›</button>
+        </div>
+      </div>
+      <button type="button" class="previa-imagem" id="previa-ampliar" aria-label="Ampliar captura: Menu principal">
+        <img id="previa-img" src="img/telas/01-menu.jpg" alt="Menu principal" width="1280" height="720">
+        <span>Ampliar imagem</span>
+      </button>
+      <div class="previa-rodape">
+        <strong id="previa-legenda">Menu principal</strong>
+        <div class="previa-pontos" id="previa-pontos" role="group" aria-label="Escolher captura"></div>
+      </div>
+    </div>
+    <div class="paisagem-transicao" aria-hidden="true">
+      <span class="arbusto arbusto-1"></span>
+      <span class="arbusto arbusto-2"></span>
+      <span class="arvore-pixel"></span>
+      <span class="arbusto arbusto-3"></span>
+      <span class="arbusto arbusto-4"></span>
+      <div class="estrada-pixel"></div>
+    </div>
+  </section>
+</div>
+
+  <!-- O JOGO -->
+  <section id="jogo" class="painel" role="tabpanel" data-painel="jogo" hidden>
+    <div class="caixa">
+      <h2 class="pixel-titulo">O jogo</h2>
+      <p class="lead">Um jogo educativo de administração pública que une entretenimento e aprendizado. Cada escolha tem consequências na economia, na população e na sua reputação como prefeito.</p>
+
+      <div class="sobre">
+        <div>
+          <h3 class="sub primeiro">Gestão com consequências</h3>
+          <p>Você lida com infraestrutura, serviços públicos, investimentos e prioridades de governo. Orçamento limitado, gestão de tempo e a repercussão das escolhas definem o rumo da cidade.</p>
+          <h3 class="sub">Matemática na prática</h3>
+          <p>Grafos, funções de 1º e 2º grau, estatística, matemática financeira e operadores lógicos aparecem dentro da jogabilidade: você resolve problemas reais enquanto governa.</p>
+        </div>
+        <aside class="objetivo">
+          <span class="fita">Objetivo do jogador</span>
+          <h3>Chegar à reeleição</h3>
+          <p>As decisões levam à <b class="pos">reeleição</b>, à <b class="neg">não reeleição</b> ou até ao <b class="neg">impeachment</b>.</p>
+          <ul>
+            <li>Reputação, orçamento e indicadores sociais</li>
+            <li>Desafios matemáticos contextualizados</li>
+            <li>Passagem de tempo em 3 velocidades</li>
+            <li>Até 3 salvamentos simultâneos</li>
+          </ul>
+        </aside>
+      </div>
+
+      <div class="numeros numeros-jogo">
+        <div><strong>4</strong><span>anos de mandato</span></div>
+        <div><strong>12</strong><span>requisitos funcionais</span></div>
+        <div><strong>3</strong><span>níveis de dificuldade</span></div>
+        <div><strong>2</strong><span>idiomas (PT-BR / EN)</span></div>
+      </div>
+
+      <h3 class="sub">Como o jogo funciona</h3>
+      <div class="grade-cartoes">
+        <article class="cartao">
+          <h3>Objetivo</h3>
+          <p>Chegar à eleição com pelo menos <strong>50% de reputação</strong> e depois concluir o segundo mandato.</p>
+        </article>
+        <article class="cartao">
+          <h3>Problemas</h3>
+          <p>Cada ocorrência tem enunciado, imagem e resposta. Use o <strong>rascunho</strong> e a <strong>calculadora</strong> do jogo.</p>
+        </article>
+        <article class="cartao">
+          <h3>Investimentos</h3>
+          <p>Invista em serviços ou em obras. Uma obra custa <strong>R$ 35.000</strong> e leva <strong>20 dias</strong>.</p>
+        </article>
+        <article class="cartao">
+          <h3>Projeções</h3>
+          <p>Gráficos do histórico com estimativa para os próximos <strong>6 meses</strong>.</p>
+        </article>
+        <article class="cartao perigo">
+          <h3>Impeachment</h3>
+          <p>Reputação abaixo de 10% por três meses seguidos, ou chegando a zero, encerra a gestão.</p>
+        </article>
+        <article class="cartao">
+          <h3>Tempo</h3>
+          <p>Três velocidades: normal (3 min/mês), rápido (1,5 min/mês) e muito rápido (30 s/mês). Pausa no <kbd>Espaço</kbd>, menu no <kbd>Esc</kbd>.</p>
+        </article>
+        <article class="cartao">
+          <h3>Construções</h3>
+          <p>Obras resolvem problemas urgentes ou melhoram o governo. Um engenheiro precisa de ajuda com cálculos? Resolva e adiante a obra.</p>
+        </article>
+        <article class="cartao">
+          <h3>Salvamentos</h3>
+          <p>Até <strong>três</strong> slots de save independentes.</p>
+        </article>
+        <article class="cartao">
+          <h3>Câmera livre</h3>
+          <p>Movimente a câmera pela cidade e ajuste o zoom para ver cada região.</p>
+        </article>
+        <article class="cartao">
+          <h3>Pausa segura</h3>
+          <p>Pause sem consequências, inclusive durante ocorrências e pop-ups.</p>
+        </article>
+      </div>
+
+      <section class="categorias-container" aria-labelledby="titulo-categorias">
+        <h3 class="sub" id="titulo-categorias">Problemas</h3>
+        <ul class="categorias-problemas" aria-label="Categorias de ocorrências do jogo">
+          <li class="cartao cat-optional"><img src="img/optional.png" alt=""><div><strong>Opcional</strong><span>Desafio extra que pode ser resolvido ou deixado para depois.</span></div></li>
+          <li class="cartao cat-common"><img src="img/common.png" alt=""><div><strong>Comum</strong><span>Ocorrência frequente ligada à rotina da cidade.</span></div></li>
+          <li class="cartao cat-important"><img src="img/important.png" alt=""><div><strong>Importante</strong><span>Demanda que merece atenção e pode afetar a gestão.</span></div></li>
+          <li class="cartao cat-urgent"><img src="img/urgent.png" alt=""><div><strong>Urgente</strong><span>Situação prioritária que pede uma resposta rápida.</span></div></li>
+        </ul>
+      </section>
+
+      <h3 class="sub">Escolha a dificuldade</h3>
+      <div class="dificuldade" role="radiogroup" aria-label="Dificuldade">
+        <button type="button" role="radio" data-dif="facil" aria-checked="false">Fácil</button>
+        <button type="button" role="radio" data-dif="medio" aria-checked="true">Médio</button>
+        <button type="button" role="radio" data-dif="dificil" aria-checked="false">Difícil</button>
+      </div>
+      <div class="reputacao" aria-live="polite">
+        <div class="reputacao-linha">
+          <span>Reputação inicial</span>
+          <strong id="rep-valor">55%</strong>
+        </div>
+        <div class="barra"><div class="barra-cheia" id="rep-barra" style="width:55%"></div><div class="barra-meta" title="Meta da eleição: 50%"></div></div>
+        <p class="nota" id="rep-nota"></p>
+      </div>
+
+      <h3 class="sub">Simule um mandato</h3>
+      <div class="simulador">
+        <p class="nota">Simulação ilustrativa (os valores não são os do jogo). Começa com a reputação da dificuldade escolhida.</p>
+        <div class="sim-acoes">
+          <button type="button" data-efeito="8" data-texto="Investiu em saúde">Investir em saúde <b>+8</b></button>
+          <button type="button" data-efeito="12" data-texto="Resolveu um problema urgente">Resolver urgente <b>+12</b></button>
+          <button type="button" data-efeito="-10" data-texto="Aumentou impostos">Aumentar impostos <b>−10</b></button>
+          <button type="button" data-efeito="-15" data-texto="Ignorou uma enchente">Ignorar enchente <b>−15</b></button>
+        </div>
+        <div class="reputacao-linha"><span>Reputação simulada</span><strong id="sim-valor">55%</strong></div>
+        <div class="barra"><div class="barra-cheia" id="sim-barra" style="width:55%"></div><div class="barra-meta"></div></div>
+        <p class="sim-status" id="sim-status" aria-live="polite">Faça uma escolha.</p>
+        <button type="button" class="sim-reiniciar" id="sim-reiniciar">Recomeçar</button>
+      </div>
+
+      <h3 class="sub">Seis serviços</h3>
+      <ul class="servicos">
+        <li><img src="img/education.svg" alt="">Educação</li>
+        <li><img src="img/health.svg" alt="">Saúde</li>
+        <li><img src="img/water.svg" alt="">Saneamento</li>
+        <li><img src="img/security.svg" alt="">Segurança</li>
+        <li><img src="img/culture.svg" alt="">Cultura</li>
+        <li><img src="img/social.svg" alt="">Assistência</li>
+      </ul>
+
+      <h3 class="sub">Como rodar</h3>
+      <ol class="passos">
+        <li>Instale o <a href="https://godotengine.org/download" target="_blank" rel="noopener">Godot 4.7</a>.</li>
+        <li>Baixe o projeto no <a href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">GitHub</a>.</li>
+        <li>Abra <code>godot/project.godot</code> e aperte <kbd>F5</kbd>.</li>
+      </ol>
+
+      <div class="baixar">
+        <h3>Pronto para governar?</h3>
+        <p>O ProblemaCIDADE é gratuito. Comece seu mandato.</p>
+        <a class="pixel-btn verde" href="#download" data-aba="download">Baixar o jogo</a>
+        <small>Windows 10/11 (64-bit) e Linux Debian · mínimo de 4 GB de RAM</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD -->
+  <section id="download" class="painel" role="tabpanel" data-painel="download" hidden>
+    <div class="caixa">
+      <h2 class="pixel-titulo">Download</h2>
+      <p class="lead">Um só arquivo para Windows e Linux. Baixe, extraia e abra o executável do seu sistema.</p>
+
+      <div class="download-cartao">
+        <a class="pixel-btn verde grande" id="baixar-jogo" href="https://github.com/Jogojava/ProblemaCIDADE/releases" aria-disabled="true">Baixar ProblemaCIDADE</a>
+        <p class="nota">Arquivo: <code id="nome-zip">ProblemaCIDADE.zip</code> · direto do <a href="https://github.com/Jogojava/ProblemaCIDADE/releases" target="_blank" rel="noopener">Releases do GitHub</a></p>
+        <div class="numeros" id="versao">
+          <div><strong>…</strong><span>versão</span></div>
+          <div><strong>…</strong><span>publicada em</span></div>
+          <div><strong>…</strong><span>tamanho do .zip</span></div>
+          <div><strong>…</strong><span>downloads</span></div>
+        </div>
+      </div>
+
+      <div class="sistemas">
+        <article class="cartao">
+          <h3>Windows 10/11</h3>
+          <ol class="passos">
+            <li>Extraia o .zip.</li>
+            <li>Abra a pasta <code>Windows</code> e dê dois cliques em <code>ProblemaCIDADE.exe</code>.</li>
+            <li>Se o Windows avisar que o app é desconhecido, clique em <strong>Mais informações → Executar assim mesmo</strong>.</li>
+          </ol>
+        </article>
+        <article class="cartao">
+          <h3>Linux (Debian)</h3>
+          <ol class="passos">
+            <li>Extraia o .zip.</li>
+            <li>No terminal, dentro da pasta <code>Linux</code>: <code>chmod +x ProblemaCIDADE.x86_64</code></li>
+            <li>Rode <code>./ProblemaCIDADE.x86_64</code>.</li>
+          </ol>
+        </article>
+      </div>
+      <p class="nota">Requisitos mínimos: 64 bits, 4 GB de RAM e placa de vídeo integrada. Não precisa instalar o Godot.</p>
+    </div>
+  </section>
+
+  <!-- EQUIPE -->
+  <section id="equipe" class="painel" role="tabpanel" data-painel="equipe" hidden>
+    <div class="caixa">
+      <div class="equipe-topo">
+        <img src="img/pato_jogos_logo.jpg" alt="Logo da Pato Jogos" class="logo">
+        <div>
+          <h2 class="pixel-titulo">Equipe Duck (Pato)</h2>
+          <p class="lead">Pato Jogos: alunos do 3º ano de Desenvolvimento de Sistemas, IFSP Campus São Paulo (2026). Clique num nome para abrir o perfil no GitHub.</p>
+        </div>
+      </div>
+      <div class="grade-equipe" id="grade-equipe"></div>
+
+      <div class="repo">
+        <div class="repo-cabeca">
+          <h3>Repositório no GitHub</h3>
+          <a class="pixel-btn azul pequeno" href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">Abrir no GitHub</a>
+        </div>
+        <div class="numeros" id="numeros">
+          <div><strong data-num="commits">…</strong><span>commits</span></div>
+          <div><strong data-num="contribuidores">…</strong><span>contribuidores</span></div>
+          <div><strong data-num="criado">…</strong><span>início</span></div>
+          <div><strong data-num="atualizado">…</strong><span>última atualização</span></div>
+        </div>
+        <div class="linguagens" id="linguagens"></div>
+        <h3>Commits por semana</h3>
+        <div class="grafico" id="grafico"><p class="nota">Carregando do GitHub…</p></div>
+        <h3>Commits recentes</h3>
+        <ul class="commits" id="commits"><li class="carregando">Carregando do GitHub…</li></ul>
+        <p class="nota" id="api-status"></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="cidade-cresce" aria-hidden="true"></div>
+</main>
+<div class="pato" aria-hidden="true"></div>
+
+<footer class="rodape">
+  <p>ProblemaCIDADE · jogo educativo de administração pública · projeto escolar do IFSP Campus São Paulo</p>
+  <p><a href="https://github.com/Jogojava/ProblemaCIDADE" target="_blank" rel="noopener">GitHub</a> · <a href="mailto:duckgamestm@gmail.com">duckgamestm@gmail.com</a></p>
+  <p>© 2026 Pato Jogos (Duck Games)</p>
+</footer>
+
+<dialog class="ampliar" id="ampliar" aria-label="Captura ampliada">
+  <button type="button" class="fechar" aria-label="Fechar">×</button>
+  <button type="button" class="seta anterior" aria-label="Captura anterior">‹</button>
+  <button type="button" class="seta proxima" aria-label="Próxima captura">›</button>
+  <img alt="">
+  <p></p>
+</dialog>
+
+<script src="js/dados.js"></script>
+<script src="js/github.js"></script>
+<script src="js/app.js"></script>
+<script src="js/efeitos.js"></script>
+<script src="js/visitas.js"></script>
+</body>
+</html>
