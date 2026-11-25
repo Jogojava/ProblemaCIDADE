@@ -764,6 +764,7 @@ func ensure_month_content(month: int, year: int) -> void:
 				definition.graph = {"a": pa, "b": pb}
 			5:
 				definition.title = "Média de atendimentos"
+				definition.image = "res://assets/problems/atendimento.png"
 				definition.description_pattern = "Uma unidade atendeu %d, %d e %d pessoas em três dias. Qual é a média diária?"
 				definition.description_values = [n * 10, n * 10 + 10, n * 10 + 20]
 				definition.description = definition.description_pattern % definition.description_values
@@ -771,6 +772,7 @@ func ensure_month_content(month: int, year: int) -> void:
 				definition.explanation = "Some os três valores e divida por três."
 			6:
 				definition.title = "Plano de emergência"
+				definition.image = "res://assets/problems/macahospitalar.png"
 				definition.description_pattern = "O plano é aprovado quando P e Q são verdadeiros. P: há pelo menos 20 leitos. Q: o custo não supera R$ 50.000. A proposta tem %d leitos e custa R$ 45.000. P ∧ Q é verdadeiro?"
 				definition.description_values = [(n + 10)]
 				definition.description = definition.description_pattern % definition.description_values
@@ -781,6 +783,7 @@ func ensure_month_content(month: int, year: int) -> void:
 				definition.availability_duration_days = null
 			7:
 				definition.title = "Distribuição de recursos"
+				definition.image = "res://assets/problems/dinheiro.png"
 				definition.description_pattern = "Um orçamento de R$ %d será dividido igualmente entre 4 bairros. Quanto cada bairro receberá?"
 				definition.description_values = [(n * 4000)]
 				definition.description = definition.description_pattern % definition.description_values

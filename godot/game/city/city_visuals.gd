@@ -56,7 +56,22 @@ const NPC_PATHS := [
 	"res://assets/chara/npc5.png",
 	"res://assets/chara/npc6.png",
 ]
+const VEHICLE_SPECS := [
+	{"path": "res://assets/vehicles/car_1.png", "width": 44.0, "min_speed": 1.65, "max_speed": 2.35},
+	{"path": "res://assets/vehicles/car_2.png", "width": 48.0, "min_speed": 1.65, "max_speed": 2.35},
+	{"path": "res://assets/vehicles/car_3.png", "width": 46.0, "min_speed": 1.60, "max_speed": 2.25},
+	{"path": "res://assets/vehicles/car_4.png", "width": 42.0, "min_speed": 1.60, "max_speed": 2.25},
+	{"path": "res://assets/vehicles/car_5.png", "width": 50.0, "min_speed": 1.75, "max_speed": 2.45},
+	{"path": "res://assets/vehicles/car_6.png", "width": 48.0, "min_speed": 1.45, "max_speed": 2.00},
+	{"path": "res://assets/vehicles/car_7.png", "width": 48.0, "min_speed": 1.55, "max_speed": 2.15},
+	{"path": "res://assets/vehicles/taxi.png", "width": 48.0, "min_speed": 1.70, "max_speed": 2.40},
+	{"path": "res://assets/vehicles/truck_1.png", "width": 52.0, "min_speed": 1.35, "max_speed": 1.85},
+	{"path": "res://assets/vehicles/truck_2.png", "width": 58.0, "min_speed": 1.20, "max_speed": 1.65},
+	{"path": "res://assets/vehicles/bus_1.png", "width": 64.0, "min_speed": 1.15, "max_speed": 1.55},
+	{"path": "res://assets/vehicles/bus_2.png", "width": 64.0, "min_speed": 1.15, "max_speed": 1.55},
+]
 const SIDEWALK_OFFSET := 0.38
+const VEHICLE_LANE_OFFSET := 0.14
 
 static var _used_rect_cache: Dictionary = {}
 
@@ -68,8 +83,16 @@ var _lake_tiles: Dictionary = {}
 var _tree_coords: Array[Vector2i] = []
 var _tree_tiles: Dictionary = {}
 var _npcs: Array[Dictionary] = []
+var _vehicles: Array[Dictionary] = []
 var _npc_rng := RandomNumberGenerator.new()
 var _npc_redraw_accum := 0.0
+var _night_lights_root: Node2D
+var _light_texture: GradientTexture2D
+var _light_material: CanvasItemMaterial
+var _residence_lights: Array[Dictionary] = []
+var _vehicle_headlights: Array[Sprite2D] = []
+var _light_swap_timer := 0.0
+var _last_light_structure_count := -1
 var state: CityState
 var time_manager: TimeManager
 var origin := Vector2(1056, 1780)
@@ -87,22 +110,162 @@ func _init() -> void:
 func _ready() -> void:
 	var settings := get_node_or_null("/root/SettingsService")
 	if settings != null and settings.has_signal("changed"):
-		settings.connect("changed", queue_redraw)
+		settings.connect("changed", _sync_night_lights)
+	_sync_night_lights()
 
 func _is_night_mode() -> bool:
 	var settings := get_node_or_null("/root/SettingsService")
 	return settings != null and bool(settings.call("is_dark_mode"))
 
-func _draw_warm_light(pos: Vector2, radius: float, intensity: float = 1.0) -> void:
-	draw_circle(pos, radius, Color(1.0, 0.86, 0.45, 0.16 * intensity))
-	draw_circle(pos, radius * 0.55, Color(1.0, 0.92, 0.58, 0.28 * intensity))
-	draw_circle(pos, radius * 0.22, Color(1.0, 0.97, 0.80, 0.65 * intensity))
+func _ensure_light_texture() -> GradientTexture2D:
+	if _light_texture != null:
+		return _light_texture
+	var grad := Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.28, 0.62, 1.0])
+	grad.colors = PackedColorArray([
+		Color(1.0, 0.94, 0.72, 1.0),
+		Color(1.0, 0.82, 0.45, 0.50),
+		Color(1.0, 0.70, 0.30, 0.14),
+		Color(1.0, 0.62, 0.20, 0.0),
+	])
+	_light_texture = GradientTexture2D.new()
+	_light_texture.gradient = grad
+	_light_texture.width = 128
+	_light_texture.height = 128
+	_light_texture.fill = GradientTexture2D.FILL_RADIAL
+	_light_texture.fill_from = Vector2(0.5, 0.5)
+	_light_texture.fill_to = Vector2(0.5, 0.0)
+	return _light_texture
+
+func _ensure_light_material() -> CanvasItemMaterial:
+	if _light_material != null:
+		return _light_material
+	_light_material = CanvasItemMaterial.new()
+	_light_material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	_light_material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	return _light_material
+
+func _add_night_light(pos: Vector2, scale_val: float, alpha: float, tint: Color = Color("ffdca0")) -> Sprite2D:
+	if _night_lights_root == null:
+		return null
+	var light := Sprite2D.new()
+	light.texture = _ensure_light_texture()
+	light.material = _ensure_light_material()
+	light.position = pos
+	light.scale = Vector2(scale_val, scale_val)
+	light.modulate = Color(tint.r, tint.g, tint.b, alpha)
+	light.visible = alpha > 0.005
+	_night_lights_root.add_child(light)
+	return light
+
+func _sync_night_lights() -> void:
+	_residence_lights.clear()
+	_vehicle_headlights.clear()
+	_light_swap_timer = 0.0
+	if _night_lights_root != null and is_instance_valid(_night_lights_root):
+		_night_lights_root.queue_free()
+		_night_lights_root = null
+	if state == null or not is_inside_tree() or not _is_night_mode():
+		_last_light_structure_count = -1
+		return
+	_last_light_structure_count = state.residences.size() + state.buildings.size()
+	_night_lights_root = Node2D.new()
+	_night_lights_root.name = "NightLights"
+	_night_lights_root.z_index = 20
+	add_child(_night_lights_root)
+
+	# Prefeitura (grand front entrance + clock tower accent)
+	var hall_base := _structure_base({"lot": state.town_hall, "area": "hall"})
+	_add_night_light(hall_base + Vector2(0.0, 18.0), 2.4, 0.48, Color("ffe1a0"))
+	_add_night_light(hall_base + Vector2(0.0, -102.0), 1.3, 0.38, Color("8ae6ff"))
+
+	# Subtle warm streetlights at road intersections
+	for x in range(-map_radius, map_radius + 1):
+		if posmod(x, BLOCK_STRIDE) != 0:
+			continue
+		for y in range(-map_radius, map_radius + 1):
+			if posmod(y, BLOCK_STRIDE) != 0:
+				continue
+			var ibase := point({"x": x, "y": y})
+			_add_night_light(ibase + Vector2(0.0, -4.0), 1.35, 0.26, Color("ffd996"))
+
+	# Public buildings & parks (directly over the buildings)
+	for building in state.buildings:
+		var area := String(building.get("area", ""))
+		var bbase := _structure_base(building)
+		var bpath := _building_sprite_path(area, building.lot, int(building.get("variant", 0)))
+		if bpath.ends_with("/culture_2.png"):
+			for lamp_off in [Vector2(-42.0, -16.0), Vector2(42.0, -16.0), Vector2(-30.0, 26.0), Vector2(30.0, 26.0)]:
+				_add_night_light(bbase + lamp_off, 1.0, 0.36, Color("ffe4a8"))
+		elif area == "security":
+			_add_night_light(bbase + Vector2(0.0, -34.0), 1.85, 0.40, Color("9ad8ff"))
+		elif area == "health":
+			_add_night_light(bbase + Vector2(0.0, -28.0), 1.85, 0.42, Color("d4f2ff"))
+		else:
+			_add_night_light(bbase + Vector2(0.0, -28.0), 1.9, 0.42, Color("ffdca0"))
+
+	# Warm lighting right on top of almost all apartments and houses (~88% lit, swapping smoothly)
+	for home in state.residences:
+		var area := String(home.get("area", "home"))
+		var lx := int(home.lot.get("x", 0))
+		var ly := int(home.lot.get("y", 0))
+		var hbase := _structure_base(home)
+		var is_apt := area == "apartment"
+		var lit := posmod(absi(lx * 11 + ly * 17), 8) != 0
+		var base_alpha := 0.40 if is_apt else 0.36
+		var light_pos := hbase + (Vector2(0.0, -56.0) if is_apt else Vector2(0.0, -16.0))
+		var light_scale := 1.75 if is_apt else 1.05
+		var tint := Color("ffd480") if is_apt else Color("ffdc94")
+		var light := _add_night_light(light_pos, light_scale, base_alpha if lit else 0.0, tint)
+		if light != null:
+			_residence_lights.append({"light": light, "base_alpha": base_alpha, "lit": lit})
+
+	# Moving headlights for active vehicles
+	for vehicle in _vehicles:
+		var hlight := _add_night_light(_vehicle_headlight_pos(vehicle), 0.72, 0.38, Color("fff4c8"))
+		if hlight != null:
+			_vehicle_headlights.append(hlight)
+
+func _vehicle_headlight_pos(vehicle: Dictionary) -> Vector2:
+	var vpos: Vector2 = vehicle["pos"]
+	var base := point({"x": vpos.x, "y": vpos.y})
+	var axis := int(vehicle.get("axis", 0))
+	return base + (Vector2(22.0, 9.0) if axis == 0 else Vector2(-22.0, 9.0))
+
+func _update_night_lights(delta: float) -> void:
+	if _residence_lights.is_empty():
+		return
+	_light_swap_timer += delta
+	if _light_swap_timer >= 2.0:
+		_light_swap_timer = 0.0
+		var lit_indices: Array[int] = []
+		var off_indices: Array[int] = []
+		for i in range(_residence_lights.size()):
+			if bool(_residence_lights[i]["lit"]):
+				lit_indices.append(i)
+			else:
+				off_indices.append(i)
+		if not lit_indices.is_empty() and not off_indices.is_empty():
+			var turn_off_idx := lit_indices[_npc_rng.randi_range(0, lit_indices.size() - 1)]
+			var turn_on_idx := off_indices[_npc_rng.randi_range(0, off_indices.size() - 1)]
+			_residence_lights[turn_off_idx]["lit"] = false
+			_residence_lights[turn_on_idx]["lit"] = true
+	for entry in _residence_lights:
+		var light: Sprite2D = entry["light"]
+		if not is_instance_valid(light):
+			continue
+		var target := float(entry["base_alpha"]) if bool(entry["lit"]) else 0.0
+		if not is_equal_approx(light.modulate.a, target):
+			light.modulate.a = move_toward(light.modulate.a, target, delta * 0.75)
+			light.visible = light.modulate.a > 0.005
 
 func _process(delta: float) -> void:
 	if state == null:
 		return
 	if time_manager != null and time_manager.paused:
 		return
+	if not _residence_lights.is_empty():
+		_update_night_lights(delta)
 	var needs_redraw := false
 	if not state.projects.is_empty():
 		_construction_anim_time += delta
@@ -110,8 +273,11 @@ func _process(delta: float) -> void:
 		if next_frame != _construction_frame:
 			_construction_frame = next_frame
 			needs_redraw = true
-	if not _npcs.is_empty():
-		_update_npcs(delta)
+	if not _npcs.is_empty() or not _vehicles.is_empty():
+		if not _npcs.is_empty():
+			_update_npcs(delta)
+		if not _vehicles.is_empty():
+			_update_vehicles(delta)
 		_npc_redraw_accum += delta
 		if _npc_redraw_accum >= 0.033:
 			_npc_redraw_accum = 0.0
@@ -197,11 +363,14 @@ func bind(city: CityState) -> void:
 	_tree_coords.clear()
 	_tree_tiles.clear()
 	_npcs.clear()
+	_vehicles.clear()
 	map_radius = _required_radius_for_city(city)
 	_generate_lots()
 	city.configure_lots(lots)
 	_rebuild_nature_layout()
 	_populate_npcs()
+	_populate_vehicles()
+	_sync_night_lights()
 	_next_population_expansion = city.population + POPULATION_GROWTH_PER_EXPANSION
 	city.changed.connect(_on_city_changed)
 	queue_redraw()
@@ -238,6 +407,8 @@ func expand_map() -> bool:
 		state.configure_lots(lots)
 		_rebuild_nature_layout()
 		_populate_npcs()
+		_populate_vehicles()
+		_sync_night_lights()
 	map_expanded.emit(map_radius)
 	queue_redraw()
 	return true
@@ -332,6 +503,86 @@ func _update_npcs(delta: float) -> void:
 		else:
 			npc["pos"] = Vector2(float(road_coord) + float(side) * SIDEWALK_OFFSET, new_along)
 
+func _populate_vehicles() -> void:
+	var road_lines := _road_lines()
+	if road_lines.is_empty():
+		return
+	var target_count := clampi(floori(float(map_radius) * 1.6), 18, 55)
+	var limit := float(map_radius) - 0.5
+	while _vehicles.size() < target_count:
+		var axis := _npc_rng.randi_range(0, 1)
+		var road_coord := road_lines[_npc_rng.randi_range(0, road_lines.size() - 1)]
+		var along := _npc_rng.randf_range(-limit, limit)
+		var spec_idx := _npc_rng.randi_range(0, VEHICLE_SPECS.size() - 1)
+		var spec: Dictionary = VEHICLE_SPECS[spec_idx]
+		var lane := VEHICLE_LANE_OFFSET if axis == 0 else -VEHICLE_LANE_OFFSET
+		var pos := Vector2(along, float(road_coord) + lane) if axis == 0 else Vector2(float(road_coord) + lane, along)
+		_vehicles.append({
+			"pos": pos,
+			"axis": axis,
+			"road_coord": road_coord,
+			"next_turn": _next_intersection(along, 1),
+			"speed": _npc_rng.randf_range(float(spec["min_speed"]), float(spec["max_speed"])),
+			"spec_idx": spec_idx,
+		})
+
+func _update_vehicles(delta: float) -> void:
+	var speed_mult := 1.0
+	if time_manager != null:
+		speed_mult = clampf(time_manager.get_game_speed_multiplier(), 0.35, 3.0)
+	var limit := float(map_radius) + 0.4
+	var road_lines := _road_lines()
+	for i in range(_vehicles.size()):
+		var vehicle: Dictionary = _vehicles[i]
+		var pos: Vector2 = vehicle["pos"]
+		var axis: int = int(vehicle["axis"])
+		var road_coord: int = int(vehicle["road_coord"])
+		var next_turn: int = int(vehicle["next_turn"])
+		var along := pos.x if axis == 0 else pos.y
+		var base_speed := float(vehicle["speed"])
+		# Simple spacing so vehicles on the same road do not stack on top of each other.
+		var blocked := false
+		for j in range(_vehicles.size()):
+			if i == j:
+				continue
+			var other: Dictionary = _vehicles[j]
+			if int(other["axis"]) == axis and int(other["road_coord"]) == road_coord:
+				var other_pos: Vector2 = other["pos"]
+				var other_along := other_pos.x if axis == 0 else other_pos.y
+				var gap := other_along - along
+				if gap > 0.0 and gap < 1.05:
+					blocked = true
+					break
+		var effective_speed := base_speed * (0.25 if blocked else 1.0)
+		var step := effective_speed * speed_mult * delta
+		var new_along := along + step
+		var turn_target := float(next_turn) + (-VEHICLE_LANE_OFFSET if axis == 0 else VEHICLE_LANE_OFFSET)
+		if along <= turn_target and new_along >= turn_target:
+			var inside_perp := absi(next_turn) <= map_radius - 1
+			if inside_perp and _npc_rng.randf() < 0.35:
+				var new_axis := 1 - axis
+				var new_road := next_turn
+				var new_lane := VEHICLE_LANE_OFFSET if new_axis == 0 else -VEHICLE_LANE_OFFSET
+				var start_perp := float(road_coord) + (VEHICLE_LANE_OFFSET if axis == 0 else -VEHICLE_LANE_OFFSET)
+				vehicle["axis"] = new_axis
+				vehicle["road_coord"] = new_road
+				vehicle["next_turn"] = road_coord + BLOCK_STRIDE
+				vehicle["pos"] = Vector2(start_perp, float(new_road) + new_lane) if new_axis == 0 else Vector2(float(new_road) + new_lane, start_perp)
+				if i < _vehicle_headlights.size() and is_instance_valid(_vehicle_headlights[i]):
+					_vehicle_headlights[i].position = _vehicle_headlight_pos(vehicle)
+				continue
+			vehicle["next_turn"] = next_turn + BLOCK_STRIDE
+		if new_along > limit:
+			new_along = -limit
+			if not road_lines.is_empty():
+				road_coord = road_lines[_npc_rng.randi_range(0, road_lines.size() - 1)]
+				vehicle["road_coord"] = road_coord
+			vehicle["next_turn"] = _next_intersection(new_along, 1)
+		var lane := VEHICLE_LANE_OFFSET if axis == 0 else -VEHICLE_LANE_OFFSET
+		vehicle["pos"] = Vector2(new_along, float(road_coord) + lane) if axis == 0 else Vector2(float(road_coord) + lane, new_along)
+		if i < _vehicle_headlights.size() and is_instance_valid(_vehicle_headlights[i]):
+			_vehicle_headlights[i].position = _vehicle_headlight_pos(vehicle)
+
 func _rebuild_nature_layout() -> void:
 	if state == null:
 		return
@@ -419,6 +670,8 @@ func _on_city_changed() -> void:
 		_next_population_expansion += POPULATION_GROWTH_PER_EXPANSION
 		if not expand_map():
 			break
+	if state != null and _is_night_mode() and (state.residences.size() + state.buildings.size()) != _last_light_structure_count:
+		_sync_night_lights()
 	queue_redraw()
 
 func _road(x: int, y: int) -> bool:
@@ -541,6 +794,9 @@ func _draw() -> void:
 	for npc in _npcs:
 		var npos: Vector2 = npc["pos"]
 		objects.append({"lot": {"x": npos.x, "y": npos.y}, "area": "npc", "npc": npc})
+	for vehicle in _vehicles:
+		var vpos: Vector2 = vehicle["pos"]
+		objects.append({"lot": {"x": vpos.x, "y": vpos.y}, "area": "vehicle", "vehicle": vehicle})
 	objects.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var ba := _structure_base(a)
 		var bb := _structure_base(b)
@@ -555,6 +811,8 @@ func _draw() -> void:
 			_tree(base + Vector2(0, 10), int(item.lot.x), int(item.lot.y))
 		elif area == "npc":
 			_draw_npc(base, item["npc"])
+		elif area == "vehicle":
+			_draw_vehicle(base, item["vehicle"])
 		else:
 			_draw_structure(base, area, int(item.get("variant", 0)), bool(item.get("construction", false)), item.lot, false)
 	if placing and hovered != Vector2i(999, 999):
@@ -582,9 +840,22 @@ func _structure_base(item: Dictionary) -> Vector2:
 	var lot: Dictionary = item.lot
 	if area == "hall":
 		return point({"x": int(lot.x) - 1.0, "y": int(lot.y) - 1.0})
-	if area != "home" and area != "tree" and area != "npc":
+	if area != "home" and area != "tree" and area != "npc" and area != "vehicle":
 		return point({"x": int(lot.x) + 0.5, "y": int(lot.y) + 0.5})
 	return point(lot)
+
+func _draw_vehicle(base: Vector2, vehicle: Dictionary) -> void:
+	var spec_idx := int(vehicle.get("spec_idx", 0)) % VEHICLE_SPECS.size()
+	var spec: Dictionary = VEHICLE_SPECS[spec_idx]
+	var entry := _get_sprite_entry(String(spec["path"]))
+	if entry.is_empty():
+		return
+	var src_size: Vector2 = entry["src_rect"].size
+	var target_w := float(spec["width"])
+	var target_h := target_w * (src_size.y / maxf(1.0, src_size.x))
+	var flip_h := int(vehicle.get("axis", 0)) == 1
+	var dest := Rect2(Vector2(base.x - target_w * 0.5, base.y + 10.0 - target_h), Vector2(target_w, target_h))
+	_draw_sprite_entry(entry, dest, flip_h, Color.WHITE)
 
 func _draw_npc(base: Vector2, npc: Dictionary) -> void:
 	var idx := int(npc.get("sprite_idx", 0)) % NPC_PATHS.size()
@@ -645,19 +916,6 @@ func _draw_structure(base: Vector2, area: String, variant: int, construction: bo
 			_draw_sprite_entry(sprite_entry, dest, flip_h, Color(1.0, 1.0, 1.0, 0.5))
 			return
 		_draw_sprite_entry(sprite_entry, dest, flip_h, Color.WHITE)
-		if _is_night_mode():
-			if area == "hall":
-				_draw_warm_light(base + Vector2(0.0, -target_h * 0.12), 46.0, 1.1)
-				_draw_warm_light(base + Vector2(-46.0, HALF_TILE.y * 1.4), 26.0, 0.9)
-				_draw_warm_light(base + Vector2(46.0, HALF_TILE.y * 1.4), 26.0, 0.9)
-			elif is_park:
-				for lamp_off in [Vector2(-48, -14), Vector2(48, -14), Vector2(-34, 28), Vector2(34, 28)]:
-					_draw_warm_light(base + lamp_off, 24.0, 0.95)
-			elif home:
-				_draw_warm_light(Vector2(base.x, anchor_bottom_y - target_h * 0.34), 22.0, 0.85)
-			else:
-				_draw_warm_light(Vector2(base.x - 24.0, anchor_bottom_y - target_h * 0.38), 28.0, 0.9)
-				_draw_warm_light(Vector2(base.x + 24.0, anchor_bottom_y - target_h * 0.38), 28.0, 0.9)
 		if area == "hall":
 			draw_string(ThemeDB.fallback_font, base + Vector2(-42, HALF_TILE.y * 2.75), tr("Prefeitura"), HORIZONTAL_ALIGNMENT_LEFT, 120, 17, Color("f5f1dc"))
 		return
