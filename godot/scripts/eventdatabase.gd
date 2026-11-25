@@ -709,6 +709,7 @@ func ensure_month_content(month: int, year: int) -> void:
 		match i:
 			0:
 				definition.title = "Pesquisa de aprovação"
+				definition.image = "res://assets/problems/satisfacao.png"
 				definition.description_pattern = "Em uma amostra de 200 moradores, %d aprovam a gestão. Qual é a aprovação em porcentagem?"
 				definition.description_values = [(n * 10)]
 				definition.description = definition.description_pattern % definition.description_values
@@ -716,6 +717,7 @@ func ensure_month_content(month: int, year: int) -> void:
 				definition.explanation = "Divida os moradores que aprovam por 200 e multiplique por 100."
 			1:
 				definition.title = "Planejamento de obra"
+				definition.image = "res://assets/problems/engenheiros.png"
 				definition.construction_days_saved = 5
 				definition.description_pattern = "Uma obra custa R$ 5.000 fixos e R$ 200 por metro. O orçamento é R$ %d. Quantos metros podem ser construídos? Resolva 5000 + 200x = orçamento. Bônus: acertar reduz em 5 dias o prazo das obras em andamento."
 				definition.description_values = [(5000 + n * 200)]
@@ -724,6 +726,7 @@ func ensure_month_content(month: int, year: int) -> void:
 				definition.explanation = "Subtraia R$ 5.000 do orçamento e divida o restante por R$ 200. Uma resposta correta reduz em 5 dias as obras em andamento."
 			2:
 				definition.title = "Área da nova praça"
+				definition.image = "res://assets/problems/pracaarea.jpeg"
 				definition.description_pattern = "Uma praça quadrada terá área de %d m². Resolva x² = %d: qual é o lado positivo, em metros?"
 				definition.description_values = [n * n, n * n]
 				definition.description = definition.description_pattern % definition.description_values
@@ -731,6 +734,7 @@ func ensure_month_content(month: int, year: int) -> void:
 				definition.explanation = "O lado é a raiz quadrada positiva da área."
 			3:
 				definition.title = "Orçamento e juros simples"
+				definition.image = "res://assets/problems/juros.jpeg"
 				definition.description_pattern = "Uma reserva de R$ 10.000 rende juros simples de 1%% por mês durante %d meses. Qual é o montante final, em reais?"
 				definition.description_values = [n]
 				definition.description = definition.description_pattern % definition.description_values
