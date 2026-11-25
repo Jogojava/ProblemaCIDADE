@@ -23,21 +23,27 @@ func _draw() -> void:
 		return
 	_draw_legacy_graph(font)
 
+func _is_dark_mode() -> bool:
+	var settings := get_node_or_null("/root/SettingsService")
+	return settings != null and bool(settings.call("is_dark_mode"))
+
 func _draw_legacy_graph(font: Font) -> void:
+	var dark := _is_dark_mode()
 	var points := [Vector2(45, size.y / 2), Vector2(size.x / 2, 40), Vector2(size.x / 2, size.y - 40), Vector2(size.x - 45, size.y / 2)]
 	var connections := [[0, 1, _as_int(distances.get("a", 0))], [1, 3, 4], [0, 2, _as_int(distances.get("b", 0))], [2, 3, 7]]
 	for connection in connections:
 		var from: Vector2 = points[connection[0]]
 		var to: Vector2 = points[connection[1]]
-		draw_line(from, to, Color("7b9da6"), 3, true)
-		draw_string(font, (from + to) / 2 + Vector2(-16, -10), "%d km" % connection[2], HORIZONTAL_ALIGNMENT_LEFT, 100, 20, Color("20383f"))
+		draw_line(from, to, Color("5d8999") if dark else Color("7b9da6"), 3, true)
+		draw_string(font, (from + to) / 2 + Vector2(-16, -10), "%d km" % connection[2], HORIZONTAL_ALIGNMENT_LEFT, 100, 20, Color("e6f0f4") if dark else Color("20383f"))
 	for i in range(points.size()):
-		draw_circle(points[i], 23, Color("17687b"))
+		draw_circle(points[i], 23, Color("1f7c91") if dark else Color("17687b"))
 		draw_string(font, points[i] + Vector2(-8, 8), ["P", "A", "B", "H"][i], HORIZONTAL_ALIGNMENT_LEFT, 40, 23, Color.WHITE)
 
 func _draw_dynamic_graph(font: Font, nodes: Array, edges: Array, legend: String) -> void:
+	var dark := _is_dark_mode()
 	if not legend.is_empty():
-		draw_string(font, Vector2(12.0, 20.0), tr(legend), HORIZONTAL_ALIGNMENT_LEFT, maxf(1.0, size.x - 24.0), 13, Color("2d4c56"))
+		draw_string(font, Vector2(12.0, 20.0), tr(legend), HORIZONTAL_ALIGNMENT_LEFT, maxf(1.0, size.x - 24.0), 13, Color("b4cdd8") if dark else Color("2d4c56"))
 	if nodes.is_empty():
 		return
 	var node_count := nodes.size()
@@ -103,8 +109,8 @@ func _draw_dynamic_graph(font: Font, nodes: Array, edges: Array, legend: String)
 			})
 
 	var pill_style := StyleBoxFlat.new()
-	pill_style.bg_color = Color(0.97, 0.99, 1.0, 0.92)
-	pill_style.border_color = Color("9ab6be")
+	pill_style.bg_color = Color(0.11, 0.19, 0.25, 0.94) if dark else Color(0.97, 0.99, 1.0, 0.92)
+	pill_style.border_color = Color("3a5e70") if dark else Color("9ab6be")
 	pill_style.set_border_width_all(1)
 	pill_style.set_corner_radius_all(6)
 
@@ -135,7 +141,7 @@ func _draw_dynamic_graph(font: Font, nodes: Array, edges: Array, legend: String)
 			pill_rect.position.y + pad_y + font.get_ascent(edge_font_size)
 		)
 		if text_pos.is_finite():
-			draw_string(font, text_pos, label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, edge_font_size, Color("20383f"))
+			draw_string(font, text_pos, label_text, HORIZONTAL_ALIGNMENT_LEFT, -1, edge_font_size, Color("e6f0f4") if dark else Color("20383f"))
 
 	for entry in node_entries:
 		var pos: Vector2 = entry.pos

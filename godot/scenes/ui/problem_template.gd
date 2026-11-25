@@ -36,6 +36,9 @@ var _deadline_style_category := ""
 
 func _ready() -> void:
 	_apply_popup_styles()
+	var settings := get_node_or_null("/root/SettingsService")
+	if settings != null and settings.has_signal("changed"):
+		settings.connect("changed", _apply_popup_styles)
 	var option_buttons: Array[Button] = _get_option_buttons()
 	for index in range(option_buttons.size()):
 		option_buttons[index].set_meta("sfx", "none")
@@ -230,23 +233,33 @@ func show_route_graph(distances: Dictionary) -> void:
 	illustration_panel.add_child(graph)
 	graph.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
+func _is_dark_mode() -> bool:
+	var settings := get_node_or_null("/root/SettingsService")
+	return settings != null and bool(settings.call("is_dark_mode"))
+
 func _apply_popup_styles() -> void:
+	var dark := _is_dark_mode()
+	var ink := Color("e6f0f4") if dark else Color(0.13, 0.22, 0.27, 1.0)
+	var muted_ink := Color("9fb8c4") if dark else Color(0.35, 0.42, 0.47, 1.0)
+
 	var image_style := StyleBoxFlat.new()
-	image_style.bg_color = Color("e6f0f1")
+	image_style.bg_color = Color("111c24") if dark else Color("e6f0f1")
 	image_style.set_corner_radius_all(10)
 	illustration_panel.add_theme_stylebox_override("panel", image_style)
+
 	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.98, 0.99, 1.0, 1.0)
-	panel_style.border_color = Color(0.45, 0.58, 0.65, 1.0)
+	panel_style.bg_color = Color("15222c") if dark else Color(0.98, 0.99, 1.0, 1.0)
+	panel_style.border_color = Color("315060") if dark else Color(0.45, 0.58, 0.65, 1.0)
 	panel_style.set_border_width_all(2)
 	panel_style.set_corner_radius_all(22)
-	panel_style.shadow_color = Color(0.02, 0.08, 0.12, 0.35)
+	panel_style.shadow_color = Color(0.01, 0.04, 0.07, 0.55 if dark else 0.35)
 	panel_style.shadow_size = 18
 	panel_style.shadow_offset = Vector2(0, 8)
 	$Center/Panel.add_theme_stylebox_override("panel", panel_style)
+
 	var deadline_style := StyleBoxFlat.new()
-	deadline_style.bg_color = Color("edf3f0")
-	deadline_style.border_color = Color("b7d0d1")
+	deadline_style.bg_color = Color("16232d") if dark else Color("edf3f0")
+	deadline_style.border_color = Color("304d5d") if dark else Color("b7d0d1")
 	deadline_style.set_border_width_all(2)
 	deadline_style.set_corner_radius_all(24)
 	deadline_style.content_margin_left = 14
@@ -261,45 +274,56 @@ func _apply_popup_styles() -> void:
 	urgent_deadline_button.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
 		urgent_deadline_button.add_theme_color_override(state, Color.WHITE)
-	_apply_deadline_style(EventDatabase.CATEGORY_URGENT)
+	urgent_deadline_phase.add_theme_color_override("font_color", muted_ink)
+	urgent_deadline_countdown.add_theme_color_override("font_color", ink)
+	_apply_deadline_style(_deadline_style_category if not _deadline_style_category.is_empty() else EventDatabase.CATEGORY_URGENT)
 
 	var statement_style := StyleBoxFlat.new()
-	statement_style.bg_color = Color(0.91, 0.96, 0.98, 1.0)
-	statement_style.border_color = Color(0.76, 0.85, 0.89, 1.0)
+	statement_style.bg_color = Color("1b2d3a") if dark else Color(0.91, 0.96, 0.98, 1.0)
+	statement_style.border_color = Color("325263") if dark else Color(0.76, 0.85, 0.89, 1.0)
 	statement_style.set_border_width_all(1)
 	statement_style.set_corner_radius_all(14)
 	$Center/Panel/Margin/Content/StatementCard.add_theme_stylebox_override("panel", statement_style)
+	$Center/Panel/Margin/Content/StatementCard/StatementMargin/StatementContent/StatementLabel.add_theme_color_override("font_color", Color("5cc8f0") if dark else Color(0.1, 0.45, 0.64, 1))
+	$Center/Panel/Margin/Content/Header/HeaderHint.add_theme_color_override("font_color", muted_ink)
+	title_label.add_theme_color_override("font_color", ink)
+	description_label.add_theme_color_override("font_color", ink)
+	answer_heading.add_theme_color_override("font_color", ink)
+	answer_hint.add_theme_color_override("font_color", muted_ink)
 
 	var input_style := StyleBoxFlat.new()
-	input_style.bg_color = Color.WHITE
-	input_style.border_color = Color(0.6, 0.7, 0.75, 1.0)
+	input_style.bg_color = Color("0f1820") if dark else Color.WHITE
+	input_style.border_color = Color("395c6e") if dark else Color(0.6, 0.7, 0.75, 1.0)
 	input_style.set_border_width_all(2)
 	input_style.set_corner_radius_all(10)
 	answer_input.add_theme_stylebox_override("normal", input_style)
 	answer_input.add_theme_stylebox_override("focus", input_style)
+	answer_input.add_theme_color_override("font_color", ink)
+	answer_input.add_theme_color_override("caret_color", ink)
+	answer_input.add_theme_color_override("font_placeholder_color", muted_ink)
 
 	var option_normal := StyleBoxFlat.new()
-	option_normal.bg_color = Color(0.94, 0.97, 0.98, 1.0)
-	option_normal.border_color = Color(0.57, 0.69, 0.75, 1.0)
+	option_normal.bg_color = Color("1d3140") if dark else Color(0.94, 0.97, 0.98, 1.0)
+	option_normal.border_color = Color("37596b") if dark else Color(0.57, 0.69, 0.75, 1.0)
 	option_normal.set_border_width_all(2)
 	option_normal.set_corner_radius_all(12)
 	var option_hover := option_normal.duplicate() as StyleBoxFlat
-	option_hover.bg_color = Color(0.84, 0.94, 0.98, 1.0)
-	option_hover.border_color = Color(0.2, 0.61, 0.76, 1.0)
+	option_hover.bg_color = Color("274457") if dark else Color(0.84, 0.94, 0.98, 1.0)
+	option_hover.border_color = Color("3bb9eb") if dark else Color(0.2, 0.61, 0.76, 1.0)
 	for button in _get_option_buttons():
 		button.add_theme_stylebox_override("normal", option_normal)
 		button.add_theme_stylebox_override("hover", option_hover)
 		button.add_theme_stylebox_override("pressed", option_hover)
 		button.add_theme_font_size_override("font_size", 22)
 		button.custom_minimum_size = Vector2(button.custom_minimum_size.x, 70)
-		button.add_theme_color_override("font_color", Color(0.13, 0.22, 0.27, 1.0))
-		button.add_theme_color_override("font_focus_color", Color(0.13, 0.22, 0.27, 1.0))
-		button.add_theme_color_override("font_hover_color", Color(0.13, 0.22, 0.27, 1.0))
-		button.add_theme_color_override("font_pressed_color", Color(0.13, 0.22, 0.27, 1.0))
+		button.add_theme_color_override("font_color", ink)
+		button.add_theme_color_override("font_focus_color", ink)
+		button.add_theme_color_override("font_hover_color", ink)
+		button.add_theme_color_override("font_pressed_color", ink)
 
 	var board_normal := StyleBoxFlat.new()
-	board_normal.bg_color = Color(0.87, 0.94, 0.97, 1.0)
-	board_normal.border_color = Color(0.34, 0.62, 0.72, 1.0)
+	board_normal.bg_color = Color("1a3240") if dark else Color(0.87, 0.94, 0.97, 1.0)
+	board_normal.border_color = Color("36667a") if dark else Color(0.34, 0.62, 0.72, 1.0)
 	board_normal.set_border_width_all(2)
 	board_normal.set_corner_radius_all(12)
 	for tool_button in [$Center/Panel/Margin/Content/Body/ProblemTools/BoardButton, $Center/Panel/Margin/Content/Body/ProblemTools/CalculatorButton]:
@@ -307,19 +331,19 @@ func _apply_popup_styles() -> void:
 		tool_button.add_theme_stylebox_override("hover", option_hover)
 		tool_button.add_theme_stylebox_override("pressed", option_hover)
 		tool_button.add_theme_font_size_override("font_size", 19)
-		tool_button.add_theme_color_override("font_color", Color(0.13, 0.22, 0.27, 1.0))
-		tool_button.add_theme_color_override("font_focus_color", Color(0.13, 0.22, 0.27, 1.0))
-		tool_button.add_theme_color_override("font_hover_color", Color(0.13, 0.22, 0.27, 1.0))
-		tool_button.add_theme_color_override("font_pressed_color", Color(0.13, 0.22, 0.27, 1.0))
+		tool_button.add_theme_color_override("font_color", ink)
+		tool_button.add_theme_color_override("font_focus_color", ink)
+		tool_button.add_theme_color_override("font_hover_color", ink)
+		tool_button.add_theme_color_override("font_pressed_color", ink)
 	var calculator_panel_style := StyleBoxFlat.new()
-	calculator_panel_style.bg_color = Color("f7fafb")
-	calculator_panel_style.border_color = Color("53727c")
+	calculator_panel_style.bg_color = Color("15222c") if dark else Color("f7fafb")
+	calculator_panel_style.border_color = Color("335464") if dark else Color("53727c")
 	calculator_panel_style.set_border_width_all(2)
 	calculator_panel_style.set_corner_radius_all(18)
 	$CalculatorOverlay/Center/Panel.add_theme_stylebox_override("panel", calculator_panel_style)
 	var display_style := StyleBoxFlat.new()
-	display_style.bg_color = Color("18343f")
-	display_style.border_color = Color("41616b")
+	display_style.bg_color = Color("0d1820") if dark else Color("18343f")
+	display_style.border_color = Color("345766") if dark else Color("41616b")
 	display_style.set_border_width_all(2)
 	display_style.set_corner_radius_all(10)
 	calculator_display.add_theme_stylebox_override("normal", display_style)
@@ -329,27 +353,27 @@ func _apply_popup_styles() -> void:
 	calculator_display.add_theme_color_override("font_uneditable_color", Color("f5fbfc"))
 	calculator_display.add_theme_color_override("caret_color", Color("f5fbfc"))
 	var key_normal := StyleBoxFlat.new()
-	key_normal.bg_color = Color("edf3f5")
-	key_normal.border_color = Color("a8bec5")
+	key_normal.bg_color = Color("1f3342") if dark else Color("edf3f5")
+	key_normal.border_color = Color("385869") if dark else Color("a8bec5")
 	key_normal.set_border_width_all(1)
 	key_normal.set_corner_radius_all(10)
 	var key_hover := key_normal.duplicate() as StyleBoxFlat
-	key_hover.bg_color = Color("d8e8ec")
-	key_hover.border_color = Color("658792")
+	key_hover.bg_color = Color("2a4557") if dark else Color("d8e8ec")
+	key_hover.border_color = Color("4d7c91") if dark else Color("658792")
 	var utility_normal := key_normal.duplicate() as StyleBoxFlat
-	utility_normal.bg_color = Color("dbe7ea")
+	utility_normal.bg_color = Color("273f50") if dark else Color("dbe7ea")
 	var utility_hover := key_hover.duplicate() as StyleBoxFlat
-	utility_hover.bg_color = Color("c6dbe0")
+	utility_hover.bg_color = Color("335469") if dark else Color("c6dbe0")
 	var operator_normal := key_normal.duplicate() as StyleBoxFlat
-	operator_normal.bg_color = Color("236b78")
-	operator_normal.border_color = Color("18515c")
+	operator_normal.bg_color = Color("1f6f85") if dark else Color("236b78")
+	operator_normal.border_color = Color("2e8fa8") if dark else Color("18515c")
 	var operator_hover := operator_normal.duplicate() as StyleBoxFlat
-	operator_hover.bg_color = Color("2d8290")
+	operator_hover.bg_color = Color("2b8ca6") if dark else Color("2d8290")
 	for key_button in calculator_keys.get_children():
 		if key_button is Button:
 			var button_style := key_normal
 			var button_hover_style := key_hover
-			var button_color := Color("18313a")
+			var button_color := ink if dark else Color("18313a")
 			if ["C", "⌫", "%", "±"].has(key_button.text):
 				button_style = utility_normal
 				button_hover_style = utility_hover

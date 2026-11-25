@@ -113,7 +113,7 @@ func _apply_night_theme() -> void:
 	var dark := SettingsService.is_dark_mode()
 	RenderingServer.set_default_clear_color(Color("0b1220") if dark else Color("243d39"))
 	if _night_modulate != null and is_instance_valid(_night_modulate):
-		_night_modulate.color = Color(0.38, 0.45, 0.66, 1.0) if dark else Color.WHITE
+		_night_modulate.color = Color.WHITE
 
 func _process(delta: float) -> void:
 	if city.outcome != "playing":

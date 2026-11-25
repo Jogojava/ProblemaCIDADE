@@ -72,8 +72,11 @@ const VEHICLE_SPECS := [
 ]
 const SIDEWALK_OFFSET := 0.38
 const VEHICLE_LANE_OFFSET := 0.14
+const NIGHT_WORLD_TINT := Color(0.28, 0.34, 0.52, 1.0)
 
 static var _used_rect_cache: Dictionary = {}
+static var _night_path_cache: Dictionary = {}
+static var _night_off_path_cache: Dictionary = {}
 
 var _textures: Dictionary = {}
 var _construction_anim_time := 0.0
@@ -90,7 +93,7 @@ var _night_lights_root: Node2D
 var _light_texture: GradientTexture2D
 var _light_material: CanvasItemMaterial
 var _residence_lights: Array[Dictionary] = []
-var _vehicle_headlights: Array[Sprite2D] = []
+var _lit_buildings: Dictionary = {}
 var _light_swap_timer := 0.0
 var _last_light_structure_count := -1
 var state: CityState
@@ -110,12 +113,32 @@ func _init() -> void:
 func _ready() -> void:
 	var settings := get_node_or_null("/root/SettingsService")
 	if settings != null and settings.has_signal("changed"):
-		settings.connect("changed", _sync_night_lights)
+		settings.connect("changed", _on_settings_changed)
 	_sync_night_lights()
+
+func _on_settings_changed() -> void:
+	_sync_night_lights()
+	queue_redraw()
 
 func _is_night_mode() -> bool:
 	var settings := get_node_or_null("/root/SettingsService")
 	return settings != null and bool(settings.call("is_dark_mode"))
+
+func _night_sprite_path(day_path: String) -> String:
+	if _night_path_cache.has(day_path):
+		return String(_night_path_cache[day_path])
+	var candidate := day_path.replace(".png", "_night.png")
+	var resolved := candidate if (day_path.ends_with(".png") and ResourceLoader.exists(candidate)) else ""
+	_night_path_cache[day_path] = resolved
+	return resolved
+
+func _night_off_sprite_path(day_path: String) -> String:
+	if _night_off_path_cache.has(day_path):
+		return String(_night_off_path_cache[day_path])
+	var candidate := day_path.replace(".png", "_night_off.png")
+	var resolved := candidate if (day_path.ends_with(".png") and ResourceLoader.exists(candidate)) else ""
+	_night_off_path_cache[day_path] = resolved
+	return resolved
 
 func _ensure_light_texture() -> GradientTexture2D:
 	if _light_texture != null:
@@ -160,7 +183,7 @@ func _add_night_light(pos: Vector2, scale_val: float, alpha: float, tint: Color 
 
 func _sync_night_lights() -> void:
 	_residence_lights.clear()
-	_vehicle_headlights.clear()
+	_lit_buildings.clear()
 	_light_swap_timer = 0.0
 	if _night_lights_root != null and is_instance_valid(_night_lights_root):
 		_night_lights_root.queue_free()
@@ -174,10 +197,12 @@ func _sync_night_lights() -> void:
 	_night_lights_root.z_index = 20
 	add_child(_night_lights_root)
 
-	# Prefeitura (grand front entrance + clock tower accent)
+	# Prefeitura (always uses prefeitura_night.png + warm glow)
 	var hall_base := _structure_base({"lot": state.town_hall, "area": "hall"})
-	_add_night_light(hall_base + Vector2(0.0, 18.0), 2.4, 0.48, Color("ffe1a0"))
-	_add_night_light(hall_base + Vector2(0.0, -102.0), 1.3, 0.38, Color("8ae6ff"))
+	var hall_key := Vector2i(int(state.town_hall.get("x", -1)), int(state.town_hall.get("y", -1)))
+	_lit_buildings[hall_key] = true
+	_add_night_light(hall_base + Vector2(0.0, 18.0), 2.4, 0.44, Color("ffe1a0"))
+	_add_night_light(hall_base + Vector2(0.0, -102.0), 1.3, 0.36, Color("8ae6ff"))
 
 	# Subtle warm streetlights at road intersections
 	for x in range(-map_radius, map_radius + 1):
@@ -189,48 +214,45 @@ func _sync_night_lights() -> void:
 			var ibase := point({"x": x, "y": y})
 			_add_night_light(ibase + Vector2(0.0, -4.0), 1.35, 0.26, Color("ffd996"))
 
-	# Public buildings & parks (directly over the buildings)
+	# Public buildings (~80% lit with *_night.png + glow; unlit ones have NO glow)
 	for building in state.buildings:
 		var area := String(building.get("area", ""))
 		var bbase := _structure_base(building)
 		var bpath := _building_sprite_path(area, building.lot, int(building.get("variant", 0)))
-		if bpath.ends_with("/culture_2.png"):
-			for lamp_off in [Vector2(-42.0, -16.0), Vector2(42.0, -16.0), Vector2(-30.0, 26.0), Vector2(30.0, 26.0)]:
-				_add_night_light(bbase + lamp_off, 1.0, 0.36, Color("ffe4a8"))
-		elif area == "security":
-			_add_night_light(bbase + Vector2(0.0, -34.0), 1.85, 0.40, Color("9ad8ff"))
-		elif area == "health":
-			_add_night_light(bbase + Vector2(0.0, -28.0), 1.85, 0.42, Color("d4f2ff"))
-		else:
-			_add_night_light(bbase + Vector2(0.0, -28.0), 1.9, 0.42, Color("ffdca0"))
+		if _night_sprite_path(bpath).is_empty():
+			continue
+		var bx := int(building.lot.get("x", 0))
+		var by := int(building.lot.get("y", 0))
+		var bkey := Vector2i(bx, by)
+		var lit := posmod(absi(bx * 11 + by * 17), 5) != 0
+		_lit_buildings[bkey] = lit
+		var tint := Color("9ad8ff") if area == "security" else (Color("d4f2ff") if area == "health" else Color("ffdca0"))
+		var light_pos := bbase + (Vector2(0.0, -34.0) if area == "security" else Vector2(0.0, -28.0))
+		var base_alpha := 0.36
+		var light := _add_night_light(light_pos, 1.85, base_alpha if lit else 0.0, tint)
+		if light != null:
+			_residence_lights.append({"light": light, "key": bkey, "base_alpha": base_alpha, "lit": lit})
 
-	# Warm lighting right on top of almost all apartments and houses (~88% lit, swapping smoothly)
+	# Apartments and houses (~80% lit with *_night.png + glow; unlit or without *_night.png have NO glow)
 	for home in state.residences:
 		var area := String(home.get("area", "home"))
+		var hpath := _building_sprite_path(area, home.lot, int(home.get("variant", 0)))
+		if _night_sprite_path(hpath).is_empty():
+			continue
 		var lx := int(home.lot.get("x", 0))
 		var ly := int(home.lot.get("y", 0))
+		var hkey := Vector2i(lx, ly)
 		var hbase := _structure_base(home)
 		var is_apt := area == "apartment"
-		var lit := posmod(absi(lx * 11 + ly * 17), 8) != 0
-		var base_alpha := 0.40 if is_apt else 0.36
+		var lit := posmod(absi(lx * 11 + ly * 17), 5) != 0
+		_lit_buildings[hkey] = lit
+		var base_alpha := 0.34 if is_apt else 0.30
 		var light_pos := hbase + (Vector2(0.0, -56.0) if is_apt else Vector2(0.0, -16.0))
-		var light_scale := 1.75 if is_apt else 1.05
+		var light_scale := 1.70 if is_apt else 1.0
 		var tint := Color("ffd480") if is_apt else Color("ffdc94")
 		var light := _add_night_light(light_pos, light_scale, base_alpha if lit else 0.0, tint)
 		if light != null:
-			_residence_lights.append({"light": light, "base_alpha": base_alpha, "lit": lit})
-
-	# Moving headlights for active vehicles
-	for vehicle in _vehicles:
-		var hlight := _add_night_light(_vehicle_headlight_pos(vehicle), 0.72, 0.38, Color("fff4c8"))
-		if hlight != null:
-			_vehicle_headlights.append(hlight)
-
-func _vehicle_headlight_pos(vehicle: Dictionary) -> Vector2:
-	var vpos: Vector2 = vehicle["pos"]
-	var base := point({"x": vpos.x, "y": vpos.y})
-	var axis := int(vehicle.get("axis", 0))
-	return base + (Vector2(22.0, 9.0) if axis == 0 else Vector2(-22.0, 9.0))
+			_residence_lights.append({"light": light, "key": hkey, "base_alpha": base_alpha, "lit": lit})
 
 func _update_night_lights(delta: float) -> void:
 	if _residence_lights.is_empty():
@@ -250,6 +272,9 @@ func _update_night_lights(delta: float) -> void:
 			var turn_on_idx := off_indices[_npc_rng.randi_range(0, off_indices.size() - 1)]
 			_residence_lights[turn_off_idx]["lit"] = false
 			_residence_lights[turn_on_idx]["lit"] = true
+			_lit_buildings[_residence_lights[turn_off_idx]["key"]] = false
+			_lit_buildings[_residence_lights[turn_on_idx]["key"]] = true
+			queue_redraw()
 	for entry in _residence_lights:
 		var light: Sprite2D = entry["light"]
 		if not is_instance_valid(light):
@@ -568,8 +593,6 @@ func _update_vehicles(delta: float) -> void:
 				vehicle["road_coord"] = new_road
 				vehicle["next_turn"] = road_coord + BLOCK_STRIDE
 				vehicle["pos"] = Vector2(start_perp, float(new_road) + new_lane) if new_axis == 0 else Vector2(float(new_road) + new_lane, start_perp)
-				if i < _vehicle_headlights.size() and is_instance_valid(_vehicle_headlights[i]):
-					_vehicle_headlights[i].position = _vehicle_headlight_pos(vehicle)
 				continue
 			vehicle["next_turn"] = next_turn + BLOCK_STRIDE
 		if new_along > limit:
@@ -580,8 +603,6 @@ func _update_vehicles(delta: float) -> void:
 			vehicle["next_turn"] = _next_intersection(new_along, 1)
 		var lane := VEHICLE_LANE_OFFSET if axis == 0 else -VEHICLE_LANE_OFFSET
 		vehicle["pos"] = Vector2(new_along, float(road_coord) + lane) if axis == 0 else Vector2(float(road_coord) + lane, new_along)
-		if i < _vehicle_headlights.size() and is_instance_valid(_vehicle_headlights[i]):
-			_vehicle_headlights[i].position = _vehicle_headlight_pos(vehicle)
 
 func _rebuild_nature_layout() -> void:
 	if state == null:
@@ -732,6 +753,8 @@ func _draw() -> void:
 	var road_line_sprite := _get_sprite_entry(ROAD_LINE_PATH)
 	var road_inter_sprite := _get_sprite_entry(ROAD_INTERSECTION_PATH)
 	var lake_sprite := _get_sprite_entry(LAKE_PATH) if ResourceLoader.exists(LAKE_PATH) else {}
+	var dark := _is_night_mode()
+	var world_tint := NIGHT_WORLD_TINT if dark else Color.WHITE
 	var tile_size := HALF_TILE * 2.0 + Vector2(2.0, 1.5)
 	var tile_offset := HALF_TILE + Vector2(1.0, 0.75)
 	for depth in range(-map_radius * 2, map_radius * 2 + 1):
@@ -747,9 +770,9 @@ func _draw() -> void:
 			if not road:
 				var shade := posmod(x * 7 + y * 13, 4)
 				if not grass_sprite.is_empty():
-					_draw_sprite_entry(grass_sprite, tile_rect, posmod(x + y, 2) == 1, Color.WHITE.darkened(shade * 0.02))
+					_draw_sprite_entry(grass_sprite, tile_rect, posmod(x + y, 2) == 1, world_tint.darkened(shade * 0.02))
 				else:
-					draw_colored_polygon(_diamond(base), Color("73945b").lightened(shade * 0.018))
+					draw_colored_polygon(_diamond(base), (Color("73945b").lightened(shade * 0.018)) * world_tint)
 					draw_polyline(_closed(_diamond(base)), Color(0.27, 0.39, 0.22, 0.12), 1)
 				if placing and state != null:
 					var lot := {"x": x, "y": y}
@@ -758,17 +781,17 @@ func _draw() -> void:
 						draw_polyline(_closed(_diamond(base, 3)), Color(0.8, 1, 0.76, 0.45), 1.5)
 			else:
 				if is_road_x and is_road_y and not road_inter_sprite.is_empty():
-					_draw_sprite_entry(road_inter_sprite, tile_rect, false)
+					_draw_sprite_entry(road_inter_sprite, tile_rect, false, world_tint)
 				elif not road_line_sprite.is_empty():
 					# road_line.png runs top-left to bottom-right (along X axis, when y % stride == 0).
 					# Flip horizontally for roads running top-right to bottom-left (along Y axis, when x % stride == 0).
-					_draw_sprite_entry(road_line_sprite, tile_rect, is_road_x and not is_road_y)
+					_draw_sprite_entry(road_line_sprite, tile_rect, is_road_x and not is_road_y, world_tint)
 				else:
-					draw_colored_polygon(_diamond(base), Color("334a50"))
+					draw_colored_polygon(_diamond(base), Color("334a50") * world_tint)
 					if not _road(x - 1, y) or not _road(x, y - 1):
-						draw_polyline(_closed(_diamond(base, 3)), Color("52676a"), 3)
+						draw_polyline(_closed(_diamond(base, 3)), Color("52676a") * world_tint, 3)
 					if posmod(x, BLOCK_STRIDE) != 0 and y == 0 and posmod(x, 2) == 1:
-						draw_line(base + Vector2(-16, -10), base + Vector2(16, 10), Color("bec9ad"), 2)
+						draw_line(base + Vector2(-16, -10), base + Vector2(16, 10), Color("bec9ad") * world_tint, 2)
 	if not lake_sprite.is_empty():
 		var lake_src: Vector2 = lake_sprite["src_rect"].size
 		for anchor in _lake_anchors:
@@ -776,7 +799,7 @@ func _draw() -> void:
 			var lw := 240.0
 			var lh := lw * (lake_src.y / maxf(1.0, lake_src.x))
 			var ldest := Rect2(Vector2(lbase.x - lw * 0.5, lbase.y + HALF_TILE.y * 1.9 - lh), Vector2(lw, lh))
-			_draw_sprite_entry(lake_sprite, ldest, posmod(absi(anchor.x + anchor.y), 2) == 1)
+			_draw_sprite_entry(lake_sprite, ldest, posmod(absi(anchor.x + anchor.y), 2) == 1, world_tint)
 	if state == null:
 		return
 	var objects: Array[Dictionary] = []
@@ -854,8 +877,13 @@ func _draw_vehicle(base: Vector2, vehicle: Dictionary) -> void:
 	var target_w := float(spec["width"])
 	var target_h := target_w * (src_size.y / maxf(1.0, src_size.x))
 	var flip_h := int(vehicle.get("axis", 0)) == 1
+	if _is_night_mode():
+		var light_tex := _ensure_light_texture()
+		var beam_pos := base + (Vector2(-24.0, 10.0) if flip_h else Vector2(24.0, 10.0))
+		var beam_size := Vector2(76.0, 52.0)
+		draw_texture_rect(light_tex, Rect2(beam_pos - beam_size * 0.5, beam_size), false, Color(1.0, 0.96, 0.78, 0.85))
 	var dest := Rect2(Vector2(base.x - target_w * 0.5, base.y + 10.0 - target_h), Vector2(target_w, target_h))
-	_draw_sprite_entry(entry, dest, flip_h, Color.WHITE)
+	_draw_sprite_entry(entry, dest, flip_h, NIGHT_WORLD_TINT if _is_night_mode() else Color.WHITE)
 
 func _draw_npc(base: Vector2, npc: Dictionary) -> void:
 	var idx := int(npc.get("sprite_idx", 0)) % NPC_PATHS.size()
@@ -873,7 +901,7 @@ func _draw_npc(base: Vector2, npc: Dictionary) -> void:
 		base + Vector2(-7, 0), base + Vector2(0, -3.5), base + Vector2(7, 0), base + Vector2(0, 3.5)
 	]), Color(0.08, 0.14, 0.12, 0.28))
 	var dest := Rect2(Vector2(base.x - target_w * 0.5, base.y - target_h - bob), Vector2(target_w, target_h))
-	_draw_sprite_entry(entry, dest, moving_left, Color.WHITE)
+	_draw_sprite_entry(entry, dest, moving_left, NIGHT_WORLD_TINT if _is_night_mode() else Color.WHITE)
 
 func _structure_sort_y(item: Dictionary) -> float:
 	# Exact isometric depth of the footprint center (origin.y + (cx + cy) * HALF_TILE.y).
@@ -899,10 +927,25 @@ func _draw_structure(base: Vector2, area: String, variant: int, construction: bo
 			var target_h := target_w * (cell.y / maxf(1.0, cell.x))
 			var anchor_bottom_y := base.y + (HALF_TILE.y * 0.95 if home else HALF_TILE.y * 1.92)
 			var dest := Rect2(Vector2(base.x - target_w * 0.5, anchor_bottom_y - target_h), Vector2(target_w, target_h))
-			draw_texture_rect_region(tex, dest, src_rect, Color.WHITE)
+			draw_texture_rect_region(tex, dest, src_rect, NIGHT_WORLD_TINT if _is_night_mode() else Color.WHITE)
 			return
 	var sprite_path := _building_sprite_path(area, lot, variant)
-	var sprite_entry := _get_sprite_entry(sprite_path)
+	var active_path := sprite_path
+	var using_night_asset := false
+	if not construction and _is_night_mode():
+		var lot_key := Vector2i(int(lot.get("x", 0)), int(lot.get("y", 0)))
+		var is_lit := area == "hall" or bool(_lit_buildings.get(lot_key, false))
+		if is_lit:
+			var night_path := _night_sprite_path(sprite_path)
+			if not night_path.is_empty():
+				active_path = night_path
+				using_night_asset = true
+		else:
+			var night_off_path := _night_off_sprite_path(sprite_path)
+			if not night_off_path.is_empty():
+				active_path = night_off_path
+				using_night_asset = true
+	var sprite_entry := _get_sprite_entry(active_path)
 	if not sprite_entry.is_empty():
 		var src_size: Vector2 = sprite_entry["src_rect"].size
 		var is_park := sprite_path.ends_with("/culture_2.png")
@@ -915,7 +958,8 @@ func _draw_structure(base: Vector2, area: String, variant: int, construction: bo
 		if construction:
 			_draw_sprite_entry(sprite_entry, dest, flip_h, Color(1.0, 1.0, 1.0, 0.5))
 			return
-		_draw_sprite_entry(sprite_entry, dest, flip_h, Color.WHITE)
+		var building_tint := Color.WHITE if (not _is_night_mode() or using_night_asset) else NIGHT_WORLD_TINT
+		_draw_sprite_entry(sprite_entry, dest, flip_h, building_tint)
 		if area == "hall":
 			draw_string(ThemeDB.fallback_font, base + Vector2(-42, HALF_TILE.y * 2.75), tr("Prefeitura"), HORIZONTAL_ALIGNMENT_LEFT, 120, 17, Color("f5f1dc"))
 		return
@@ -962,7 +1006,7 @@ func _tree(base: Vector2, x: int = 0, y: int = 0) -> void:
 		var tw := 64.0
 		var th := tw * (src_size.y / maxf(1.0, src_size.x))
 		var dest := Rect2(Vector2(base.x - tw * 0.5, base.y + 4.0 - th), Vector2(tw, th))
-		_draw_sprite_entry(entry, dest, posmod(absi(x * 5 + y * 7), 2) == 1)
+		_draw_sprite_entry(entry, dest, posmod(absi(x * 5 + y * 7), 2) == 1, NIGHT_WORLD_TINT if _is_night_mode() else Color.WHITE)
 		return
 	draw_ellipse_shadow(base)
 	draw_line(base, base + Vector2(0, -24), Color("77654b"), 5)
