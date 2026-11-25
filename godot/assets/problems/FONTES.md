@@ -14,7 +14,7 @@ As fotos abaixo foram obtidas no Unsplash, cujas páginas indicam uso gratuito s
 | Mapa, Mapa Meu | `mapa_cidade.jpg` | [A close up of a map of a city — Jake Kling](https://unsplash.com/photos/a-close-up-of-a-map-of-a-city-zC9mBM18Udk) |
 | Asfalto Quente, Conta Fria | `asfalto.jpg` | [Workers paving a road with an asphalt machine — Brian J. Tromp](https://unsplash.com/photos/workers-paving-a-road-with-an-asphalt-machine-AYak7Oq4Ejw) |
 | Lixômetro | `lixometro.jpg` | [Five colorful recycling bins in front of a green hedge — Marco Cassé](https://unsplash.com/photos/five-colorful-recycling-bins-in-front-of-a-green-hedge-gbc-rHkx4Ws) |
-| Abrigo em Progressão | `abrigo_progressao.jpg` | [Street flooded with water and debris after storm](https://unsplash.com/photos/street-flooded-with-water-and-debris-after-storm-EehFb9A3QGs) |
+| Abrigo em Progressão | `abrigo_progressao.jpg` | [Industrial kitchen with food supplies — Simon Infanger](https://unsplash.com/photos/three-large-industrial-fans-in-a-dimly-lit-room-d5NqpIyQIOU) |
 | HidroMetragem | `hidrometragem.jpg` | [A water tank rests high on a metal tower — Caise Justin Tan](https://unsplash.com/photos/a-water-tank-rests-high-on-a-metal-tower-6w4zjej6Pek) |
 | Dose Certa | `dose_certa.jpg` | [First aid kit contents with bandages and medical supplies — Navy Medicine](https://unsplash.com/photos/first-aid-kit-contents-with-bandages-and-medical-supplies-nGfxoclUgSI) |
 | QuadraFora | `quadra_fora.jpg` | [People playing basketball on an outdoor court — Sparsh Paliwal](https://unsplash.com/photos/people-playing-basketball-on-an-outdoor-court-_MyiJnjKluE) |
