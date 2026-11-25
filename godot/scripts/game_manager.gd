@@ -14,6 +14,7 @@ const SKY_BACKGROUND_SCRIPT := preload("res://game/city/sky_background.gd")
 
 var city := CityState.new()
 var visuals: CityVisuals
+var _night_modulate: CanvasModulate
 var _placement_area := ""
 var _placement_bar: PanelContainer
 var _placement_text: Label
@@ -70,7 +71,11 @@ func _ready() -> void:
 	time_manager.day_passed.connect(_on_game_day)
 	time_manager.month_passed.connect(_on_game_month)
 	hud.bind_city(city)
-	RenderingServer.set_default_clear_color(Color("243d39"))
+	_night_modulate = CanvasModulate.new()
+	_night_modulate.name = "NightModulate"
+	add_child(_night_modulate)
+	SettingsService.changed.connect(_apply_night_theme)
+	_apply_night_theme()
 	var sky_background: CanvasLayer = SKY_BACKGROUND_SCRIPT.new()
 	add_child(sky_background)
 	visuals = CityVisuals.new()
@@ -103,6 +108,12 @@ func _ready() -> void:
 		time_manager.set_process(false)
 		sky_background.set_process(false)
 		set_process(false)
+
+func _apply_night_theme() -> void:
+	var dark := SettingsService.is_dark_mode()
+	RenderingServer.set_default_clear_color(Color("0b1220") if dark else Color("243d39"))
+	if _night_modulate != null and is_instance_valid(_night_modulate):
+		_night_modulate.color = Color(0.50, 0.58, 0.78, 1.0) if dark else Color.WHITE
 
 func _process(delta: float) -> void:
 	if city.outcome != "playing":

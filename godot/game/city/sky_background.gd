@@ -2,6 +2,7 @@ class_name SkyBackground
 extends CanvasLayer
 
 const SKY_TEXTURE_PATH := "res://assets/city/sky/background_sky.jpeg"
+const NIGHT_SKY_TEXTURE_PATH := "res://assets/city/sky/night_sky.jpeg"
 const CLOUD_PATHS := [
 	"res://assets/city/sky/small_cloud.png",
 	"res://assets/city/sky/medium_cloud.png",
@@ -22,6 +23,9 @@ const CLOUD_LAYOUTS := [
 
 var _clouds: Array[Dictionary] = []
 var _viewport_size := Vector2(1920.0, 1080.0)
+var _sky_rect: TextureRect
+var _day_sky_tex: Texture2D
+var _night_sky_tex: Texture2D
 
 func _init() -> void:
 	layer = -10
@@ -34,15 +38,19 @@ func _ready() -> void:
 	root_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root_control)
 
-	var sky_rect := TextureRect.new()
-	sky_rect.name = "SkyTexture"
-	sky_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	sky_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	sky_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	sky_rect.stretch_mode = TextureRect.STRETCH_SCALE
-	sky_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	sky_rect.texture = load(SKY_TEXTURE_PATH) as Texture2D
-	root_control.add_child(sky_rect)
+	_day_sky_tex = load(SKY_TEXTURE_PATH) as Texture2D
+	if ResourceLoader.exists(NIGHT_SKY_TEXTURE_PATH):
+		_night_sky_tex = load(NIGHT_SKY_TEXTURE_PATH) as Texture2D
+
+	_sky_rect = TextureRect.new()
+	_sky_rect.name = "SkyTexture"
+	_sky_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_sky_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_sky_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_sky_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	_sky_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_sky_rect.texture = _day_sky_tex
+	root_control.add_child(_sky_rect)
 
 	var cloud_textures: Array[Texture2D] = []
 	for path in CLOUD_PATHS:
@@ -78,7 +86,23 @@ func _ready() -> void:
 			"node": cloud,
 			"speed": float(cfg["speed"]),
 			"y_ratio": float(cfg["y_ratio"]),
+			"alpha": float(cfg["alpha"]),
 		})
+
+	var settings := get_node_or_null("/root/SettingsService")
+	if settings != null and settings.has_signal("changed"):
+		settings.connect("changed", _apply_theme)
+	_apply_theme()
+
+func _apply_theme() -> void:
+	var settings := get_node_or_null("/root/SettingsService")
+	var dark := settings != null and bool(settings.call("is_dark_mode"))
+	if _sky_rect != null:
+		_sky_rect.texture = _night_sky_tex if (dark and _night_sky_tex != null) else _day_sky_tex
+	for entry in _clouds:
+		var cloud: TextureRect = entry["node"]
+		var base_alpha := float(entry.get("alpha", 0.85))
+		cloud.modulate = Color(0.42, 0.52, 0.72, base_alpha * 0.72) if dark else Color(1.0, 1.0, 1.0, base_alpha)
 
 func _on_viewport_resized() -> void:
 	var vp := get_viewport()

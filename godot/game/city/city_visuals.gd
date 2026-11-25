@@ -51,6 +51,10 @@ const APARTMENT_PATHS := [
 const NPC_PATHS := [
 	"res://assets/chara/npc1.png",
 	"res://assets/chara/npc2.png",
+	"res://assets/chara/npc3.png",
+	"res://assets/chara/npc4.png",
+	"res://assets/chara/npc5.png",
+	"res://assets/chara/npc6.png",
 ]
 const SIDEWALK_OFFSET := 0.38
 
@@ -79,6 +83,20 @@ var lots: Array[Dictionary] = []
 func _init() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_npc_rng.randomize()
+
+func _ready() -> void:
+	var settings := get_node_or_null("/root/SettingsService")
+	if settings != null and settings.has_signal("changed"):
+		settings.connect("changed", queue_redraw)
+
+func _is_night_mode() -> bool:
+	var settings := get_node_or_null("/root/SettingsService")
+	return settings != null and bool(settings.call("is_dark_mode"))
+
+func _draw_warm_light(pos: Vector2, radius: float, intensity: float = 1.0) -> void:
+	draw_circle(pos, radius, Color(1.0, 0.86, 0.45, 0.16 * intensity))
+	draw_circle(pos, radius * 0.55, Color(1.0, 0.92, 0.58, 0.28 * intensity))
+	draw_circle(pos, radius * 0.22, Color(1.0, 0.97, 0.80, 0.65 * intensity))
 
 func _process(delta: float) -> void:
 	if state == null:
@@ -627,6 +645,19 @@ func _draw_structure(base: Vector2, area: String, variant: int, construction: bo
 			_draw_sprite_entry(sprite_entry, dest, flip_h, Color(1.0, 1.0, 1.0, 0.5))
 			return
 		_draw_sprite_entry(sprite_entry, dest, flip_h, Color.WHITE)
+		if _is_night_mode():
+			if area == "hall":
+				_draw_warm_light(base + Vector2(0.0, -target_h * 0.12), 46.0, 1.1)
+				_draw_warm_light(base + Vector2(-46.0, HALF_TILE.y * 1.4), 26.0, 0.9)
+				_draw_warm_light(base + Vector2(46.0, HALF_TILE.y * 1.4), 26.0, 0.9)
+			elif is_park:
+				for lamp_off in [Vector2(-48, -14), Vector2(48, -14), Vector2(-34, 28), Vector2(34, 28)]:
+					_draw_warm_light(base + lamp_off, 24.0, 0.95)
+			elif home:
+				_draw_warm_light(Vector2(base.x, anchor_bottom_y - target_h * 0.34), 22.0, 0.85)
+			else:
+				_draw_warm_light(Vector2(base.x - 24.0, anchor_bottom_y - target_h * 0.38), 28.0, 0.9)
+				_draw_warm_light(Vector2(base.x + 24.0, anchor_bottom_y - target_h * 0.38), 28.0, 0.9)
 		if area == "hall":
 			draw_string(ThemeDB.fallback_font, base + Vector2(-42, HALF_TILE.y * 2.75), tr("Prefeitura"), HORIZONTAL_ALIGNMENT_LEFT, 120, 17, Color("f5f1dc"))
 		return

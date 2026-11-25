@@ -118,7 +118,9 @@ func _ready() -> void:
 	_reputation_avatar_rect.hide()
 	reputation_button.add_child(_reputation_avatar_rect)
 	SettingsService.changed.connect(_refresh_reputation_icon)
+	SettingsService.changed.connect(_apply_theme_colors)
 	_refresh_reputation_icon()
+	_apply_theme_colors()
 	set_city_indicators()
 
 func _exit_tree() -> void:
@@ -272,7 +274,7 @@ func _rebuild_problem_buttons(events: Array[Dictionary], categories_by_id: Dicti
 			days_label.custom_minimum_size = Vector2(74, 0)
 			days_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 			days_label.add_theme_font_size_override("font_size", 15)
-			days_label.add_theme_color_override("font_color", Color("20383f"))
+			days_label.add_theme_color_override("font_color", Color("c8dae4") if SettingsService.is_dark_mode() else Color("20383f"))
 			days_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			timer_row.add_child(progress)
 			timer_row.add_child(days_label)
@@ -758,3 +760,16 @@ func _apply_layout() -> void:
 	_notice_label.add_theme_font_size_override("font_size", 20)
 	for button in [menu_button, funds_button, reputation_button, pause_button, normal_button, fast_button, very_fast_button]:
 		button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+func _apply_theme_colors() -> void:
+	var dark := SettingsService.is_dark_mode()
+	var header := get_node_or_null("HeaderBackground") as ColorRect
+	if header != null:
+		header.color = Color(0.05, 0.09, 0.14, 0.96) if dark else Color(0.10, 0.19, 0.20, 0.94)
+	$Footer.color = Color("121d26") if dark else Color("eef1e5")
+	var deadline_color := Color("c8dae4") if dark else Color("20383f")
+	for lbl in _problem_deadline_labels.values():
+		if is_instance_valid(lbl):
+			(lbl as Label).add_theme_color_override("font_color", deadline_color)
+	if _notice_label != null and is_instance_valid(_notice_label):
+		_notice_label.add_theme_color_override("font_color", Color("ffe082") if dark else Color("f1dc9c"))

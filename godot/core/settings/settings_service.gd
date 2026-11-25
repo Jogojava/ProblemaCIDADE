@@ -29,7 +29,7 @@ const WIND_NORMAL_DB := -15.0
 const WIND_DUCKED_DB := -24.0
 
 var storage_path := PATH
-var values := {"master": 80.0, "music": 65.0, "effects": 80.0, "muted": false, "mode": 0, "resolution": 0, "quality": 1, "locale": "pt_BR", "pause_unfocused": true}
+var values := {"master": 80.0, "music": 65.0, "effects": 80.0, "muted": false, "mode": 0, "resolution": 0, "quality": 1, "locale": "pt_BR", "pause_unfocused": true, "dark_mode": false}
 var game_theme: Theme
 var test_mode := false
 var _music: AudioStreamPlayer
@@ -393,7 +393,12 @@ func update(key: String, value: Variant) -> void:
 		config.save(storage_path)
 	changed.emit()
 
+func is_dark_mode() -> bool:
+	return bool(values.get("dark_mode", false))
+
 func apply_settings() -> void:
+	if game_theme != null:
+		_populate_theme(game_theme)
 	for pair in [["Master", "master"], ["Music", "music"], ["Effects", "effects"]]:
 		var bus := AudioServer.get_bus_index(pair[0])
 		AudioServer.set_bus_volume_db(bus, linear_to_db(maxf(0.0001, float(values[pair[1]]) / 100.0)))
@@ -443,6 +448,12 @@ func build_options(column: VBoxContainer) -> void:
 	inactivity.button_pressed = bool(values.pause_unfocused)
 	inactivity.toggled.connect(func(value: bool): update("pause_unfocused", value))
 	column.add_child(inactivity)
+	var dark_toggle := CheckBox.new()
+	dark_toggle.name = "DarkModeCheckBox"
+	dark_toggle.text = tr("Modo noturno (tema escuro)")
+	dark_toggle.button_pressed = is_dark_mode()
+	dark_toggle.toggled.connect(func(value: bool): update("dark_mode", value))
+	column.add_child(dark_toggle)
 	_build_player_icon_option(column)
 
 func get_default_player_icon_texture() -> Texture2D:
@@ -579,38 +590,51 @@ func _option(column: VBoxContainer, heading: String, key: String, options: Array
 
 func make_theme() -> Theme:
 	var result := Theme.new()
+	_populate_theme(result)
+	return result
+
+func _populate_theme(result: Theme) -> void:
 	result.default_font_size = 25
-	var ink := Color("20383f")
-	var teal := Color("17687b")
-	var cream := Color("f3f7f5")
+	var dark := is_dark_mode()
+	var ink := Color("e6f0f4") if dark else Color("20383f")
+	var teal := Color("3bb9eb") if dark else Color("17687b")
+	var surface := Color("16222c") if dark else Color("f3f7f5")
+	var panel_border := Color("2e4a59") if dark else Color("c0d2d6")
+	var input_bg := Color("0f1820") if dark else Color.WHITE
+	var input_border := Color("365566") if dark else Color("a8bec4")
+	var placeholder := Color("7d98a6") if dark else Color("647a82")
+	var prog_bg := Color("223542") if dark else Color("d3e1df")
+	var prog_fill := Color("3bb9eb") if dark else Color("28a3bb")
 	for type in ["Label", "CheckBox", "OptionButton", "LineEdit"]:
 		result.set_color("font_color", type, ink)
+	result.set_color("font_hover_color", "CheckBox", ink)
+	result.set_color("font_pressed_color", "CheckBox", ink)
+	result.set_color("font_focus_color", "CheckBox", ink)
 	result.set_color("icon_pressed_color", "Button", Color.WHITE)
-	result.set_color("font_disabled_color", "Button", Color("7a8b91"))
+	result.set_color("font_disabled_color", "Button", Color("6c7f8a") if dark else Color("7a8b91"))
 	result.set_color("font_color", "TooltipLabel", Color.WHITE)
 	result.set_font_size("font_size", "TooltipLabel", 22)
 	result.set_color("font_color", "LineEdit", ink)
 	result.set_color("caret_color", "LineEdit", ink)
-	result.set_color("font_placeholder_color", "LineEdit", Color("647a82"))
-	result.set_stylebox("panel", "PanelContainer", _style(cream, Color("c0d2d6"), 18, 2, 20))
-	result.set_stylebox("panel", "AcceptDialog", _style(cream, teal, 18, 2, 20))
-	result.set_stylebox("panel", "TooltipPanel", _style(Color("163b48"), Color("51b7cf"), 10, 1, 14))
-	result.set_stylebox("normal", "LineEdit", _style(Color.WHITE, Color("a8bec4"), 10, 2, 12))
-	result.set_stylebox("focus", "LineEdit", _style(Color.WHITE, teal, 10, 3, 12))
-	var focus := _style(Color.TRANSPARENT, Color("20a7cb"), 12, 3, 0)
+	result.set_color("font_placeholder_color", "LineEdit", placeholder)
+	result.set_stylebox("panel", "PanelContainer", _style(surface, panel_border, 18, 2, 20))
+	result.set_stylebox("panel", "AcceptDialog", _style(surface, teal, 18, 2, 20))
+	result.set_stylebox("panel", "TooltipPanel", _style(Color("0e2430") if dark else Color("163b48"), Color("51b7cf"), 10, 1, 14))
+	result.set_stylebox("normal", "LineEdit", _style(input_bg, input_border, 10, 2, 12))
+	result.set_stylebox("focus", "LineEdit", _style(input_bg, teal, 10, 3, 12))
+	var focus := _style(Color.TRANSPARENT, Color("3bb9eb") if dark else Color("20a7cb"), 12, 3, 0)
 	result.set_stylebox("focus", "Button", focus)
 	result.set_stylebox("focus", "OptionButton", focus)
-	result.set_stylebox("background", "ProgressBar", _style(Color("d3e1df"), Color("d3e1df"), 6, 0, 0))
-	result.set_stylebox("fill", "ProgressBar", _style(Color("28a3bb"), Color("28a3bb"), 6, 0, 0))
+	result.set_stylebox("background", "ProgressBar", _style(prog_bg, prog_bg, 6, 0, 0))
+	result.set_stylebox("fill", "ProgressBar", _style(prog_fill, prog_fill, 6, 0, 0))
 	# Reuse Debora's pixel border and palette for functional controls.
 	for state in ["normal", "hover", "pressed", "disabled"]:
-		var tint := Color.WHITE
-		if state == "hover": tint = Color(1.15, 1.15, 1.15)
-		if state == "pressed": tint = Color(0.75, 0.75, 0.75)
+		var tint := Color(0.84, 0.90, 0.98) if dark else Color.WHITE
+		if state == "hover": tint = Color(1.0, 1.08, 1.15) if dark else Color(1.15, 1.15, 1.15)
+		if state == "pressed": tint = Color(0.65, 0.72, 0.80) if dark else Color(0.75, 0.75, 0.75)
 		result.set_stylebox(state, "Button", DeboraDesign.skin("button_gray" if state == "disabled" else "button_blue", tint, true))
 	for state in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color"]:
 		result.set_color(state, "Button", Color.WHITE)
-	return result
 
 func _style(background: Color, border: Color, radius: int, border_width: int, margin: int) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
