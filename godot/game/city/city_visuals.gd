@@ -48,6 +48,11 @@ const APARTMENT_PATHS := [
 	"res://assets/city/buildings/apartment_4.png",
 	"res://assets/city/buildings/apartment_5.png",
 ]
+const NPC_PATHS := [
+	"res://assets/chara/npc1.png",
+	"res://assets/chara/npc2.png",
+]
+const SIDEWALK_OFFSET := 0.38
 
 static var _used_rect_cache: Dictionary = {}
 
@@ -58,6 +63,9 @@ var _lake_anchors: Array[Vector2i] = []
 var _lake_tiles: Dictionary = {}
 var _tree_coords: Array[Vector2i] = []
 var _tree_tiles: Dictionary = {}
+var _npcs: Array[Dictionary] = []
+var _npc_rng := RandomNumberGenerator.new()
+var _npc_redraw_accum := 0.0
 var state: CityState
 var time_manager: TimeManager
 var origin := Vector2(1056, 1780)
@@ -70,16 +78,27 @@ var lots: Array[Dictionary] = []
 
 func _init() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_npc_rng.randomize()
 
 func _process(delta: float) -> void:
-	if state == null or state.projects.is_empty():
+	if state == null:
 		return
 	if time_manager != null and time_manager.paused:
 		return
-	_construction_anim_time += delta
-	var next_frame := int(floor(_construction_anim_time * 4.5)) % 4
-	if next_frame != _construction_frame:
-		_construction_frame = next_frame
+	var needs_redraw := false
+	if not state.projects.is_empty():
+		_construction_anim_time += delta
+		var next_frame := int(floor(_construction_anim_time * 4.5)) % 4
+		if next_frame != _construction_frame:
+			_construction_frame = next_frame
+			needs_redraw = true
+	if not _npcs.is_empty():
+		_update_npcs(delta)
+		_npc_redraw_accum += delta
+		if _npc_redraw_accum >= 0.033:
+			_npc_redraw_accum = 0.0
+			needs_redraw = true
+	if needs_redraw:
 		queue_redraw()
 
 func _get_sprite_entry(path: String) -> Dictionary:
@@ -159,10 +178,12 @@ func bind(city: CityState) -> void:
 	_lake_tiles.clear()
 	_tree_coords.clear()
 	_tree_tiles.clear()
+	_npcs.clear()
 	map_radius = _required_radius_for_city(city)
 	_generate_lots()
 	city.configure_lots(lots)
 	_rebuild_nature_layout()
+	_populate_npcs()
 	_next_population_expansion = city.population + POPULATION_GROWTH_PER_EXPANSION
 	city.changed.connect(_on_city_changed)
 	queue_redraw()
@@ -198,9 +219,100 @@ func expand_map() -> bool:
 	if state != null:
 		state.configure_lots(lots)
 		_rebuild_nature_layout()
+		_populate_npcs()
 	map_expanded.emit(map_radius)
 	queue_redraw()
 	return true
+
+func _road_lines() -> Array[int]:
+	var lines: Array[int] = []
+	var max_k := floori(float(map_radius) / float(BLOCK_STRIDE))
+	for k in range(-max_k, max_k + 1):
+		lines.append(k * BLOCK_STRIDE)
+	return lines
+
+func _populate_npcs() -> void:
+	var road_lines := _road_lines()
+	if road_lines.is_empty():
+		return
+	var target_count := clampi(floori(float(map_radius) * 3.0), 36, 110)
+	var limit := float(map_radius) - 0.5
+	while _npcs.size() < target_count:
+		var axis := _npc_rng.randi_range(0, 1)
+		var road_coord := road_lines[_npc_rng.randi_range(0, road_lines.size() - 1)]
+		var side := -1 if _npc_rng.randi_range(0, 1) == 0 else 1
+		var dir := -1 if _npc_rng.randi_range(0, 1) == 0 else 1
+		var along := _npc_rng.randf_range(-limit, limit)
+		var pos := Vector2(along, float(road_coord) + float(side) * SIDEWALK_OFFSET) if axis == 0 else Vector2(float(road_coord) + float(side) * SIDEWALK_OFFSET, along)
+		var next_turn := _next_intersection(along, dir)
+		_npcs.append({
+			"pos": pos,
+			"axis": axis,
+			"road_coord": road_coord,
+			"side": side,
+			"dir": dir,
+			"next_turn": next_turn,
+			"speed": _npc_rng.randf_range(0.55, 1.05),
+			"sprite_idx": _npc_rng.randi_range(0, NPC_PATHS.size() - 1),
+			"bob_phase": _npc_rng.randf_range(0.0, TAU),
+		})
+
+func _next_intersection(along: float, dir: int) -> int:
+	var stride := float(BLOCK_STRIDE)
+	if dir > 0:
+		return int(ceil(along / stride)) * BLOCK_STRIDE
+	return int(floor(along / stride)) * BLOCK_STRIDE
+
+func _update_npcs(delta: float) -> void:
+	var speed_mult := 1.0
+	if time_manager != null:
+		speed_mult = clampf(time_manager.get_game_speed_multiplier(), 0.35, 3.0)
+	var limit := float(map_radius) - 0.4
+	for npc in _npcs:
+		var pos: Vector2 = npc["pos"]
+		var axis: int = int(npc["axis"])
+		var dir: int = int(npc["dir"])
+		var side: int = int(npc["side"])
+		var road_coord: int = int(npc["road_coord"])
+		var next_turn: int = int(npc["next_turn"])
+		var step := float(npc["speed"]) * speed_mult * delta
+		npc["bob_phase"] = fmod(float(npc["bob_phase"]) + step * 11.0, TAU)
+		var along := pos.x if axis == 0 else pos.y
+		var new_along := along + float(dir) * step
+		var corner_side := -dir
+		var turn_target := float(next_turn) + float(corner_side) * SIDEWALK_OFFSET
+		var reached_corner := (dir > 0 and along <= turn_target and new_along >= turn_target) or (dir < 0 and along >= turn_target and new_along <= turn_target)
+		if reached_corner:
+			var inside_perp := absi(next_turn) <= map_radius - 1
+			var will_turn := inside_perp and (_npc_rng.randf() < 0.45 or absf(float(next_turn + dir * BLOCK_STRIDE)) > limit)
+			if will_turn:
+				var new_axis := 1 - axis
+				var new_road := next_turn
+				var new_side := corner_side
+				var new_dir := side
+				if absf(float(road_coord + new_dir * BLOCK_STRIDE)) > limit:
+					new_dir = -new_dir
+				var snapped_perp := float(road_coord) + float(side) * SIDEWALK_OFFSET
+				npc["axis"] = new_axis
+				npc["road_coord"] = new_road
+				npc["side"] = new_side
+				npc["dir"] = new_dir
+				npc["next_turn"] = road_coord + new_dir * BLOCK_STRIDE
+				npc["pos"] = Vector2(snapped_perp, float(new_road) + float(new_side) * SIDEWALK_OFFSET) if new_axis == 0 else Vector2(float(new_road) + float(new_side) * SIDEWALK_OFFSET, snapped_perp)
+				continue
+			npc["next_turn"] = next_turn + dir * BLOCK_STRIDE
+		if new_along > limit:
+			new_along = limit
+			npc["dir"] = -1
+			npc["next_turn"] = _next_intersection(new_along, -1)
+		elif new_along < -limit:
+			new_along = -limit
+			npc["dir"] = 1
+			npc["next_turn"] = _next_intersection(new_along, 1)
+		if axis == 0:
+			npc["pos"] = Vector2(new_along, float(road_coord) + float(side) * SIDEWALK_OFFSET)
+		else:
+			npc["pos"] = Vector2(float(road_coord) + float(side) * SIDEWALK_OFFSET, new_along)
 
 func _rebuild_nature_layout() -> void:
 	if state == null:
@@ -408,6 +520,9 @@ func _draw() -> void:
 		objects.append(item)
 	for coord in _tree_coords:
 		objects.append({"lot": {"x": coord.x, "y": coord.y}, "area": "tree"})
+	for npc in _npcs:
+		var npos: Vector2 = npc["pos"]
+		objects.append({"lot": {"x": npos.x, "y": npos.y}, "area": "npc", "npc": npc})
 	objects.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var ba := _structure_base(a)
 		var bb := _structure_base(b)
@@ -420,6 +535,8 @@ func _draw() -> void:
 		var base := _structure_base(item)
 		if area == "tree":
 			_tree(base + Vector2(0, 10), int(item.lot.x), int(item.lot.y))
+		elif area == "npc":
+			_draw_npc(base, item["npc"])
 		else:
 			_draw_structure(base, area, int(item.get("variant", 0)), bool(item.get("construction", false)), item.lot, false)
 	if placing and hovered != Vector2i(999, 999):
@@ -447,9 +564,27 @@ func _structure_base(item: Dictionary) -> Vector2:
 	var lot: Dictionary = item.lot
 	if area == "hall":
 		return point({"x": int(lot.x) - 1.0, "y": int(lot.y) - 1.0})
-	if area != "home" and area != "tree":
+	if area != "home" and area != "tree" and area != "npc":
 		return point({"x": int(lot.x) + 0.5, "y": int(lot.y) + 0.5})
 	return point(lot)
+
+func _draw_npc(base: Vector2, npc: Dictionary) -> void:
+	var idx := int(npc.get("sprite_idx", 0)) % NPC_PATHS.size()
+	var entry := _get_sprite_entry(NPC_PATHS[idx])
+	if entry.is_empty():
+		return
+	var src_size: Vector2 = entry["src_rect"].size
+	var target_h := 28.0
+	var target_w := target_h * (src_size.x / maxf(1.0, src_size.y))
+	var bob := absf(sin(float(npc.get("bob_phase", 0.0)))) * 3.0
+	var axis := int(npc.get("axis", 0))
+	var dir := int(npc.get("dir", 1))
+	var moving_left := (axis == 0 and dir < 0) or (axis == 1 and dir > 0)
+	draw_colored_polygon(PackedVector2Array([
+		base + Vector2(-7, 0), base + Vector2(0, -3.5), base + Vector2(7, 0), base + Vector2(0, 3.5)
+	]), Color(0.08, 0.14, 0.12, 0.28))
+	var dest := Rect2(Vector2(base.x - target_w * 0.5, base.y - target_h - bob), Vector2(target_w, target_h))
+	_draw_sprite_entry(entry, dest, moving_left, Color.WHITE)
 
 func _structure_sort_y(item: Dictionary) -> float:
 	# Exact isometric depth of the footprint center (origin.y + (cx + cy) * HALF_TILE.y).
