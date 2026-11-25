@@ -28,6 +28,7 @@ func _ready() -> void:
 	hud.theme = SettingsService.game_theme
 	return_dialog.theme = hud.theme
 	SettingsService.play_city_music(true)
+	SettingsService.start_city_ambience()
 	hud.investment_requested.connect(_invest)
 	hud.construction_requested.connect(_construct)
 	hud.housing_requested.connect(func(): _begin_placement("home"))
@@ -190,6 +191,7 @@ func _input(event: InputEvent) -> void:
 	if event.keycode == KEY_SPACE:
 		if not hud.has_open_panel():
 			time_manager.toggle_pause()
+			SettingsService.play_little_click()
 		get_viewport().set_input_as_handled()
 	elif event.keycode == KEY_ESCAPE:
 		if not hud.close_panels():
@@ -200,12 +202,15 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event.keycode in [KEY_1, KEY_KP_1]:
 		time_manager.set_speed(TimeManager.Speed.NORMAL)
+		SettingsService.play_speed_sfx(TimeManager.Speed.NORMAL)
 		get_viewport().set_input_as_handled()
 	elif event.keycode in [KEY_2, KEY_KP_2]:
 		time_manager.set_speed(TimeManager.Speed.FAST)
+		SettingsService.play_speed_sfx(TimeManager.Speed.FAST)
 		get_viewport().set_input_as_handled()
 	elif event.keycode in [KEY_3, KEY_KP_3]:
 		time_manager.set_speed(TimeManager.Speed.VERY_FAST)
+		SettingsService.play_speed_sfx(TimeManager.Speed.VERY_FAST)
 		get_viewport().set_input_as_handled()
 	elif event.keycode == KEY_C:
 		$Camera2D.reset_view()
@@ -250,6 +255,7 @@ func open_problem(event_id: String) -> void:
 	# City time keeps running at a reduced rate (1 month = 6 min) while any problem is open.
 	time_manager.set_challenge_active(true)
 	hud.set_problem_mode(true)
+	SettingsService.set_city_ambience_ducked(true)
 	SettingsService.play_problem_music(event_id, String(problem_data.get("category", EventDatabase.CATEGORY_COMMON)))
 	var popup := PROBLEM_SCENE.instantiate() as ProblemTemplate
 	popup.theme = hud.theme
@@ -399,11 +405,13 @@ func _restore_urgent_deadlines() -> void:
 		deadline_is_active = true
 
 func _on_event_triggered(runtime_event: Dictionary) -> void:
-	if String(runtime_event.get("category", "")) == EventManager.CATEGORY_URGENT:
+	var category := String(runtime_event.get("category", ""))
+	if category == EventManager.CATEGORY_URGENT:
 		time_manager.set_speed(TimeManager.Speed.NORMAL)
 		runtime_event["deadline_phase"] = "queued"
 		runtime_event["deadline_remaining_seconds"] = URGENT_DEADLINE_SECONDS
 		_activate_next_urgent_deadline()
+	SettingsService.play_problem_notice_sfx(category)
 	_refresh_problem_tabs()
 
 func _on_event_resolved(runtime_event: Dictionary) -> void:
@@ -416,6 +424,7 @@ func _on_event_resolved(runtime_event: Dictionary) -> void:
 func _on_event_expired(runtime_event: Dictionary) -> void:
 	var definition := event_database.get_event(String(runtime_event.get("event_id", "")))
 	city.apply_problem(definition, false, true)
+	SettingsService.play_feedback(false)
 	hud.show_notice(tr("Prazo encerrado: %s. Consulte os indicadores da cidade.") % tr(String(definition.get("title", "Problema"))))
 	if String(runtime_event.get("category", "")) == EventManager.CATEGORY_URGENT:
 		_activate_next_urgent_deadline()
@@ -463,6 +472,7 @@ func _close_current_problem() -> void:
 	_current_problem_runtime_event = {}
 	time_manager.set_challenge_active(false)
 	hud.set_problem_mode(false)
+	SettingsService.set_city_ambience_ducked(false)
 	SettingsService.play_city_music(false)
 	_refresh_problem_tabs()
 
@@ -486,11 +496,15 @@ func _on_menu_requested() -> void:
 	if not _current_problem_id.is_empty() or return_dialog.visible or pause_menu.visible or _modal != null or city.outcome != "playing":
 		return
 	hud.close_panels()
+	hud.set_pause_menu_open(true)
+	SettingsService.set_city_ambience_ducked(true)
 	time_manager.hold("menu")
 	pause_menu.open_menu()
 
 func _on_resume_requested() -> void:
 	pause_menu.close_menu()
+	hud.set_pause_menu_open(false)
+	SettingsService.set_city_ambience_ducked(false)
 	time_manager.release("menu")
 
 func _on_panels_changed(is_open: bool) -> void:
@@ -514,6 +528,7 @@ func _on_return_canceled() -> void:
 	pause_menu.exit_button.grab_focus()
 
 func _on_return_confirmed() -> void:
+	SettingsService.stop_city_ambience()
 	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 func _on_game_day(day: int, month: int, year: int) -> void:
@@ -525,6 +540,10 @@ func _on_game_month(_month: int, _year: int) -> void:
 
 func _invest(area: String, amount: float) -> void:
 	var error := city.invest(area, amount)
+	if error.is_empty():
+		SettingsService.play_sfx(SettingsService.SFX_SUCCESS, -5.0, 1.12)
+	else:
+		SettingsService.play_little_click(0.76)
 	hud.show_notice(tr(error) if not error.is_empty() else tr("Investimento aplicado em %s.") % tr(GameRules.AREA_NAMES[area]))
 
 func _construct(area: String) -> void:
@@ -537,12 +556,15 @@ func _place_building(lot: Dictionary) -> void:
 	var area := _placement_area
 	var error := city.place_home(lot) if area == "home" else city.construct(area, index, lot)
 	if not error.is_empty():
+		SettingsService.play_little_click(0.76)
 		_placement_text.text = tr(error) + " · " + tr("Escolha outro lote ou cancele.")
 		return
+	SettingsService.play_building_sfx()
 	_cancel_placement()
 	hud.show_notice(tr("Moradia construída. A posição foi registrada na cidade.") if area == "home" else tr("Obra iniciada: %s. Conclusão em 20 dias.") % tr(GameRules.BUILDING_NAMES[area]))
 
 func _on_building_completed(project: Dictionary) -> void:
+	SettingsService.play_sfx(SettingsService.SFX_SUCCESS, -4.0, 1.08)
 	hud.show_notice(tr("Obra concluída: %s. Serviços e reputação atualizados.") % tr(GameRules.BUILDING_NAMES[project.area]))
 
 func _on_housing_space_needed() -> void:
@@ -554,8 +576,10 @@ func _skip_to_next() -> void:
 		return
 	hud.close_panels()
 	if time_manager.paused:
+		SettingsService.play_little_click(0.76)
 		hud.show_notice(tr("Retome o tempo antes de avançar até uma ocorrência."))
 		return
+	SettingsService.play_sfx(SettingsService.SFX_SPEED_VERY_FAST, -2.0, 1.1)
 	time_manager.skip_until_next_event(func(): return event_manager.has_active_event() or city.outcome != "playing")
 	if event_manager.has_active_event() and _modal == null:
 		open_problem(String(event_manager.active_events[0].event_id))
@@ -598,6 +622,7 @@ func _show_answer_feedback(definition: Dictionary, correct: bool) -> void:
 func _on_campaign_event(kind: String) -> void:
 	if _modal != null:
 		_close_dialog()
+	SettingsService.play_feedback(kind == "reelected" or kind == "completed")
 	if kind != "reelected":
 		time_manager.hold("ended")
 		event_manager.set_event_trigger_enabled(false)

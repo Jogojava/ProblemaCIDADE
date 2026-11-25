@@ -58,8 +58,11 @@ msgstr "Medium"
 msgid "Difícil"
 msgstr "Hard"
 
-msgid "Fácil: 65% de reputação inicial. Médio: 55%. Difícil: 45%. A dificuldade também altera ganhos, perdas, orçamento e frequência de problemas."
-msgstr "Easy: 65% initial reputation. Medium: 55%. Hard: 45%. Difficulty also changes gains, losses, budget and problem frequency."
+msgid "Fácil: 60% de reputação inicial (mais orçamento, sem problemas comuns). Médio: 52% (equilibrado). Difícil: 42% (menor orçamento e penalidades maiores)."
+msgstr "Easy: 60% starting reputation (larger budget, no common problems). Medium: 52% (balanced). Hard: 42% (smaller budget and harsher penalties)."
+
+msgid "em obra"
+msgstr "under construction"
 
 msgid "Objetivo: reeleição com pelo menos 50% de reputação após quatro anos; depois, concluir o segundo mandato."
 msgstr "Goal: win re-election with at least 50% reputation after four years, then complete the second term."
@@ -376,11 +379,56 @@ msgstr "Choose a speed or advance to the next event. Space pauses the game; Esc 
 msgid "1 mês = 6 min"
 msgstr "1 month = 6 min"
 
+msgid "1 mês = 1 min"
+msgstr "1 month = 1 min"
+
+msgid "1 mês = 30 s"
+msgstr "1 month = 30 s"
+
+msgid "1 mês = 10 s"
+msgstr "1 month = 10 s"
+
 msgid "%d dia"
 msgstr "%d day"
 
 msgid "%d dias"
 msgstr "%d days"
+
+msgid "Ícone do jogador"
+msgstr "Player icon"
+
+msgid "Importar PNG"
+msgstr "Import PNG"
+
+msgid "Padrão"
+msgstr "Default"
+
+msgid "Ícone (PNG)"
+msgstr "Icon (PNG)"
+
+msgid "Importar uma imagem PNG para o botão de reputação."
+msgstr "Import a PNG image for the reputation button."
+
+msgid "Escolher ícone do jogador (PNG)"
+msgstr "Choose player icon (PNG)"
+
+msgid "Imagens PNG"
+msgstr "PNG images"
+
+msgid "Ícone do jogador atualizado."
+msgstr "Player icon updated."
+
+msgid "Nenhum arquivo selecionado."
+msgstr "No file selected."
+
+msgid "Selecione um arquivo no formato PNG."
+msgstr "Select a PNG file."
+
+msgid "Não foi possível carregar a imagem PNG selecionada."
+msgstr "Could not load the selected PNG image."
+
+msgid "Não foi possível salvar o ícone do jogador."
+msgstr "Could not save the player icon."
 
 msgid "Iniciar mandato"
 msgstr "Start term"

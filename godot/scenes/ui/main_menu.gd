@@ -9,13 +9,20 @@ var _active_popup: Control
 
 func _ready() -> void:
 	theme = SettingsService.game_theme
+	SettingsService.stop_city_ambience()
 	SettingsService.play_main_menu_music()
+	$SoundButton.set_meta("sfx", "none")
 	$SoundButton.pressed.connect(_on_sound_pressed)
+	$ExitButton.set_meta("sfx", "little")
 	$ExitButton.pressed.connect(_on_exit_pressed)
 	quit_confirmation.confirmed.connect(func() -> void: get_tree().quit())
 	quit_confirmation.ok_button_text = "Sair"
 	quit_confirmation.cancel_button_text = "Continuar jogando"
 	_sync_sound_button()
+	$Menu/VBoxContainer/jogar.set_meta("sfx", "big")
+	$Menu/VBoxContainer/continuar.set_meta("sfx", "big")
+	$Menu/VBoxContainer/opcoes.set_meta("sfx", "big")
+	$Menu/VBoxContainer/creditos.set_meta("sfx", "big")
 	$Menu/VBoxContainer/jogar.pressed.connect(_on_btjogar_pressed)
 	$Menu/VBoxContainer/continuar.pressed.connect(_on_btcontinuar_pressed)
 	$Menu/VBoxContainer/opcoes.pressed.connect(_on_btopcoes_pressed)
@@ -23,6 +30,7 @@ func _ready() -> void:
 	$Menu/VBoxContainer/continuar.disabled = false
 	$Menu/VBoxContainer/continuar.text = "Partidas salvas"
 	$Menu/VBoxContainer/continuar.tooltip_text = "Abrir slots de salvamento."
+	SettingsService.attach_button_sfx(self)
 	SettingsService.changed.connect(_apply_design)
 	_apply_design()
 
@@ -60,7 +68,7 @@ func _on_btjogar_pressed() -> void:
 		difficulty.add_item(tr(item))
 	difficulty.selected = 1
 	column.add_child(difficulty)
-	column.add_child(UIFactory.label(tr("Fácil: 65% de reputação inicial. Médio: 55%. Difícil: 45%. A dificuldade também altera ganhos, perdas, orçamento e frequência de problemas."), 23))
+	column.add_child(UIFactory.label(tr("Fácil: 60% de reputação inicial (mais orçamento, sem problemas comuns). Médio: 52% (equilibrado). Difícil: 42% (menor orçamento e penalidades maiores)."), 23))
 	column.add_child(UIFactory.label(tr("Objetivo: reeleição com pelo menos 50% de reputação após quatro anos; depois, concluir o segundo mandato."), 23))
 	column.add_child(UIFactory.button(tr("Começar"), func():
 		SaveManager.start_new(city_name.text, ["easy", "medium", "hard"][difficulty.selected])
@@ -109,6 +117,7 @@ func _close_active_popup() -> void:
 func _on_sound_pressed() -> void:
 	SettingsService.update("muted", not bool(SettingsService.values.muted))
 	_sync_sound_button()
+	SettingsService.play_little_click()
 
 func _sync_sound_button() -> void:
 	var master := AudioServer.get_bus_index("Master")
@@ -147,3 +156,38 @@ func _apply_design() -> void:
 	$Menu/VBoxContainer/continuar.text = "Continuar"
 	$Menu/VBoxContainer.add_theme_constant_override("separation", 8)
 	_sync_sound_button()
+	_sync_exit_button()
+
+func _sync_exit_button() -> void:
+	$ExitButton.tooltip_text = tr("Sair")
+	$ExitButton.text = ""
+	$ExitButton.custom_minimum_size = Vector2(100, 83)
+	$ExitButton.offset_left = -128
+	$ExitButton.offset_top = -111
+	$ExitButton.offset_right = -28
+	$ExitButton.offset_bottom = -28
+	$ExitButton.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var raw := load("res://assets/ui/hud/sair.png") as Texture2D
+	if raw == null:
+		return
+	var tex: Texture2D = raw
+	var img := raw.get_image()
+	if img != null:
+		var used := img.get_used_rect()
+		if used.size.x > 0 and used.size.y > 0:
+			var atlas := AtlasTexture.new()
+			atlas.atlas = raw
+			atlas.region = Rect2(used.position, used.size)
+			tex = atlas
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var style := StyleBoxTexture.new()
+		style.texture = tex
+		var tint := Color.WHITE
+		if state == "hover": tint = Color(1.15, 1.15, 1.15)
+		if state == "pressed": tint = Color(0.75, 0.75, 0.75)
+		if state == "disabled": tint = Color(0.55, 0.55, 0.55, 0.7)
+		style.modulate_color = tint
+		$ExitButton.add_theme_stylebox_override(state, style)
+	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_disabled_color"]:
+		$ExitButton.add_theme_color_override(state, Color.TRANSPARENT)
+	$ExitButton.add_theme_constant_override("outline_size", 0)

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://urj72jqu74f2"
-path="res://.godot/imported/pixilart-drawing.png-bb04a02d4ad836e1db2c1b6e64a0af9b.ctex"
+uid="uid://ck1q26x1bh4g8"
+path="res://.godot/imported/sair.png-d84248a0f60abc854afaf1562a3a23b9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/pixilart-drawing.png"
-dest_files=["res://.godot/imported/pixilart-drawing.png-bb04a02d4ad836e1db2c1b6e64a0af9b.ctex"]
+source_file="res://assets/ui/hud/sair.png"
+dest_files=["res://.godot/imported/sair.png-d84248a0f60abc854afaf1562a3a23b9.ctex"]
 
 [params]
 

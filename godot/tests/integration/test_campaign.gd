@@ -98,7 +98,7 @@ func _answer_all() -> void:
 			check(false, "Problema deve abrir: " + id)
 			continue
 		check(not game.time_manager.paused and game.time_manager.challenge_active, "Problemas mantêm o calendário rodando em velocidade reduzida.")
-		check(is_equal_approx(game.time_manager.get_game_speed_multiplier(), 0.25), "Velocidade durante problemas é 1 mês = 6 min (0,25x da normal).")
+		check(is_equal_approx(game.time_manager.get_game_speed_multiplier(), 60.0 / 360.0), "Velocidade durante problemas é 1 mês = 6 min.")
 		var before: int = game.city.solved_count
 		var answer := String(definition.get("correct_answer", ""))
 		var payload: Dictionary = definition.get("payload", {})

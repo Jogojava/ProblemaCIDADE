@@ -424,7 +424,7 @@ button_group = SubResource("speed")
 button_pressed = true
 icon = ExtResource("icon_play")
 expand_icon = true
-tooltip_text = "Velocidade normal (1) • 1 mês = 1 min 30 s"
+tooltip_text = "Velocidade normal (1) • 1 mês = 1 min"
 
 [node name="FastButton" type="Button" parent="TimeDock/TimeControls"]
 custom_minimum_size = Vector2(84, 84)
@@ -434,7 +434,7 @@ toggle_mode = true
 button_group = SubResource("speed")
 icon = ExtResource("icon_fast")
 expand_icon = true
-tooltip_text = "Velocidade rápida (2) • 1 mês = 45 s"
+tooltip_text = "Velocidade rápida (2) • 1 mês = 30 s"
 
 [node name="VeryFastButton" type="Button" parent="TimeDock/TimeControls"]
 custom_minimum_size = Vector2(84, 84)
@@ -444,13 +444,13 @@ toggle_mode = true
 button_group = SubResource("speed")
 icon = ExtResource("icon_very_fast")
 expand_icon = true
-tooltip_text = "Velocidade muito rápida (3) • 1 mês = 15 s"
+tooltip_text = "Velocidade muito rápida (3) • 1 mês = 10 s"
 
 [node name="StatusLabel" type="Label" parent="TimeDock"]
 layout_mode = 2
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 26
-text = "1 mês = 1 min 30 s"
+text = "1 mês = 1 min"
 
 [node name="ReputationButton" type="Button" parent="."]
 layout_mode = 1
