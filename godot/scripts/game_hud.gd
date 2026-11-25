@@ -53,6 +53,7 @@ var _urgent_event_id := ""
 var _hovered_category := ""
 var _sidebar_expanded := false
 var _problem_mode := false
+var _pause_menu_open := false
 var _sidebar_panel: PanelContainer
 var _problem_list: VBoxContainer
 var _housing_button: Button
@@ -62,12 +63,18 @@ var _chart: ProjectionChart
 var _projection_key := "funds"
 var _city_label: Label
 var _notice_label: Label
+var _default_reputation_icon: Texture2D
+var _reputation_avatar_rect: TextureRect
 
 func _ready() -> void:
 	_setup_sidebar()
 	_setup_city_panels()
 	_apply_layout()
 	menu_button.pressed.connect(func(): menu_requested.emit())
+	pause_button.set_meta("sfx", "none")
+	normal_button.set_meta("sfx", "none")
+	fast_button.set_meta("sfx", "none")
+	very_fast_button.set_meta("sfx", "none")
 	pause_button.pressed.connect(_on_pause_pressed)
 	normal_button.pressed.connect(_on_speed_pressed.bind(TimeManager.Speed.NORMAL))
 	fast_button.pressed.connect(_on_speed_pressed.bind(TimeManager.Speed.FAST))
@@ -96,7 +103,58 @@ func _ready() -> void:
 	low_button.mouse_entered.connect(_on_category_mouse_entered.bind(EventDatabase.CATEGORY_OPTIONAL))
 	for panel in [investment_panel, statistics_panel]:
 		panel.get_node("Content/Header/CloseButton").pressed.connect(close_panels)
+	_default_reputation_icon = reputation_button.icon
+	_reputation_avatar_rect = TextureRect.new()
+	_reputation_avatar_rect.name = "CustomAvatar"
+	_reputation_avatar_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_reputation_avatar_rect.offset_left = 7.0
+	_reputation_avatar_rect.offset_top = 7.0
+	_reputation_avatar_rect.offset_right = -7.0
+	_reputation_avatar_rect.offset_bottom = -7.0
+	_reputation_avatar_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_reputation_avatar_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_reputation_avatar_rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_reputation_avatar_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_reputation_avatar_rect.hide()
+	reputation_button.add_child(_reputation_avatar_rect)
+	SettingsService.changed.connect(_refresh_reputation_icon)
+	_refresh_reputation_icon()
 	set_city_indicators()
+
+func _exit_tree() -> void:
+	if SettingsService.changed.is_connected(_refresh_reputation_icon):
+		SettingsService.changed.disconnect(_refresh_reputation_icon)
+
+func _refresh_reputation_icon() -> void:
+	if not is_instance_valid(reputation_button):
+		return
+	var custom_icon := SettingsService.get_player_icon_texture()
+	if custom_icon != null:
+		reputation_button.icon = null
+		_reputation_avatar_rect.offset_left = 4.0
+		_reputation_avatar_rect.offset_top = 4.0
+		_reputation_avatar_rect.offset_right = -4.0
+		_reputation_avatar_rect.offset_bottom = -4.0
+		_reputation_avatar_rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		_reputation_avatar_rect.texture = custom_icon
+		_reputation_avatar_rect.show()
+	else:
+		var default_icon := SettingsService.get_default_player_icon_texture()
+		if default_icon != null:
+			reputation_button.icon = null
+			_reputation_avatar_rect.offset_left = 0.0
+			_reputation_avatar_rect.offset_top = 0.0
+			_reputation_avatar_rect.offset_right = 0.0
+			_reputation_avatar_rect.offset_bottom = 0.0
+			_reputation_avatar_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			_reputation_avatar_rect.texture = default_icon
+			_reputation_avatar_rect.show()
+		else:
+			_reputation_avatar_rect.hide()
+			_reputation_avatar_rect.texture = null
+			reputation_button.icon = _default_reputation_icon
+			reputation_button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			reputation_button.add_theme_constant_override("icon_max_width", 60)
 
 func bind_time_manager(manager: TimeManager) -> void:
 	_time_manager = manager
@@ -315,7 +373,7 @@ func _update_sidebar_layout() -> void:
 
 func _update_urgent_alert(runtime_event: Dictionary) -> void:
 	_urgent_event_id = String(runtime_event.get("event_id", ""))
-	problem_tabs.visible = not _urgent_event_id.is_empty() and not _problem_mode
+	problem_tabs.visible = not _urgent_event_id.is_empty() and not _problem_mode and not _pause_menu_open
 	if _urgent_event_id.is_empty():
 		urgent_open_button.text = tr("Problema urgente")
 		return
@@ -333,6 +391,10 @@ func _update_urgent_alert(runtime_event: Dictionary) -> void:
 	urgent_progress.max_value = 90.0
 	urgent_progress.value = remaining
 	urgent_open_button.disabled = _problem_mode
+
+func set_pause_menu_open(open: bool) -> void:
+	_pause_menu_open = open
+	_update_urgent_alert(_find_urgent_event())
 
 func set_problem_mode(active: bool) -> void:
 	_problem_mode = active
@@ -454,10 +516,12 @@ func _refresh_date() -> void:
 func _on_pause_pressed() -> void:
 	if _time_manager != null:
 		_time_manager.toggle_pause()
+		SettingsService.play_little_click()
 
 func _on_speed_pressed(speed: int) -> void:
 	if _time_manager != null:
 		_time_manager.set_speed(speed)
+		SettingsService.play_speed_sfx(speed)
 
 func _on_paused_changed(paused: bool) -> void:
 	pause_button.icon = _play_icon if paused else _pause_icon
@@ -482,11 +546,11 @@ func _refresh_status() -> void:
 		return
 	match _time_manager.current_speed:
 		TimeManager.Speed.NORMAL:
-			status_label.text = tr("1 mês = 1 min 30 s")
+			status_label.text = tr("1 mês = 1 min")
 		TimeManager.Speed.FAST:
-			status_label.text = tr("1 mês = 45 s")
+			status_label.text = tr("1 mês = 30 s")
 		TimeManager.Speed.VERY_FAST:
-			status_label.text = tr("1 mês = 15 s")
+			status_label.text = tr("1 mês = 10 s")
 
 func _setup_sidebar() -> void:
 	theme = SettingsService.game_theme
@@ -537,6 +601,7 @@ func _setup_city_panels() -> void:
 	_notice_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var skip := UIFactory.button("", func(): skip_requested.emit(), tr("Até a próxima ocorrência (Enter): avançar os dias até o próximo problema, mantendo receitas, obras e eleições."))
 	skip.name = "SkipButton"
+	skip.set_meta("sfx", "none")
 	skip.custom_minimum_size = Vector2(84, 84)
 	skip.icon = preload("res://assets/ui/hud/skip_next.svg")
 	skip.expand_icon = true
@@ -591,6 +656,15 @@ func _setup_city_panels() -> void:
 	$StatisticsPanel.offset_bottom = 370
 	$StatisticsPanel/Content.add_theme_constant_override("separation", 10)
 	$StatisticsPanel/Content/Header/Title.add_theme_font_size_override("font_size", 32)
+	var stats_header := $StatisticsPanel/Content/Header as HBoxContainer
+	var icon_button := UIFactory.button(tr("Ícone (PNG)"), func() -> void:
+		SettingsService.open_player_icon_picker(self, func(error: String) -> void:
+			show_notice(tr(error) if not error.is_empty() else tr("Ícone do jogador atualizado."))))
+	icon_button.name = "ImportPlayerIconButton"
+	icon_button.custom_minimum_size = Vector2(168, 48)
+	icon_button.tooltip_text = tr("Importar uma imagem PNG para o botão de reputação.")
+	stats_header.add_child(icon_button)
+	stats_header.move_child(icon_button, maxi(0, stats_header.get_child_count() - 2))
 	var selector := OptionButton.new()
 	for heading in ["Saldo", "Reputação", "Educação", "Saúde", "Segurança", "Desemprego", "Fome", "Saneamento", "Cultura", "Assistência social"]:
 		selector.add_item(tr(heading))
@@ -630,13 +704,26 @@ func refresh_city() -> void:
 	$InvestmentPanel/Content/EmptyBalance.text = tr("Escolha o serviço. Para construir, selecione uma área contínua de quatro lotes no mapa. Obras: %d/3.") % _city.projects.size()
 	if not _city.has_required_buildings():
 		$InvestmentPanel/Content/EmptyBalance.text += "\n" + tr("Construa ao menos %d instalação(ões) para destravar o crescimento de reputação e população.") % _city.required_buildings()
+	var built_counts: Dictionary = {}
+	for building in _city.buildings:
+		var b_area := String(building.get("area", ""))
+		built_counts[b_area] = int(built_counts.get(b_area, 0)) + 1
+	var building_in_progress: Dictionary = {}
+	for project in _city.projects:
+		var p_area := String(project.get("area", ""))
+		building_in_progress[p_area] = int(building_in_progress.get(p_area, 0)) + 1
 	for area in GameRules.AREAS:
 		var cell_name: String = {"education": "Education", "health": "Health", "water": "Water", "security": "Security", "culture": "Culture", "social": "Social"}[area]
 		var cell := $InvestmentPanel/Content/Categories.get_node(cell_name + "Cell")
 		var button := cell.get_node(cell_name + "Button") as Button
+		var label := cell.get_node("Label") as Label
+		var count := int(built_counts.get(area, 0))
+		var in_progress := int(building_in_progress.get(area, 0))
+		var area_name := tr(GameRules.AREA_NAMES[area])
+		label.text = "%s (%d + %d)" % [area_name, count, in_progress] if in_progress > 0 else "%s (%d)" % [area_name, count]
 		button.disabled = _city.outcome != "playing"
 		button.text = "%.0f/100" % float(_city.indicators[area])
-		button.tooltip_text = "%s · %.0f/100" % [tr(GameRules.AREA_NAMES[area]), float(_city.indicators[area])]
+		button.tooltip_text = "%s · %.0f/100 · %s: %d%s" % [area_name, float(_city.indicators[area]), tr(GameRules.BUILDING_NAMES[area]), count, (" (+%d " + tr("em obra") + ")") % in_progress if in_progress > 0 else ""]
 	var description := tr("Mês %d/96 · %d respostas corretas em %d problemas · %d expirados.") % [_city.completed_months, _city.correct_count, _city.solved_count, _city.expired_count]
 	$StatisticsPanel/Content/Description.text = description
 	var next_funds: Dictionary = _city.projection("funds")

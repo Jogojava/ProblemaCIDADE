@@ -38,6 +38,7 @@ func _ready() -> void:
 	_apply_popup_styles()
 	var option_buttons: Array[Button] = _get_option_buttons()
 	for index in range(option_buttons.size()):
+		option_buttons[index].set_meta("sfx", "none")
 		option_buttons[index].pressed.connect(_on_option_pressed.bind(index))
 	$Center/Panel/Margin/Content/Body/ProblemTools/BoardButton.pressed.connect(_show_board)
 	$Center/Panel/Margin/Content/Body/ProblemTools/CalculatorButton.pressed.connect(_show_calculator)
@@ -47,7 +48,9 @@ func _ready() -> void:
 	$CalculatorOverlay/Center/Panel/Margin/Content/Header/CloseButton.pressed.connect(_hide_calculator)
 	for key_button in calculator_keys.get_children():
 		if key_button is Button:
+			key_button.set_meta("sfx", "little")
 			key_button.pressed.connect(_on_calculator_key_pressed.bind(key_button.text))
+	submit_button.set_meta("sfx", "none")
 	submit_button.pressed.connect(_submit_typed_answer)
 	answer_input.text_submitted.connect(func(_text: String): _submit_typed_answer())
 

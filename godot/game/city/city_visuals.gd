@@ -149,7 +149,7 @@ func _should_flip_building(lot: Dictionary, area: String, sprite_path: String = 
 			flip = false
 		else:
 			flip = posmod(absi(lx * 7 + ly * 11), 2) == 1
-	if area == "security" or area == "water" or sprite_path.ends_with("/house_2.png"):
+	if area == "security" or area == "water" or sprite_path.ends_with("/house_1.png") or sprite_path.ends_with("/house_2.png") or sprite_path.ends_with("/house_3.png") or sprite_path.ends_with("/house_5.png"):
 		return not flip
 	return flip
 

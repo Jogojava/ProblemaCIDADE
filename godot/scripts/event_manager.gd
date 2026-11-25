@@ -44,6 +44,7 @@ var _event_database: Node = null
 
 var _last_scheduled_month: int = -1
 var _last_scheduled_year: int = -1
+var _category_period_plan: Dictionary = {}
 
 func _ready() -> void:
 	_rng.randomize()
@@ -165,9 +166,13 @@ func _create_month_schedule(month: int, year: int) -> void:
 		CATEGORY_URGENT: 0
 	}
 
-	var optional_amount := optional_events_per_month
-	var common_amount := common_events_per_month
-	var important_amount := important_events_per_month
+	var abs_month := maxi(0, (year - 1) * 12 + (month - 1))
+	var optional_amount := _decide_period_amount(CATEGORY_OPTIONAL, optional_events_per_month, 3, abs_month)
+	var common_amount := _decide_period_amount(CATEGORY_COMMON, common_events_per_month, 2, abs_month)
+	var important_amount := _decide_period_amount(CATEGORY_IMPORTANT, important_events_per_month, 3, abs_month)
+	var urgent_amount := 0
+	if not _has_urgent_for_month(month, year):
+		urgent_amount = _decide_period_amount(CATEGORY_URGENT, URGENT_EVENTS_PER_MONTH, 3, abs_month)
 	var min_day_floor := 1
 
 	if _should_schedule_mandatory_first_event(month, year):
@@ -186,13 +191,14 @@ func _create_month_schedule(month: int, year: int) -> void:
 		created_counts[first_category] = int(created_counts.get(first_category, 0)) + 1
 		event_scheduled.emit(FIRST_GAME_EVENT_ID, first_category, FIRST_GAME_EVENT_DAY, month, year)
 		min_day_floor = FIRST_GAME_EVENT_DAY + 1
+		_category_period_plan[first_category] = {"period": 0, "chosen_offset": 0}
 		match first_category:
 			CATEGORY_OPTIONAL:
-				optional_amount = maxi(0, optional_amount - 1)
+				optional_amount = 0
 			CATEGORY_COMMON:
-				common_amount = maxi(0, common_amount - 1)
+				common_amount = 0
 			CATEGORY_IMPORTANT:
-				important_amount = maxi(0, important_amount - 1)
+				important_amount = 0
 
 	_schedule_category(
 		CATEGORY_OPTIONAL,
@@ -229,7 +235,7 @@ func _create_month_schedule(month: int, year: int) -> void:
 
 	_schedule_category(
 		CATEGORY_URGENT,
-		URGENT_EVENTS_PER_MONTH if not _has_urgent_for_month(month, year) else 0,
+		urgent_amount,
 		maxi(min_day_for_urgent, min_day_floor),
 		max_day_for_urgent,
 		month,
@@ -239,6 +245,21 @@ func _create_month_schedule(month: int, year: int) -> void:
 	)
 
 	monthly_schedule_created.emit(month, year, created_counts)
+
+func _decide_period_amount(category: String, max_per_month: int, period_months: int, abs_month: int) -> int:
+	if max_per_month <= 0:
+		return 0
+	var safe_period := maxi(1, period_months)
+	var period_index := floori(float(abs_month) / float(safe_period))
+	var offset_in_period := abs_month % safe_period
+	var plan: Dictionary = _category_period_plan.get(category, {})
+	if int(plan.get("period", -1)) != period_index:
+		plan = {
+			"period": period_index,
+			"chosen_offset": _rng.randi_range(offset_in_period, safe_period - 1)
+		}
+		_category_period_plan[category] = plan
+	return 1 if offset_in_period == int(plan.get("chosen_offset", 0)) else 0
 
 func _should_schedule_mandatory_first_event(month: int, year: int) -> bool:
 	if month != 1 or year != 1:
@@ -389,6 +410,7 @@ func clear_all() -> void:
 	expired_events.clear()
 	_last_scheduled_month = -1
 	_last_scheduled_year = -1
+	_category_period_plan.clear()
 
 func get_save_data() -> Dictionary:
 	return {
@@ -398,7 +420,8 @@ func get_save_data() -> Dictionary:
 		"resolved_events": resolved_events,
 		"expired_events": expired_events,
 		"last_scheduled_month": _last_scheduled_month,
-		"last_scheduled_year": _last_scheduled_year
+		"last_scheduled_year": _last_scheduled_year,
+		"category_period_plan": _category_period_plan.duplicate(true)
 	}
 
 func load_save_data(data: Dictionary) -> void:
@@ -409,6 +432,9 @@ func load_save_data(data: Dictionary) -> void:
 	expired_events.assign(data.get("expired_events", []))
 	_last_scheduled_month = int(data.get("last_scheduled_month", -1))
 	_last_scheduled_year = int(data.get("last_scheduled_year", -1))
+	_category_period_plan.clear()
+	if data.get("category_period_plan") is Dictionary:
+		_category_period_plan = (data["category_period_plan"] as Dictionary).duplicate(true)
 	_ensure_database_content_for_loaded_state()
 
 func _ensure_database_content_for_loaded_state() -> void:

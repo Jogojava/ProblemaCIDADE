@@ -1,7 +1,7 @@
 [gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/creditos_script.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://assets/ui/pixilart-drawing.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/ui/fundoAtualizada.png" id="2_background"]
 [ext_resource type="Texture2D" path="res://assets/ui/credits/pato_jogos_logo.jpg" id="3_logo"]
 [ext_resource type="Texture2D" path="res://assets/ui/credits/beatriz.jpg" id="4_beatriz"]
 [ext_resource type="Texture2D" path="res://assets/ui/credits/camilo.png" id="5_camilo"]
