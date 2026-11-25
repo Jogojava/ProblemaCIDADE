@@ -55,6 +55,9 @@ const NPC_PATHS := [
 	"res://assets/chara/npc4.png",
 	"res://assets/chara/npc5.png",
 	"res://assets/chara/npc6.png",
+	"res://assets/chara/npc7.png",
+	"res://assets/chara/npc8.png",
+	"res://assets/chara/npc9.png",
 ]
 const VEHICLE_SPECS := [
 	{"path": "res://assets/vehicles/car_1.png", "width": 44.0, "min_speed": 1.65, "max_speed": 2.35},
