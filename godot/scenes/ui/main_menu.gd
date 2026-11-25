@@ -147,13 +147,13 @@ func _apply_design() -> void:
 					logo_rect.texture = atlas
 	var portuguese := not String(SettingsService.values.locale).begins_with("en")
 	var names := ["jogar", "continuar", "opcoes", "creditos"]
-	var art := ["play", "continue", "options", "credits"]
-	var blanks := ["blue", "gray", "green", "yellow"]
+	var art_pt := ["play", "continuar", "options", "credits"]
+	var art_en := ["playeng", "continueeng", "optionseng", "creditseng"]
 	for index in range(names.size()):
 		var control: Button = $Menu/VBoxContainer.get_node(names[index])
 		control.custom_minimum_size = Vector2(440, 104)
-		DeboraDesign.button(control, art[index] if portuguese else "button_" + blanks[index], portuguese)
-	$Menu/VBoxContainer/continuar.text = "Continuar"
+		DeboraDesign.button(control, art_pt[index] if portuguese else art_en[index], true)
+	$Menu/VBoxContainer/continuar.text = "Continuar" if portuguese else "Continue"
 	$Menu/VBoxContainer.add_theme_constant_override("separation", 8)
 	_sync_sound_button()
 	_sync_exit_button()

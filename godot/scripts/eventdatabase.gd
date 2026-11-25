@@ -113,6 +113,7 @@ func register_default_problems() -> void:
 		},
 		"juros_bancos": {
 			"title": "Juros pelo meu milhão",
+			"image": "res://assets/problems/bancos.png",
 			"description": "Um empréstimo de R$ 1 milhão será quitado em 24 meses. O Banco Grotesco cobra juros simples de 25% ao ano; o NuhBanho cobra juros compostos de 20% ao ano. Qual banco custa menos ao final de dois anos?",
 			"category": CATEGORY_COMMON,
 			"interaction_type": INTERACTION_CHOICE,
@@ -129,6 +130,7 @@ func register_default_problems() -> void:
 		},
 		"rota_medicamentos": {
 			"title": "MedicaMOVImentos",
+			"image": "res://assets/problems/remedios.png",
 			"description": "A Rota A tem 120 km, média de 60 km/h e custo de R$ 600. A Rota B tem 90 km, média de 60 km/h e custo de R$ 800. Some 30 minutos para carga e descarga. Escolha uma rota e compare tempo e custo.",
 			"category": CATEGORY_IMPORTANT,
 			"interaction_type": INTERACTION_CHOICE,
@@ -163,6 +165,7 @@ func register_default_problems() -> void:
 		},
 		"verba_imss": {
 			"title": "Verba IMSS",
+			"image": "res://assets/problems/velhoimss.png",
 			"description": "25% da população continua elegível ao IMSS. A população passou de 25.932 para 28.484 pessoas. O orçamento disponível é R$ 17,8 milhões e a verba do ano passado foi R$ 1,36 milhão. A verba aumentará quando P e Q forem verdadeiros: P, elegíveis cresceram pelo menos 8%; Q, a verba não passa de 10% do orçamento. A verba aumentará?",
 			"category": CATEGORY_IMPORTANT,
 			"interaction_type": INTERACTION_CHOICE,
@@ -221,6 +224,7 @@ func register_default_problems() -> void:
 		},
 		"pesquisa_satisfacao": {
 			"title": "Pesquisa satisfatória",
+			"image": "res://assets/problems/satisfacao.png",
 			"description": "O instituto DataCidade entrevistou 1.200 cidadãos: 540 aprovam, 420 desaprovam e 240 são neutros. Qual é o percentual de aprovação e desaprovação, respectivamente?",
 			"category": CATEGORY_OPTIONAL,
 			"interaction_type": INTERACTION_CHOICE,
@@ -239,6 +243,7 @@ func register_default_problems() -> void:
 		},
 		"obras_combinacoes": {
 			"title": "Obra-primarial",
+			"image": "res://assets/problems/obra-primarial.png",
 			"description": "A prefeitura tem 5 obras prioritárias, mas o orçamento permite executar 2 no mesmo período. A ordem não importa. Quantas combinações diferentes de obras existem?",
 			"category": CATEGORY_COMMON,
 			"interaction_type": INTERACTION_CHOICE,
