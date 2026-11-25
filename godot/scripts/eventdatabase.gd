@@ -114,7 +114,7 @@ func register_default_problems() -> void:
 		"juros_bancos": {
 			"title": "Juros pelo meu milhão",
 			"image": "res://assets/problems/bancos.png",
-			"description": "Um empréstimo de R$ 1 milhão será quitado em 24 meses. O Banco Grotesco cobra juros simples de 25% ao ano; o NuhBanho cobra juros compostos de 20% ao ano. Qual banco custa menos ao final de dois anos?",
+			"description": "Um empréstimo de R$ 1 milhão será quitado em 24 meses. O Banco Grotesco cobra juros simples de 25% ao ano; o NuhBanho cobra juros compostos de 20% ao ano. Para comparar, use juros simples = capital × (1 + taxa × anos) e juros compostos = capital × (1 + taxa)^anos. Qual banco custa menos ao final de dois anos?",
 			"category": CATEGORY_COMMON,
 			"interaction_type": INTERACTION_CHOICE,
 			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
@@ -148,7 +148,7 @@ func register_default_problems() -> void:
 		"moradias_enchente": {
 			"title": "Tsente: moradias após a enchente",
 			"image": "res://assets/problems/tsente.png",
-			"description": "Uma enchente deixou 120 sobreviventes sem moradia. Qual modelo atende a todos pelo menor custo? A: 4 pessoas por R$ 78.829,91; B: 6 pessoas por R$ 108.182,34; C: 10 pessoas por R$ 155.330,72.",
+			"description": "Uma enchente deixou 120 sobreviventes sem moradia. Qual modelo atende a todos pelo menor custo? A: 4 pessoas por R$ 8.000; B: 6 pessoas por R$ 10.500; C: 10 pessoas por R$ 15.000.",
 			"category": CATEGORY_URGENT,
 			"interaction_type": INTERACTION_CHOICE,
 			"availability_duration_days": null,
@@ -161,12 +161,12 @@ func register_default_problems() -> void:
 			"success_effects": {"social": 2.0},
 			"failure_effects": {"social": -1.0},
 			"expiration_effects": {"social": -1.0},
-			"explanation": "O modelo C precisa de 12 unidades. Mesmo com o custo unitário maior, o total aproximado é R$ 1,86 milhão, menor que os modelos A e B."
+			"explanation": "Para 120 pessoas, são necessárias 30 unidades A (R$ 240.000), 20 unidades B (R$ 210.000) ou 12 unidades C (R$ 180.000). O modelo C atende todos pelo menor custo."
 		},
 		"verba_imss": {
 			"title": "Verba IMSS",
 			"image": "res://assets/problems/velhoimss.png",
-			"description": "25% da população continua elegível ao IMSS. A população passou de 25.932 para 28.484 pessoas. O orçamento disponível é R$ 17,8 milhões e a verba do ano passado foi R$ 1,36 milhão. A verba aumentará quando P e Q forem verdadeiros: P, elegíveis cresceram pelo menos 8%; Q, a verba não passa de 10% do orçamento. A verba aumentará?",
+			"description": "O número de pessoas elegíveis passou de 6.400 para 6.976. A verba atual é R$ 1,36 milhão e será reajustada pelo mesmo percentual desse crescimento. O reajuste só é aprovado se o crescimento for de pelo menos 8% e a nova verba não passar de 10% do orçamento municipal de R$ 17,8 milhões. A verba poderá aumentar?",
 			"category": CATEGORY_IMPORTANT,
 			"interaction_type": INTERACTION_CHOICE,
 			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
@@ -178,11 +178,11 @@ func register_default_problems() -> void:
 			"success_effects": {"social": 2.0},
 			"failure_effects": {"social": -1.0},
 			"expiration_effects": {"social": -1.0},
-			"explanation": "Elegíveis cresceram cerca de 9,84%, então P é verdadeiro. O aumento para aproximadamente R$ 1,49 milhão fica abaixo de 10% de R$ 17,8 milhões (R$ 1,78 milhão), então Q também é verdadeiro."
+			"explanation": "O número de elegíveis cresceu (6.976 − 6.400) ÷ 6.400 = 9%. A nova verba fica em R$ 1.360.000 × 1,09 = R$ 1.482.400, abaixo do limite de R$ 1.780.000. As duas condições são atendidas."
 		},
 		"rota_presidio": {
 			"title": "Intriga do Carroeios",
-			"description": "A polícia precisa transportar presos de H ao presídio R antes do fechamento, em 30 minutos. O pedágio total não pode passar de R$ 6; o combustível custa R$ 2 por quilômetro. Estradas (km, min, pedágio): H-A (4, 6, 0); H-B (2, 10, 2); A-C (5, 5, 1); A-D (3, 12, 0); B-C (6, 4, 3); B-E (4, 7, 1); C-F (2, 3, 2); D-F (7, 8, 0); E-R (3, 5, 1); F-R (5, 6, 2); D-R (9, 15, 0). Existe um caminho que atende às restrições?",
+			"description": "A polícia precisa transportar presos de H ao presídio R antes do fechamento, em até 30 minutos. O custo total do trajeto (combustível a R$ 2 por quilômetro mais pedágios) não pode passar de R$ 25. Estradas (km, min, pedágio): H-A (4, 6, 0); H-B (2, 10, 2); A-C (5, 5, 1); A-D (3, 12, 0); B-C (6, 4, 3); B-E (4, 7, 1); C-F (2, 3, 2); D-F (7, 8, 0); E-R (3, 5, 1); F-R (5, 6, 2); D-R (9, 15, 0). Existe um caminho que atende às restrições?",
 			"category": CATEGORY_URGENT,
 			"interaction_type": INTERACTION_CHOICE,
 			"availability_duration_days": null,
@@ -194,7 +194,7 @@ func register_default_problems() -> void:
 			"success_effects": {"security": 2.0},
 			"failure_effects": {"security": -1.0},
 			"expiration_effects": {"security": -1.0},
-			"explanation": "A viagem leva 22 minutos e paga R$ 4 de pedágio. O combustível custa R$ 18, totalizando R$ 22; as duas restrições são atendidas.",
+			"explanation": "O caminho H-B-E-R leva 22 minutos, percorre 9 km e paga R$ 4 de pedágio. O combustível custa 9 × R$ 2 = R$ 18; o total é R$ 22, dentro dos dois limites.",
 			"graph": {
 				"legend": "km, min, pedágio (R$)",
 				"nodes": [
@@ -527,13 +527,13 @@ func _register_suggested_problems() -> void:
 		"merenda_emergencia": {
 			"title": "Merenda em Conta: Bandejão Multiplicador",
 			"image": "res://assets/problems/merenda_conta.jpg",
-			"description": "Durante uma emergência, 5 cozinhas comunitárias prepararam 24 refeições cada para os abrigos municipais. Quantas refeições foram preparadas ao todo?",
-			"category": CATEGORY_IMPORTANT,
+			"description": "Durante uma emergência, 5 cozinhas comunitárias prepararam 24 refeições cada para os abrigos. As refeições serão enviadas em caixas com 8 unidades. Quantas caixas completas serão entregues?",
+			"category": CATEGORY_URGENT,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
-			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
-			"payload": {"prompt": "Digite a quantidade total de refeições", "correct_value": 120, "placeholder": "Ex.: 120"},
+			"availability_duration_days": null,
+			"payload": {"prompt": "Digite a quantidade de caixas", "correct_value": 15, "placeholder": "Ex.: 15"},
 			"success_effects": {"education": 1.5, "social": 1.0}, "failure_effects": {"education": -1.0, "social": -0.5},
-			"explanation": "São 5 cozinhas preparando 24 refeições cada: 5 × 24 = 120 refeições."
+			"explanation": "As cozinhas prepararam 5 × 24 = 120 refeições. Dividindo em caixas de 8: 120 ÷ 8 = 15 caixas."
 		}
 	}
 
