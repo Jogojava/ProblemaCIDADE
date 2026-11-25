@@ -268,6 +268,279 @@ func register_default_problems() -> void:
 		_default_event_ids[String(event_id)] = true
 		register_event(String(event_id), problems[event_id])
 
+	_register_suggested_problems()
+
+func _register_suggested_problems() -> void:
+	var problems := {
+		"aprova_cidade": {
+			"title": "AprovaCIDADE",
+			"image": "res://assets/problems/aprova_cidade.jpg",
+			"description": "Em uma consulta sobre a reforma da praça, 180 dos 240 moradores ouvidos aprovaram o projeto. Qual foi o percentual de aprovação?",
+			"category": CATEGORY_OPTIONAL,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "60%"}, {"id": "b", "text": "70%"},
+				{"id": "c", "text": "75%"}, {"id": "d", "text": "80%"}
+			]},
+			"correct_answer": "c",
+			"success_effects": {"social": 2.0}, "failure_effects": {"social": -1.0},
+			"explanation": "180 ÷ 240 = 0,75. Multiplicando por 100, a aprovação foi de 75%."
+		},
+		"media_dos_barulhinhos": {
+			"title": "Barulhômetro: Mediana no Volume Máximo",
+			"image": "res://assets/problems/barulhometro.jpg",
+			"description": "A fiscalização anotou 18, 26 e 22 decibéis perto de uma escola. Qual é a mediana dessas três medições?",
+			"category": CATEGORY_OPTIONAL,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "20 decibéis"}, {"id": "b", "text": "22 decibéis"},
+				{"id": "c", "text": "24 decibéis"}, {"id": "d", "text": "66 decibéis"}
+			]},
+			"correct_answer": "b",
+			"success_effects": {"health": 1.0}, "failure_effects": {"health": -0.5},
+			"explanation": "Ordenando os valores: 18, 22 e 26. O valor que fica no meio é 22 decibéis."
+		},
+		"praca_quadrada": {
+			"title": "Praça, que Perímetro!",
+			"image": "res://assets/problems/praca_perimetro.jpg",
+			"description": "Uma praça retangular mede 18 metros por 12 metros. Quantos metros de grade são necessários para cercar todo o contorno?",
+			"category": CATEGORY_OPTIONAL,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "30 m"}, {"id": "b", "text": "48 m"},
+				{"id": "c", "text": "60 m"}, {"id": "d", "text": "216 m"}
+			]},
+			"correct_answer": "c",
+			"success_effects": {"culture": 1.0}, "failure_effects": {"culture": -0.5},
+			"explanation": "O contorno tem dois lados de cada medida: 18 + 12 + 18 + 12 = 60 metros."
+		},
+		"onibus_sem_lotacao": {
+			"title": "Ônibus no Ponto, Horário na Conta",
+			"image": "res://assets/problems/onibus_horario.jpg",
+			"description": "Uma linha municipal sai do terminal a cada 15 minutos, das 6h às 8h, incluindo a saída exatamente às 8h. Quantas partidas estão previstas nesse período?",
+			"category": CATEGORY_OPTIONAL,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "8 partidas"}, {"id": "b", "text": "9 partidas"},
+				{"id": "c", "text": "10 partidas"}, {"id": "d", "text": "12 partidas"}
+			]},
+			"correct_answer": "b",
+			"success_effects": {"education": 2.0}, "failure_effects": {"education": -1.0},
+			"explanation": "De 6h até 8h há 120 minutos, ou 8 intervalos de 15 minutos. Contando a partida inicial das 6h, são 9 partidas."
+		},
+		"apagao_avenida": {
+			"title": "IluminaCIDADE: Apagão de Descontos",
+			"image": "res://assets/problems/iluminacidade.jpg",
+			"description": "A prefeitura precisa de 17 lâmpadas para a avenida. A oferta A cobra R$ 120 por lâmpada mais R$ 300 de entrega. A oferta B cobra R$ 2.200 com entrega incluída. Qual oferta custa menos e qual é a economia?",
+			"category": CATEGORY_OPTIONAL,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "Oferta A; economiza R$ 140"},
+				{"id": "b", "text": "Oferta B; economiza R$ 140"},
+				{"id": "c", "text": "Oferta A; economiza R$ 300"},
+				{"id": "d", "text": "As duas custam o mesmo"}
+			]},
+			"correct_answer": "b",
+			"success_effects": {"security": 2.0}, "failure_effects": {"security": -1.0},
+			"explanation": "A oferta A custa 17 × R$ 120 + R$ 300 = R$ 2.340. A oferta B custa R$ 2.200, uma economia de R$ 140."
+		},
+		"feira_de_quem_te_viu": {
+			"title": "Feira-ção de Fração",
+			"image": "res://assets/problems/feira_fracao.jpg",
+			"description": "A feira municipal tem 40 barracas. Três quintos delas vendem alimentos produzidos na própria cidade. Quantas barracas são de produtores locais?",
+			"category": CATEGORY_COMMON,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "8 barracas"}, {"id": "b", "text": "16 barracas"},
+				{"id": "c", "text": "24 barracas"}, {"id": "d", "text": "32 barracas"}
+			]},
+			"correct_answer": "c",
+			"success_effects": {"culture": 1.5}, "failure_effects": {"culture": -0.5},
+			"explanation": "40 ÷ 5 = 8 barracas por quinto. Três quintos correspondem a 3 × 8 = 24 barracas."
+		},
+		"juros_sem_grasnar": {
+			"title": "Banco Pato: o Cofre Não é Ninho",
+			"image": "res://assets/problems/banco_pato.jpg",
+			"description": "A prefeitura reservou R$ 12.000 para manutenção. Já usou R$ 3.450 em materiais e R$ 2.750 em mão de obra. Quanto ainda resta nessa verba?",
+			"category": CATEGORY_COMMON,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "R$ 5.800"}, {"id": "b", "text": "R$ 6.200"},
+				{"id": "c", "text": "R$ 6.800"}, {"id": "d", "text": "R$ 9.250"}
+			]},
+			"correct_answer": "a",
+			"success_effects": {"social": 1.5}, "failure_effects": {"social": -0.5},
+			"explanation": "As despesas somam R$ 3.450 + R$ 2.750 = R$ 6.200. Restam R$ 12.000 − R$ 6.200 = R$ 5.800."
+		},
+		"atalho_turistico": {
+			"title": "Mapa, Mapa Meu: Qual é o Caminho?",
+			"image": "res://assets/problems/mapa_cidade.jpg",
+			"description": "No mapa da cidade, 1 cm representa 200 metros. A distância entre o depósito municipal e uma praça mede 4 cm no mapa. Qual é a distância real?",
+			"category": CATEGORY_COMMON,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "400 m"}, {"id": "b", "text": "800 m"},
+				{"id": "c", "text": "1.200 m"}, {"id": "d", "text": "2.000 m"}
+			]},
+			"correct_answer": "b",
+			"success_effects": {"health": 1.5}, "failure_effects": {"health": -0.5},
+			"explanation": "Cada centímetro representa 200 metros. Então, 4 × 200 = 800 metros."
+		},
+		"asfalto_cada_metro": {
+			"title": "Asfalto Quente, Conta Fria",
+			"image": "res://assets/problems/asfalto.jpg",
+			"description": "Uma rua será pavimentada em 8 trechos de 25 metros. O serviço custa R$ 40 por metro, mais R$ 1.000 pelo aluguel das máquinas. Qual é o custo total da obra?",
+			"category": CATEGORY_COMMON,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"prompt": "Digite o total em reais, sem símbolos", "correct_value": 9000, "placeholder": "Ex.: 9000"},
+			"success_effects": {"water": 1.5}, "failure_effects": {"water": -0.5},
+			"explanation": "A rua terá 8 × 25 = 200 m. O pavimento custa 200 × R$ 40 = R$ 8.000; com as máquinas, R$ 9.000."
+		},
+		"lixeira_atacado": {
+			"title": "Lixômetro: Cabe Mais que Reclamação",
+			"image": "res://assets/problems/lixometro.jpg",
+			"description": "A cidade instalou 50 lixeiras, cada uma com capacidade para 80 litros. Qual é a capacidade total de armazenamento, em litros?",
+			"category": CATEGORY_COMMON,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"prompt": "Digite a capacidade total em litros", "correct_value": 4000, "placeholder": "Ex.: 4000"},
+			"success_effects": {"social": 1.5}, "failure_effects": {"social": -0.5},
+			"explanation": "Multiplique a quantidade de lixeiras pela capacidade de cada uma: 50 × 80 = 4.000 litros."
+		},
+		"abrigo_do_e": {
+			"title": "Abrigo em Progressão: Colchão que Cresce",
+			"image": "res://assets/problems/abrigo_progressao.jpg",
+			"description": "Para montar abrigos, a prefeitura separou 12 colchões para o primeiro, 16 para o segundo e segue aumentando a quantidade em 4 colchões por abrigo. Quantos colchões serão destinados ao terceiro abrigo?",
+			"category": CATEGORY_IMPORTANT,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"options": [
+				{"id": "a", "text": "18 colchões"}, {"id": "b", "text": "20 colchões"},
+				{"id": "c", "text": "24 colchões"}, {"id": "d", "text": "28 colchões"}
+			]},
+			"correct_answer": "b",
+			"success_effects": {"health": 2.0}, "failure_effects": {"health": -1.0},
+			"explanation": "A quantidade aumenta em 4 a cada abrigo: 12, 16, 20. O terceiro recebe 20 colchões."
+		},
+		"agua_todo_mundo": {
+			"title": "HidroMetragem: Água em Outra Medida",
+			"image": "res://assets/problems/hidrometragem.jpg",
+			"description": "Um reservatório municipal comporta 2,5 metros cúbicos de água. Sabendo que 1 metro cúbico equivale a 1.000 litros, quantos litros cabem no reservatório?",
+			"category": CATEGORY_IMPORTANT,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"prompt": "Digite a capacidade em litros", "correct_value": 2500, "placeholder": "Ex.: 2500"},
+			"success_effects": {"water": 2.0}, "failure_effects": {"water": -1.0},
+			"explanation": "Multiplique 2,5 por 1.000: a capacidade é de 2.500 litros."
+		},
+		"rota_do_remedio": {
+			"title": "Dose Certa: Sem Sobrar, Sem Faltar",
+			"image": "res://assets/problems/dose_certa.jpg",
+			"description": "A secretaria de saúde recebeu 48 kits de primeiros socorros para distribuir igualmente entre 6 unidades de saúde. Quantos kits cada unidade receberá?",
+			"category": CATEGORY_IMPORTANT,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"prompt": "Digite a quantidade de kits por unidade", "correct_value": 8, "placeholder": "Ex.: 8"},
+			"success_effects": {"health": 2.0}, "failure_effects": {"health": -1.0},
+			"explanation": "Divida os 48 kits igualmente entre as 6 unidades: 48 ÷ 6 = 8 kits para cada uma."
+		},
+		"raiz_da_praca": {
+			"title": "QuadraFora: Área de Jogo",
+			"image": "res://assets/problems/quadra_fora.jpg",
+			"description": "Uma quadra retangular de um centro esportivo municipal mede 18 metros de comprimento e 12 metros de largura. Qual é a área total?",
+			"category": CATEGORY_IMPORTANT,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"prompt": "Digite a área em metros quadrados", "correct_value": 216, "placeholder": "Ex.: 216"},
+			"success_effects": {"culture": 1.5}, "failure_effects": {"culture": -0.5},
+			"explanation": "A área do retângulo é comprimento × largura: 18 × 12 = 216 m²."
+		},
+		"conta_luz_reuniao": {
+			"title": "Luz, Câmera… Leitura!",
+			"image": "res://assets/problems/leitura_luz.jpg",
+			"description": "O medidor de energia de um posto municipal marcava 590 kWh no mês passado e 650 kWh neste mês. Quantos kWh foram consumidos no período?",
+			"category": CATEGORY_IMPORTANT,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
+			"payload": {"prompt": "Digite o consumo em kWh", "correct_value": 60, "placeholder": "Ex.: 60"},
+			"success_effects": {"social": 1.5}, "failure_effects": {"social": -0.5},
+			"explanation": "O consumo é a diferença entre as leituras: 650 − 590 = 60 kWh."
+		},
+		"todo_mundo_no_busao": {
+			"title": "Plantão Multiplicado, Problema Dividido",
+			"image": "res://assets/problems/plantao.jpg",
+			"description": "Na emergência, a prefeitura convocou 5 equipes com 4 agentes cada. O plano precisa de 24 agentes. Quantos agentes ainda faltam?",
+			"category": CATEGORY_URGENT,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": null,
+			"payload": {"options": [
+				{"id": "a", "text": "2 agentes"}, {"id": "b", "text": "4 agentes"},
+				{"id": "c", "text": "5 agentes"}, {"id": "d", "text": "20 agentes"}
+			]},
+			"correct_answer": "b",
+			"success_effects": {"social": 2.0}, "failure_effects": {"social": -1.0},
+			"explanation": "As equipes somam 5 × 4 = 20 agentes. Para chegar a 24, faltam 24 − 20 = 4 agentes."
+		},
+		"sirene_do_ou": {
+			"title": "Sirene: OU Toca, OU Dá Ruim",
+			"image": "res://assets/problems/sirene.jpg",
+			"description": "A sirene municipal deve tocar se houver alerta de enchente OU alerta de ventos fortes. Hoje não há alerta de enchente, mas há alerta de ventos fortes. A sirene deve tocar?",
+			"category": CATEGORY_URGENT,
+			"interaction_type": INTERACTION_CHOICE,
+			"availability_duration_days": null,
+			"payload": {"options": [{"id": "sim", "text": "Sim"}, {"id": "nao", "text": "Não"}]},
+			"correct_answer": "sim",
+			"success_effects": {"security": 2.0}, "failure_effects": {"security": -1.0},
+			"explanation": "No OU lógico, basta uma das condições ser verdadeira. O alerta de ventos fortes já ativa a sirene."
+		},
+		"rota_do_resgate": {
+			"title": "Relógio de Resgate: Contra o Tempo",
+			"image": "res://assets/problems/relogio_resgate.jpg",
+			"description": "Uma equipe saiu às 9h35 para atender uma ocorrência e chegou às 11h10. Quanto tempo durou o deslocamento?",
+			"category": CATEGORY_URGENT,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": null,
+			"payload": {"prompt": "Digite a duração total em minutos", "correct_value": 95, "placeholder": "Ex.: 95"},
+			"success_effects": {"health": 2.0}, "failure_effects": {"health": -1.0},
+			"explanation": "De 9h35 a 10h35 passa 1 hora; até 11h10 passam mais 35 minutos. No total, 95 minutos."
+		},
+		"reserva_que_encolheu": {
+			"title": "H2Oh Não! Cadê Minha Reserva?",
+			"image": "res://assets/problems/reserva_h2oh.jpg",
+			"description": "Um reservatório emergencial contém 1.000 litros. Uma bomba transfere mais 160 litros por hora durante 5 horas. Quantos litros haverá no reservatório ao final?",
+			"category": CATEGORY_URGENT,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": null,
+			"payload": {"prompt": "Digite o volume final em litros", "correct_value": 1800, "placeholder": "Ex.: 1800"},
+			"success_effects": {"water": 2.0}, "failure_effects": {"water": -1.0},
+			"explanation": "A bomba acrescenta 160 × 5 = 800 litros. Somando ao volume inicial: 1.000 + 800 = 1.800 litros."
+		},
+		"merenda_emergencia": {
+			"title": "Merenda em Conta: Bandejão Multiplicador",
+			"image": "res://assets/problems/merenda_conta.jpg",
+			"description": "Durante uma emergência, 5 cozinhas comunitárias prepararam 24 refeições cada para os abrigos municipais. Quantas refeições foram preparadas ao todo?",
+			"category": CATEGORY_URGENT,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
+			"availability_duration_days": null,
+			"payload": {"prompt": "Digite a quantidade total de refeições", "correct_value": 120, "placeholder": "Ex.: 120"},
+			"success_effects": {"education": 1.5, "social": 1.0}, "failure_effects": {"education": -1.0, "social": -0.5},
+			"explanation": "São 5 cozinhas preparando 24 refeições cada: 5 × 24 = 120 refeições."
+		}
+	}
+
+	for event_id in problems:
+		_default_event_ids[String(event_id)] = true
+		register_event(String(event_id), problems[event_id])
+
 func has_event(event_id: String) -> bool:
 	return events.has(event_id)
 
@@ -340,15 +613,20 @@ func get_random_event_id_by_category(category: String) -> String:
 
 	var used_ids: Array = _used_ids_by_category.get(category, [])
 	var available: Array[String] = []
+	var authored_available: Array[String] = []
 
 	for candidate in candidates:
 		if not used_ids.has(candidate):
 			available.append(candidate)
+			if _default_event_ids.has(candidate):
+				authored_available.append(candidate)
 
 	if available.is_empty():
 		return ""
 
-	var chosen_id := available[_rng.randi_range(0, available.size() - 1)]
+	# Let every hand-written problem appear before the recurring monthly templates.
+	var pool := authored_available if not authored_available.is_empty() else available
+	var chosen_id := pool[_rng.randi_range(0, pool.size() - 1)]
 	used_ids.append(chosen_id)
 	_used_ids_by_category[category] = used_ids
 
