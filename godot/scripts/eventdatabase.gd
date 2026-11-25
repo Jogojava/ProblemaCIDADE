@@ -403,15 +403,18 @@ func _register_suggested_problems() -> void:
 			"explanation": "Multiplique a quantidade de lixeiras pela capacidade de cada uma: 50 × 80 = 4.000 litros."
 		},
 		"abrigo_do_e": {
-			"title": "Abrigo do “E”: Passou no Teste?",
-			"description": "Um abrigo emergencial só é aprovado se tiver pelo menos 20 leitos E custar no máximo R$ 50.000. A proposta tem 24 leitos e custa R$ 55.000. Ela atende às duas condições?",
+			"title": "Abrigo em Progressão: Colchão que Cresce",
+			"description": "Para montar abrigos, a prefeitura separou 12 colchões para o primeiro, 16 para o segundo e segue aumentando a quantidade em 4 colchões por abrigo. Quantos colchões serão destinados ao terceiro abrigo?",
 			"category": CATEGORY_IMPORTANT,
 			"interaction_type": INTERACTION_CHOICE,
 			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
-			"payload": {"options": [{"id": "sim", "text": "Sim"}, {"id": "nao", "text": "Não"}]},
-			"correct_answer": "nao",
+			"payload": {"options": [
+				{"id": "a", "text": "18 colchões"}, {"id": "b", "text": "20 colchões"},
+				{"id": "c", "text": "24 colchões"}, {"id": "d", "text": "28 colchões"}
+			]},
+			"correct_answer": "b",
 			"success_effects": {"health": 2.0}, "failure_effects": {"health": -1.0},
-			"explanation": "A proposta atende ao mínimo de leitos, mas excede o limite de custo. Como as duas condições precisam ser verdadeiras, ela não é aprovada."
+			"explanation": "A quantidade aumenta em 4 a cada abrigo: 12, 16, 20. O terceiro recebe 20 colchões."
 		},
 		"agua_todo_mundo": {
 			"title": "HidroMetragem: Água em Outra Medida",
@@ -424,15 +427,14 @@ func _register_suggested_problems() -> void:
 			"explanation": "Multiplique 2,5 por 1.000: a capacidade é de 2.500 litros."
 		},
 		"rota_do_remedio": {
-			"title": "Dose de Pontualidade",
-			"description": "Uma equipe inicia as entregas de medicamentos às 7h e faz uma nova saída a cada 6 horas. Qual será o horário da terceira saída do dia?",
+			"title": "Dose Certa: Sem Sobrar, Sem Faltar",
+			"description": "A secretaria de saúde recebeu 48 kits de primeiros socorros para distribuir igualmente entre 6 unidades de saúde. Quantos kits cada unidade receberá?",
 			"category": CATEGORY_IMPORTANT,
-			"interaction_type": INTERACTION_CHOICE,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
 			"availability_duration_days": PROBLEM_AVAILABILITY_DAYS,
-			"payload": {"options": [{"id": "a", "text": "13h"}, {"id": "b", "text": "19h"}, {"id": "c", "text": "1h do dia seguinte"}, {"id": "d", "text": "7h do dia seguinte"}]},
-			"correct_answer": "b",
+			"payload": {"prompt": "Digite a quantidade de kits por unidade", "correct_value": 8, "placeholder": "Ex.: 8"},
 			"success_effects": {"health": 2.0}, "failure_effects": {"health": -1.0},
-			"explanation": "As saídas são às 7h, 13h e 19h. A terceira saída acontece às 19h."
+			"explanation": "Divida os 48 kits igualmente entre as 6 unidades: 48 ÷ 6 = 8 kits para cada uma."
 		},
 		"raiz_da_praca": {
 			"title": "QuadraFora: Área de Jogo",
@@ -491,17 +493,13 @@ func _register_suggested_problems() -> void:
 		},
 		"reserva_que_encolheu": {
 			"title": "H2Oh Não! Cadê Minha Reserva?",
-			"description": "Depois de uma distribuição emergencial, restaram 1.000 litros de uma reserva de 2.400 litros. Aproximadamente que porcentagem da reserva ainda está disponível?",
+			"description": "Um reservatório emergencial contém 1.000 litros. Uma bomba transfere mais 160 litros por hora durante 5 horas. Quantos litros haverá no reservatório ao final?",
 			"category": CATEGORY_URGENT,
+			"interaction_type": INTERACTION_NUMBER_INPUT,
 			"availability_duration_days": null,
-			"payload": {"options": [
-				{"id": "a", "text": "25%"}, {"id": "b", "text": "42%"},
-				{"id": "c", "text": "58%"}, {"id": "d", "text": "70%"}
-			]},
-			"interaction_type": INTERACTION_CHOICE,
-			"correct_answer": "b",
+			"payload": {"prompt": "Digite o volume final em litros", "correct_value": 1800, "placeholder": "Ex.: 1800"},
 			"success_effects": {"water": 2.0}, "failure_effects": {"water": -1.0},
-			"explanation": "1.000 ÷ 2.400 × 100 ≈ 41,7%, que arredondado corresponde a 42%."
+			"explanation": "A bomba acrescenta 160 × 5 = 800 litros. Somando ao volume inicial: 1.000 + 800 = 1.800 litros."
 		},
 		"merenda_emergencia": {
 			"title": "Merenda em Conta: Bandejão Multiplicador",
@@ -592,15 +590,20 @@ func get_random_event_id_by_category(category: String) -> String:
 
 	var used_ids: Array = _used_ids_by_category.get(category, [])
 	var available: Array[String] = []
+	var authored_available: Array[String] = []
 
 	for candidate in candidates:
 		if not used_ids.has(candidate):
 			available.append(candidate)
+			if _default_event_ids.has(candidate):
+				authored_available.append(candidate)
 
 	if available.is_empty():
 		return ""
 
-	var chosen_id := available[_rng.randi_range(0, available.size() - 1)]
+	# Let every hand-written problem appear before the recurring monthly templates.
+	var pool := authored_available if not authored_available.is_empty() else available
+	var chosen_id := pool[_rng.randi_range(0, pool.size() - 1)]
 	used_ids.append(chosen_id)
 	_used_ids_by_category[category] = used_ids
 
