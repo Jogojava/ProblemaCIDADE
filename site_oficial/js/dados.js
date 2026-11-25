@@ -16,10 +16,11 @@ const DIFICULDADES = {
 };
 
 const TELAS = [
-  { img: "img/telas/01-menu.jpg", legenda: "Menu principal" },
-  { img: "img/telas/03-instrucoes.jpg", legenda: "Início do mandato" },
-  { img: "img/telas/04-cidade.jpg", legenda: "A cidade" },
-  { img: "img/telas/06-problema.jpg", legenda: "Um problema opcional" },
-  { img: "img/telas/08-investimentos.jpg", legenda: "Investimentos em serviços" },
-  { img: "img/telas/09-projecoes.jpg", legenda: "Reputação, finanças e projeções" }
+  { img: "img/telas/01-menu.png", legenda: "Menu principal" },
+  { img: "img/telas/02-instrucoes.png", legenda: "Início do mandato" },
+  { img: "img/telas/03-cidade.png", legenda: "A cidade" },
+  { img: "img/telas/04-noite.png", legenda: "A cidade à noite" },
+  { img: "img/telas/05-problema.png", legenda: "Resolução de problemas" },
+  { img: "img/telas/06-investimentos.png", legenda: "Investimentos e construções" },
+  { img: "img/telas/07-projecoes.png", legenda: "Reputação, finanças e projeções" }
 ];
