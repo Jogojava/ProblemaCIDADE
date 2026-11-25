@@ -269,6 +269,7 @@ func _register_suggested_problems() -> void:
 	var problems := {
 		"aprova_cidade": {
 			"title": "AprovaCIDADE",
+			"image": "res://assets/problems/aprova_cidade.jpg",
 			"description": "Em uma consulta sobre a reforma da praça, 180 dos 240 moradores ouvidos aprovaram o projeto. Qual foi o percentual de aprovação?",
 			"category": CATEGORY_OPTIONAL,
 			"interaction_type": INTERACTION_CHOICE,
@@ -283,6 +284,7 @@ func _register_suggested_problems() -> void:
 		},
 		"media_dos_barulhinhos": {
 			"title": "Barulhômetro: Mediana no Volume Máximo",
+			"image": "res://assets/problems/barulhometro.jpg",
 			"description": "A fiscalização anotou 18, 26 e 22 decibéis perto de uma escola. Qual é a mediana dessas três medições?",
 			"category": CATEGORY_OPTIONAL,
 			"interaction_type": INTERACTION_CHOICE,
@@ -297,6 +299,7 @@ func _register_suggested_problems() -> void:
 		},
 		"praca_quadrada": {
 			"title": "Praça, que Perímetro!",
+			"image": "res://assets/problems/praca_perimetro.jpg",
 			"description": "Uma praça retangular mede 18 metros por 12 metros. Quantos metros de grade são necessários para cercar todo o contorno?",
 			"category": CATEGORY_OPTIONAL,
 			"interaction_type": INTERACTION_CHOICE,
@@ -311,7 +314,7 @@ func _register_suggested_problems() -> void:
 		},
 		"onibus_sem_lotacao": {
 			"title": "Ônibus no Ponto, Horário na Conta",
-			"image": "res://assets/problems/onibus.png",
+			"image": "res://assets/problems/onibus_horario.jpg",
 			"description": "Uma linha municipal sai do terminal a cada 15 minutos, das 6h às 8h, incluindo a saída exatamente às 8h. Quantas partidas estão previstas nesse período?",
 			"category": CATEGORY_OPTIONAL,
 			"interaction_type": INTERACTION_CHOICE,
@@ -326,6 +329,7 @@ func _register_suggested_problems() -> void:
 		},
 		"apagao_avenida": {
 			"title": "IluminaCIDADE: Apagão de Descontos",
+			"image": "res://assets/problems/iluminacidade.jpg",
 			"description": "A prefeitura precisa de 17 lâmpadas para a avenida. A oferta A cobra R$ 120 por lâmpada mais R$ 300 de entrega. A oferta B cobra R$ 2.200 com entrega incluída. Qual oferta custa menos e qual é a economia?",
 			"category": CATEGORY_OPTIONAL,
 			"interaction_type": INTERACTION_CHOICE,
@@ -342,6 +346,7 @@ func _register_suggested_problems() -> void:
 		},
 		"feira_de_quem_te_viu": {
 			"title": "Feira-ção de Fração",
+			"image": "res://assets/problems/feira_fracao.jpg",
 			"description": "A feira municipal tem 40 barracas. Três quintos delas vendem alimentos produzidos na própria cidade. Quantas barracas são de produtores locais?",
 			"category": CATEGORY_COMMON,
 			"interaction_type": INTERACTION_CHOICE,
@@ -356,6 +361,7 @@ func _register_suggested_problems() -> void:
 		},
 		"juros_sem_grasnar": {
 			"title": "Banco Pato: o Cofre Não é Ninho",
+			"image": "res://assets/problems/banco_pato.jpg",
 			"description": "A prefeitura reservou R$ 12.000 para manutenção. Já usou R$ 3.450 em materiais e R$ 2.750 em mão de obra. Quanto ainda resta nessa verba?",
 			"category": CATEGORY_COMMON,
 			"interaction_type": INTERACTION_CHOICE,
@@ -370,6 +376,7 @@ func _register_suggested_problems() -> void:
 		},
 		"atalho_turistico": {
 			"title": "Mapa, Mapa Meu: Qual é o Caminho?",
+			"image": "res://assets/problems/mapa_cidade.jpg",
 			"description": "No mapa da cidade, 1 cm representa 200 metros. A distância entre o depósito municipal e uma praça mede 4 cm no mapa. Qual é a distância real?",
 			"category": CATEGORY_COMMON,
 			"interaction_type": INTERACTION_CHOICE,
@@ -384,6 +391,7 @@ func _register_suggested_problems() -> void:
 		},
 		"asfalto_cada_metro": {
 			"title": "Asfalto Quente, Conta Fria",
+			"image": "res://assets/problems/asfalto.jpg",
 			"description": "Uma rua será pavimentada em 8 trechos de 25 metros. O serviço custa R$ 40 por metro, mais R$ 1.000 pelo aluguel das máquinas. Qual é o custo total da obra?",
 			"category": CATEGORY_COMMON,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
@@ -394,6 +402,7 @@ func _register_suggested_problems() -> void:
 		},
 		"lixeira_atacado": {
 			"title": "Lixômetro: Cabe Mais que Reclamação",
+			"image": "res://assets/problems/lixometro.jpg",
 			"description": "A cidade instalou 50 lixeiras, cada uma com capacidade para 80 litros. Qual é a capacidade total de armazenamento, em litros?",
 			"category": CATEGORY_COMMON,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
@@ -404,6 +413,7 @@ func _register_suggested_problems() -> void:
 		},
 		"abrigo_do_e": {
 			"title": "Abrigo em Progressão: Colchão que Cresce",
+			"image": "res://assets/problems/abrigo_progressao.jpg",
 			"description": "Para montar abrigos, a prefeitura separou 12 colchões para o primeiro, 16 para o segundo e segue aumentando a quantidade em 4 colchões por abrigo. Quantos colchões serão destinados ao terceiro abrigo?",
 			"category": CATEGORY_IMPORTANT,
 			"interaction_type": INTERACTION_CHOICE,
@@ -418,6 +428,7 @@ func _register_suggested_problems() -> void:
 		},
 		"agua_todo_mundo": {
 			"title": "HidroMetragem: Água em Outra Medida",
+			"image": "res://assets/problems/hidrometragem.jpg",
 			"description": "Um reservatório municipal comporta 2,5 metros cúbicos de água. Sabendo que 1 metro cúbico equivale a 1.000 litros, quantos litros cabem no reservatório?",
 			"category": CATEGORY_IMPORTANT,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
@@ -428,6 +439,7 @@ func _register_suggested_problems() -> void:
 		},
 		"rota_do_remedio": {
 			"title": "Dose Certa: Sem Sobrar, Sem Faltar",
+			"image": "res://assets/problems/dose_certa.jpg",
 			"description": "A secretaria de saúde recebeu 48 kits de primeiros socorros para distribuir igualmente entre 6 unidades de saúde. Quantos kits cada unidade receberá?",
 			"category": CATEGORY_IMPORTANT,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
@@ -438,6 +450,7 @@ func _register_suggested_problems() -> void:
 		},
 		"raiz_da_praca": {
 			"title": "QuadraFora: Área de Jogo",
+			"image": "res://assets/problems/quadra_fora.jpg",
 			"description": "Uma quadra retangular de um centro esportivo municipal mede 18 metros de comprimento e 12 metros de largura. Qual é a área total?",
 			"category": CATEGORY_IMPORTANT,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
@@ -448,6 +461,7 @@ func _register_suggested_problems() -> void:
 		},
 		"conta_luz_reuniao": {
 			"title": "Luz, Câmera… Leitura!",
+			"image": "res://assets/problems/leitura_luz.jpg",
 			"description": "O medidor de energia de um posto municipal marcava 590 kWh no mês passado e 650 kWh neste mês. Quantos kWh foram consumidos no período?",
 			"category": CATEGORY_IMPORTANT,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
@@ -458,6 +472,7 @@ func _register_suggested_problems() -> void:
 		},
 		"todo_mundo_no_busao": {
 			"title": "Plantão Multiplicado, Problema Dividido",
+			"image": "res://assets/problems/plantao.jpg",
 			"description": "Na emergência, a prefeitura convocou 5 equipes com 4 agentes cada. O plano precisa de 24 agentes. Quantos agentes ainda faltam?",
 			"category": CATEGORY_URGENT,
 			"interaction_type": INTERACTION_CHOICE,
@@ -472,6 +487,7 @@ func _register_suggested_problems() -> void:
 		},
 		"sirene_do_ou": {
 			"title": "Sirene: OU Toca, OU Dá Ruim",
+			"image": "res://assets/problems/sirene.jpg",
 			"description": "A sirene municipal deve tocar se houver alerta de enchente OU alerta de ventos fortes. Hoje não há alerta de enchente, mas há alerta de ventos fortes. A sirene deve tocar?",
 			"category": CATEGORY_URGENT,
 			"interaction_type": INTERACTION_CHOICE,
@@ -483,6 +499,7 @@ func _register_suggested_problems() -> void:
 		},
 		"rota_do_resgate": {
 			"title": "Relógio de Resgate: Contra o Tempo",
+			"image": "res://assets/problems/relogio_resgate.jpg",
 			"description": "Uma equipe saiu às 9h35 para atender uma ocorrência e chegou às 11h10. Quanto tempo durou o deslocamento?",
 			"category": CATEGORY_URGENT,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
@@ -493,6 +510,7 @@ func _register_suggested_problems() -> void:
 		},
 		"reserva_que_encolheu": {
 			"title": "H2Oh Não! Cadê Minha Reserva?",
+			"image": "res://assets/problems/reserva_h2oh.jpg",
 			"description": "Um reservatório emergencial contém 1.000 litros. Uma bomba transfere mais 160 litros por hora durante 5 horas. Quantos litros haverá no reservatório ao final?",
 			"category": CATEGORY_URGENT,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
@@ -503,7 +521,7 @@ func _register_suggested_problems() -> void:
 		},
 		"merenda_emergencia": {
 			"title": "Merenda em Conta: Bandejão Multiplicador",
-			"image": "res://assets/problems/merenda_escolar.png",
+			"image": "res://assets/problems/merenda_conta.jpg",
 			"description": "Durante uma emergência, 5 cozinhas comunitárias prepararam 24 refeições cada para os abrigos municipais. Quantas refeições foram preparadas ao todo?",
 			"category": CATEGORY_URGENT,
 			"interaction_type": INTERACTION_NUMBER_INPUT,
